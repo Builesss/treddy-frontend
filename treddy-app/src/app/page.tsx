@@ -4,7 +4,6 @@
 
 import { useEffect, useState } from 'react';
 import { getFiguras } from '../lib/api';
-import Link from 'next/link';
 import Image from 'next/image';
 import Footer from '../pages/footer'; 
 import Nav from '../pages/nav';
@@ -58,7 +57,7 @@ export default function HomePage() {
               >
                 {figuras.map((figura: any) => (
                   <div
-                    key={figura.id}
+                    key={figura.producto_id}
                     className="flex-shrink-0 w-full flex justify-center items-center p-6"
                   >
                     <div className="text-center">
