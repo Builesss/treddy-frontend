@@ -38,10 +38,9 @@ export default function Footer() {
       <section> 
         <h2 className="font-bold mb-2">Contáctanos</h2>
         <ul className="space-y-1">
-          <li><Link href="/contacto#email"  className="hover:text-[#00E6F6]">Correo</Link></li>
-          <li><Link href="/contacto#telefono" className="hover:text-[#00E6F6]">Teléfono</Link></li>
-          <li><Link href="/contacto#whatsapp"  className="hover:text-[#00E6F6]">WhatsApp</Link></li>
-          <li><Link href="/contacto#oficina"  className="hover:text-[#00E6F6]">Oficina</Link></li>
+          <li><Link href="/contacto#email"  className="hover:text-[#00E6F6]">Correo:</Link></li>
+          <li><Link href="/contacto#telefono" className="hover:text-[#00E6F6]">Teléfono:</Link></li>
+          <li><Link href="/contacto#whatsapp"  className="hover:text-[#00E6F6]">WhatsApp:</Link></li>
         </ul>
       </section>
     </footer>

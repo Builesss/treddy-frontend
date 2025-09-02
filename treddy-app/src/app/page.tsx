@@ -35,10 +35,8 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white">
-      {/* HEADER */}
       <Nav/>
 
-      {/* HERO */}
       <section className="flex flex-col md:flex-row justify-between items-center px-8 py-16">
         <div className="max-w-xl">
           <h2 className="text-5xl font-bold">Treddy Figuras 3D</h2>

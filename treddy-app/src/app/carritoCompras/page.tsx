@@ -7,7 +7,6 @@ import Footer from "../../pages/footer";
 
 export default function Carrito() {
   const [figuras, setFiguras] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const total = figuras.reduce(
     (suma:number,figura: any) => suma + Number(figura.precio_base),
     0
@@ -37,7 +36,7 @@ export default function Carrito() {
               <div className="space-y-4">
                 {figuras.map((figura: any) => (
                   <div
-                    key={figura.id}
+                    key={figura.producto_id}
                     className="flex justify-between items-center bg-[#1a214f] p-3 rounded-lg"
                   >
                     <Image src={figura.imagenUrl} alt={figura.nombre}  width={70}
