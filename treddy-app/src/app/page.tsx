@@ -46,7 +46,7 @@ export default function HomePage() {
         <h3 className="text-2xl font-bold mb-6">Productos Populares</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {figuras.map((figura: any) => (
-            <div key={figura.id} className="bg-[#0F173A] p-4 rounded-lg text-center">
+            <div key={figura.producto_id} className="bg-[#0F173A] p-4 rounded-lg text-center">
               <Image src={figura.imagenUrl} alt={figura.nombre} width={100} height={100} className="mx-auto" />
               <p className="mt-2 font-medium">{figura.nombre}</p>
             </div>
