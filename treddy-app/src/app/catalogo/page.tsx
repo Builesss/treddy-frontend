@@ -3,10 +3,7 @@ import Link from "next/link";
 import Image from 'next/image';
 import { getFiguras } from '@/lib/api';
 import { useEffect, useState } from 'react';
-import TarjetaExpandible from './TajetaExpandible'
-
-
-
+import TarjetaExpandible from './TajetaExpandible';
 
 export default function Catalogo() {
   const [figuras, setFiguras] = useState([
@@ -15,7 +12,8 @@ export default function Catalogo() {
       nombre: "Figura de Iron Man",
       imagenUrl: "",
       precio_base: 120,
-      descripcion: "Figura coleccionable impresa en 3D con detalles metálicos."
+      descripcion: "Figura coleccionable impresa en 3D con detalles metálicos.",
+      stock: 30,
     }
   ]);
     useEffect(() => {
@@ -48,6 +46,7 @@ export default function Catalogo() {
             onClick={() => setSeleccionada(figura)}
             className="cursor-pointer bg-[#0F173A] p-4 rounded-xl shadow-lg flex flex-col items-center text-center hover:scale-105 transition-transform duration-200"
           >
+             <p className="text-[#00E6F6] font-bold mt-1">Disponible:{figura.stock}</p>
             <Image
               src={figura.imagenUrl || "/placeholder.png"}
               alt={figura.nombre}

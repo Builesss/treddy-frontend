@@ -1,5 +1,5 @@
 'use client'
-import Image from 'next/image'
+import Image from 'next/image';
 
 type Figura = {
   id: number
@@ -7,6 +7,7 @@ type Figura = {
   imagenUrl: string
   precio_base: number
   descripcion: string
+  stock: number
 }
 
 export default function TarjetaExpandible({ figura, onClose }: { figura: Figura, onClose: () => void }) {
@@ -21,11 +22,12 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura,
         >
           X
         </button>
+         <p className="text-[#00E6F6] font-bold mt-1">Disponible: {figura.stock}</p>
         <Image
-          src={figura.imagenUrl || "/placeholder.png"} // usa un placeholder si está vacío
+          src={figura.imagenUrl || "/placeholder.png"} 
           alt={figura.nombre}
           width={200}
-          height={200}
+          height={400}
           className="mx-auto mb-4 rounded-lg"
         />
         <h2 className="text-2xl font-bold mb-2">{figura.nombre}</h2>
