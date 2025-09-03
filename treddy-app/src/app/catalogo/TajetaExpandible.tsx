@@ -26,7 +26,7 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura,
         <Image
           src={figura.imagenUrl || "/placeholder.png"} 
           alt={figura.nombre}
-          width={200}
+          width={350}
           height={400}
           className="mx-auto mb-4 rounded-lg"
         />

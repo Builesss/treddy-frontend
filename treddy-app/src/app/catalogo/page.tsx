@@ -14,6 +14,16 @@ export default function Catalogo() {
       precio_base: 120,
       descripcion: "Figura coleccionable impresa en 3D con detalles metálicos.",
       stock: 30,
+      
+    },
+     {
+      id: 2,
+      nombre: "Figura de Spider Man",
+      imagenUrl: "",
+      precio_base: 90,
+      descripcion: "Figura coleccionable impresa en 3D con detalles metálicos.",
+      stock: 25,
+      
     }
   ]);
     useEffect(() => {
