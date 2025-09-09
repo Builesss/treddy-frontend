@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="flex flex-col md:flex-row justify-between bg-[#0F173A] text-white px-8 py-10 border-t border-[#1a1f40] pt-10">
+    <footer className="flex flex-col md:flex-row justify-between bg-[#0F173A] text-white px-8 py-10 border-t border-[#1a1f40] pt-10 mt-10">
       {/* Sobre nosotros */}
       <section>
         <h2 className="font-bold mb-2">Sobre nosotros</h2>

@@ -5,8 +5,8 @@
 import { useEffect, useState } from 'react';
 import { getFiguras } from '../lib/api';
 import Image from 'next/image';
-import Footer from '../pages/footer'; 
-import Nav from '../pages/nav';
+import Footer from "@/pages/footer"; 
+import Nav from "@/pages/nav";
 
 export default function HomePage() {
   const [figuras, setFiguras] = useState<any[]>([]);
@@ -140,7 +140,7 @@ export default function HomePage() {
       </section>
 
       {/* SECCIÓN AR */}
-      <section className="px-8 py-16 bg-[#0F173A] flex flex-col md:flex-row justify-between items-center mb-10">
+      <section className="px-8 py-16 bg-[#0F173A] flex flex-col md:flex-row justify-between items-center ">
         <div className="max-w-xl">
           <h4 className="text-xl font-bold mb-2">Visualiza tu imagen en realidad aumentada</h4>
           <p className="text-[#B5B8C5]">

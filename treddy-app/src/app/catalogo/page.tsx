@@ -4,6 +4,8 @@ import Image from 'next/image'
 import { getFiguras } from '@/lib/api'
 import { useEffect, useState } from 'react'
 import TarjetaExpandible from './TajetaExpandible'
+import Nav from "@/pages/nav"
+import Footer from "@/pages/footer"
 
 export default function Catalogo() {
   const [figuras, setFiguras] = useState<any[]>([])
@@ -14,22 +16,9 @@ export default function Catalogo() {
   }, [])
 
   return (
-    <main className="min-h-screen bg-[#0A1A2F] text-white px-6 py-8">
-      <header className="flex justify-between items-center px-8 py-6 border-b border-[#1a1f40]">
-        <h1 className="text-2xl font-bold text-[#00E6F6]">TREDDY</h1>
-        <nav className="space-x-6">
-          <Link href="#" className="hover:text-[#00E6F6]">Inicio</Link>
-          <Link href="#" className="hover:text-[#00E6F6]">Productos</Link>
-          <Link href="#" className="hover:text-[#00E6F6]">Personalizar</Link>
-          <Link href="#" className="hover:text-[#00E6F6]">Contacto</Link>
-        </nav>
-        <div className="space-x-4">
-          <button>🔍</button>
-          <button>👤</button>
-          <button>🛒</button>
-        </div>
-      </header>
-
+    <main className="min-h-screen bg-[#0A1A2F] text-white ">
+     <Nav/>
+      
       <h2 className="text-center text-2xl font-bold mb-6">CATALOGO DE FIGURAS 3D</h2>
 
       <div className="grid grid-cols-3 gap-6">
@@ -55,10 +44,11 @@ export default function Catalogo() {
           </div>
         ))}
       </div>
-
+        
       {seleccionada && (
         <TarjetaExpandible figura={seleccionada} onClose={() => setSeleccionada(null)} />
       )}
+      <Footer/>
     </main>
   )
 }

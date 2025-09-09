@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { getFiguras } from "../../lib/api";
 import Image from "next/image";
-import Nav from "../../pages/nav";
-import Footer from "../../pages/footer";
+import Nav from "@/pages/nav";
+import Footer from "@/pages/footer";
+
 
 export default function Carrito() {
   const [figuras, setFiguras] = useState([]);
