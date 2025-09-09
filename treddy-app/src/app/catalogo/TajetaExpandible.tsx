@@ -1,9 +1,9 @@
 'use client'
-import Image from 'next/image';
+import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
 
 type Figura = {
-  id: number
+  producto_id: number
   nombre: string
   imagenUrl: string
   precio_base: number
@@ -15,7 +15,7 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura,
   const [mostrarAR, setmostrarAR] = useState(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
-    useEffect(() => {
+  useEffect(() => {
     if (mostrarAR && videoRef.current) {
       navigator.mediaDevices.getUserMedia({ video: true })
         .then((stream) => {
@@ -40,7 +40,7 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura,
         </button>
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-white py-2 rounded-lg  hover:text-[#00E6F6]"
+          className="absolute top-3 right-3 text-white py-2 rounded-lg hover:text-[#00E6F6]"
         >
           X
         </button>
@@ -69,10 +69,10 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura,
       </div>
 
       {mostrarAR && (
-          <div className="w-1/2 bg-black rounded-xl flex items-center justify-center">
-            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover rounded-xl" />
-          </div>
-        )}
+        <div className="w-1/2 bg-black rounded-xl flex items-center justify-center">
+          <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover rounded-xl" />
+        </div>
+      )}
     </div>
   )
 }
