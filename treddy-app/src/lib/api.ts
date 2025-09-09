@@ -1,10 +1,15 @@
 export async function getFiguras() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/figuras`);
-  if (!res.ok) throw new Error('Error al obtener las figuras');
+  if (!res.ok) throw new Error("Error al obtener las figuras");
   return res.json();
 }
 
-export async function registerUser(data: { nombre: string; apellido: string; email: string; contrasena: string }) {
+export async function registerUser(data: {
+  nombre: string;
+  apellido: string;
+  email: string;
+  contrasena: string;
+}) {
   const res = await fetch("http://localhost:4000/api/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

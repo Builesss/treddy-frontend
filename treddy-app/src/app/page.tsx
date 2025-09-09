@@ -112,13 +112,28 @@ export default function HomePage() {
       </section>
 
       {/* PRODUCTOS POPULARES */}
-      <section className="px-8 py-10">
-        <h3 className="text-2xl font-bold mb-6">Productos Populares</h3>
+      <section className="px-8 py-16">
+        <h3 className="text-3xl font-bold mb-10 text-center">
+          ⭐ Productos Populares
+        </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {figuras.map((figura: any) => (
-            <div key={figura.producto_id} className="bg-[#0F173A] p-4 rounded-lg text-center">
-              <Image src={figura.imagenUrl} alt={figura.nombre} width={100} height={100} className="mx-auto" />
-              <p className="mt-2 font-medium">{figura.nombre}</p>
+            <div
+              key={figura.producto_id}
+              className="bg-[#10193F] p-5 rounded-xl text-center shadow-lg hover:scale-105 transition-transform"
+            >
+              <Image
+                src={figura.imagenUrl}
+                alt={figura.nombre}
+                width={120}
+                height={120}
+                className="mx-auto"
+              />
+              <p className="mt-3 font-semibold">{figura.nombre}</p>
+              <p className="text-cyan-400">$29.99</p>
+              <button className="mt-3 bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-1 rounded-lg text-black font-medium">
+                Ver más
+              </button>
             </div>
           ))}
         </div>
