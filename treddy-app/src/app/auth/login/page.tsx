@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import AnimatedBackground from "../../../components/animatedBackground";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,16 +41,19 @@ export default function LoginPage() {
       localStorage.setItem("token", data.token);
 
       alert("Inicio de sesión exitoso");
-      router.push("/"); 
+      router.push("/");
     } catch (error) {
-      console.error("❌ Error en login:", error);
+      console.error("Error en login:", error);
       alert("Error en la conexión con el servidor");
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#0b1520]">
-      <div className="bg-[#0f1c2b] text-white p-10 rounded-2xl shadow-lg w-full max-w-md">
+    <div className="relative flex justify-center items-center min-h-screen overflow-hidden">
+      {/* 🎨 Fondo animado */}
+      <AnimatedBackground />
+
+      <div className="relative bg-[#0f1c2b] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg">
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full flex justify-center items-center border border-cyan-400">
             <span className="text-5xl">👨🏻</span>
@@ -57,7 +61,7 @@ export default function LoginPage() {
           <h2 className="text-2xl font-bold mt-4">Inicia Sesión</h2>
           <p className="text-sm text-cyan-400 mt-1">
             ¿Es tu primera vez?{" "}
-            <a href="/register" className="underline text-cyan-300">
+            <a href="register" className="underline text-cyan-300">
               Regístrate
             </a>
           </p>
@@ -88,7 +92,7 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <a href="#" className="text-cyan-400 hover:underline">
+            <a href="recuperar" className="text-cyan-400 hover:underline">
               ¿Se te olvidó la contraseña?
             </a>
             <div className="flex items-center space-x-2">
