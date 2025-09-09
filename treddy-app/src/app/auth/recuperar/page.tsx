@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AnimatedBackground from "@/components/animatedBackground";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -33,9 +34,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#0b1520]">
-      <div className="bg-[#0f1c2b] text-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        
+    <div className="relative flex justify-center items-center min-h-screen">
+      {/* Fondo animado */}
+      <AnimatedBackground />
+
+      <div className="bg-[#0f1c2b] text-white p-8 rounded-2xl shadow-lg w-full max-w-md relative z-10">
         {/* Encabezado centrado */}
         <div className="flex flex-col items-center mb-6">
           <span className="text-6xl mb-2">🐻</span>
