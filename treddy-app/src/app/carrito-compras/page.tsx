@@ -7,14 +7,72 @@ import Nav from "../../pages/nav";
 import Footer from "../../pages/footer";
 
 export default function Carrito() {
-  const [figuras, setFiguras] = useState([]);
+  const [figuras, setFiguras] = useState<any[]>([]);
   const total = figuras.reduce(
     (suma: number, figura: any) => suma + Number(figura.precio_base),
     0
   );
+
   useEffect(() => {
     getFiguras().then(setFiguras).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://sdk.mercadopago.com/js/v2";
+    script.async = true;
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      const btn = document.getElementById("checkout-button");
+      if (!btn) return;
+
+      const handleClick = async () => {
+        try {
+          const res = await fetch(
+            `https://4fe99f0c07e5.ngrok-free.app/api/payment/create_preference`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                items: figuras.map((figura: any) => ({
+                  id: figura.producto_id,
+                  title: figura.nombre,
+                  quantity: 1,
+                  currency_id: "COP",
+                  unit_price: Number(figura.precio_base),
+                })),
+              }),
+            }
+          );
+
+          if (!res.ok) throw new Error("Error en backend");
+
+          const data = await res.json();
+          console.log("Preferencia creada:", data);
+
+          const mp = new (window as any).MercadoPago(
+            process.env.NEXT_PUBLIC_MP_PUBLIC_KEY!,
+            { locale: "es-CO" }
+          );
+
+          mp.checkout({
+            preference: { id: data.id },
+            autoOpen: true,
+          });
+        } catch (error) {
+          console.error("Error en fetch o checkout:", error);
+        }
+      };
+
+      btn.addEventListener("click", handleClick);
+      return () => btn.removeEventListener("click", handleClick);
+    };
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  });
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white flex flex-col">
@@ -40,7 +98,7 @@ export default function Carrito() {
                       alt={figura.nombre}
                       width={70}
                       height={70}
-                    ></Image>
+                    />
                     <p>{figura.nombre}</p>
                     <span>${figura.precio_base}</span>
                   </div>
@@ -52,7 +110,11 @@ export default function Carrito() {
                 <span>${total}</span>
               </div>
 
-              <button className="mt-6 w-full bg-[#00E6F6] text-black py-2 rounded-full font-medium hover:bg-[#00c8d4]">
+              {/* Botón conectado al checkout */}
+              <button
+                id="checkout-button"
+                className="mt-6 w-full bg-[#00E6F6] text-black py-2 rounded-full font-medium hover:bg-[#00c8d4]"
+              >
                 Proceder al pago
               </button>
             </>
