@@ -4,6 +4,8 @@ export async function getFiguras() {
   return res.json();
 }
 
+
+
 export async function registerUser(data: {
   nombre: string;
   apellido: string;
