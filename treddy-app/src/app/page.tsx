@@ -114,7 +114,7 @@ export default function HomePage() {
       {/* PRODUCTOS POPULARES */}
       <section className="px-8 py-16">
         <h3 className="text-3xl font-bold mb-10 text-center">
-          ⭐ Productos Populares
+           Productos Populares
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {figuras.map((figura: any) => (
