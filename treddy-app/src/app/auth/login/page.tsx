@@ -92,7 +92,7 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <a href="recuperar" className="text-cyan-400 hover:underline">
+            <a href="../recover-password" className="text-cyan-400 hover:underline">
               ¿Se te olvidó la contraseña?
             </a>
             <div className="flex items-center space-x-2">

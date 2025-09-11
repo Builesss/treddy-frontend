@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import AnimatedBackground from "@/components/animatedBackground";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4000/api/auth/forgot-password", {
+      const response = await fetch("http://localhost:4000/api/user/recover-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -24,6 +26,7 @@ export default function ForgotPasswordPage() {
         alert(data.message || "Error al solicitar recuperación");
       } else {
         alert("Te enviamos un correo con instrucciones para restablecer tu contraseña");
+        router.push("auth/login");
       }
     } catch (error) {
       console.error("Error en forgot-password:", error);
