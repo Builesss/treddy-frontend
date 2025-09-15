@@ -31,7 +31,7 @@ export default function Carrito() {
       const handleClick = async () => {
         try {
           const res = await fetch(
-            `https://082d5500e4b0.ngrok-free.app/api/payment/create_preference`,
+            `https://4ac7b7a2a950.ngrok-free.app/api/payment/create_preference`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
