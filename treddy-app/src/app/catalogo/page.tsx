@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { getFiguras } from '@/lib/api'
 import { useEffect, useState } from 'react'
-import TarjetaExpandible from './TajetaExpandible'
+import TarjetaExpandible from '../../components/TarjetaExpandible'
 import Nav from "@/pages/nav"
 import Footer from "@/pages/footer"
 
