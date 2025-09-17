@@ -33,7 +33,7 @@ export default function HomePage() {
       <Nav />
 
       {/* HERO */}
-      <section className="flex flex-col md:flex-row justify-between items-center px-45 py-10">
+      <section className="mx-8 flex flex-col md:flex-row justify-between items-center px-35 py-10 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
         <div className="max-w-xxl">
           <h2 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
             Treddy Figuras 3D
@@ -128,7 +128,7 @@ export default function HomePage() {
 
       {/* PRODUCTOS POPULARES */}
       <section className="px-8 py-16">
-        <h3 className="text-3xl font-bold mb-10 text-center text-cyan-400">
+        <h3 className="text-3xl text-center font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-10">
           Productos Populares
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
@@ -148,7 +148,7 @@ export default function HomePage() {
                 className="mx-auto rounded-md"
               />
               <p className="mt-3 font-semibold text-lg">{figura.nombre}</p>
-              <p className="text-cyan-400 font-bold">{figura.precio_base}$</p>
+              <p className="font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">{figura.precio_base}$</p>
               <button className="mt-3 bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-2 rounded-lg text-black font-medium hover:opacity-90">
                 Ver más
               </button>
@@ -158,7 +158,7 @@ export default function HomePage() {
       </section>
 
       {/* SECCIÓN AR */}
-      <section className="px-70 py-8 bg-[#0F173A] flex flex-col md:flex-row justify-between items-center ">
+      <section className="mx-8 px-70 py-8 bg-[#0F173A] flex flex-col md:flex-row justify-between items-center  bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
         <div className="max-w-xl">
           <h4 className="text-4xl font-bold mb-2 font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
             Visualiza tu imagen en realidad aumentada
