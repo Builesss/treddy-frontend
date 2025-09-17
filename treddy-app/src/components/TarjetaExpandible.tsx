@@ -34,13 +34,13 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura,
       <div className="bg-[#0F173A] p-6 rounded-xl max-w-md w-full text-center relative text-white">
         <button
           onClick={() => setmostrarAR(!mostrarAR)}
-          className="absolute top-3 left-3 bg-gray-600 text-white font-semibold py-2 rounded-lg hover:bg-[#00E6F6] hover:text-black transition"
+          className="absolute top-3 left-3 bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-[#00E6F6] hover:text-black transition"
         >
           AR
         </button>
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-white py-2 rounded-lg hover:text-[#00E6F6]"
+          className="absolute top-3 right-3 text-white py-2 px-4 rounded-lg hover:text-[#00E6F6]"
         >
           X
         </button>
@@ -56,14 +56,14 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura,
         <p className="text-[#00E6F6] font-bold mb-2">${figura.precio_base}</p>
         <p className="text-gray-300 mb-4">{figura.descripcion}</p>
         <div className="flex flex-col gap-2">
-          <button className="bg-[#00E6F6] text-black font-bold py-2 rounded-lg hover:bg-black hover:text-[#00E6F6] transition">
+          <button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
             Comprar
           </button>
           <button className="bg-gray-600 text-white font-semibold py-2 rounded-lg hover:bg-[#00E6F6] hover:text-black transition">
             Personalizar
           </button>
           <button className="bg-gray-600 text-white font-semibold py-2 rounded-lg hover:bg-[#00E6F6] hover:text-black transition">
-            enviar a carrito de compras
+            Enviar a carrito de compras
           </button>
         </div>
       </div>
