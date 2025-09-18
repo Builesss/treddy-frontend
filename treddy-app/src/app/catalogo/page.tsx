@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import Link from "next/link"
 import Image from 'next/image'
 import { getFiguras } from '@/lib/api'
 import { useEffect, useState } from 'react'
-import TarjetaExpandible from './TajetaExpandible'
+import TarjetaExpandible from '../../components/TarjetaExpandible'
 import Nav from "@/pages/nav"
 import Footer from "@/pages/footer"
 
@@ -21,25 +21,25 @@ export default function Catalogo() {
       
       <h2 className="text-center text-2xl font-bold mb-6">CATALOGO DE FIGURAS 3D</h2>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-6 px-20">
         {figuras.map((figura) => (
           <div
             key={figura.producto_id}
             onClick={() => setSeleccionada(figura)}
-            className="cursor-pointer bg-[#0F173A] p-4 rounded-xl shadow-lg flex flex-col items-center text-center hover:scale-105 transition-transform duration-200"
+            className="`cursor-pointer bg-[#0F173A] w-140 p-4 rounded-xl py-5 shadow-lg flex flex-col items-center text-center hover:scale-105 hover:ring-2 hover:ring-cyan-400 transition-transform duration-200`"
           >
             <p className="text-[#00E6F6] font-bold mt-1">Disponible:{figura.stock}</p>
             <Image
               src={figura.imagenUrl || "/placeholder.png"}
               alt={figura.nombre}
-              width={150}
+              width={200}
               height={150}
-              className="mx-auto mb-3 rounded-lg"
+              className="mx-auto mb-1 rounded-lg"
             />
             <h3 className="text-white font-semibold text-lg">{figura.nombre}</h3>
             <p className="text-[#00E6F6] font-bold mt-1">${figura.precio_base}</p>
-            <button className="bg-gray-600 text-white font-semibold py-2 rounded-lg hover:bg-[#00E6F6] hover:text-black transition">
-              carrito de compras
+            <button className="bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-[#00E6F6] hover:text-black transition">
+              Carrito de compras
             </button>
           </div>
         ))}

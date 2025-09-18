@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/page.tsx
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { getFiguras } from '../lib/api';
-import Image from 'next/image';
-import Footer from "@/pages/footer"; 
+import { useEffect, useState } from "react";
+import { getFiguras } from "../lib/api";
+import Image from "next/image";
+import Footer from "@/pages/footer";
 import Nav from "@/pages/nav";
 
 export default function HomePage() {
@@ -17,15 +17,11 @@ export default function HomePage() {
   }, []);
 
   const prevSlide = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? figuras.length - 1 : prev - 1
-    );
+    setCurrentIndex((prev) => (prev === 0 ? figuras.length - 1 : prev - 1));
   };
 
   const nextSlide = () => {
-    setCurrentIndex((prev) =>
-      prev === figuras.length - 1 ? 0 : prev + 1
-    );
+    setCurrentIndex((prev) => (prev === figuras.length - 1 ? 0 : prev + 1));
   };
 
   const goToSlide = (index: number) => {
@@ -34,15 +30,18 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white">
-      <Nav/>
+      <Nav />
 
-      <section className="flex flex-col md:flex-row justify-between items-center px-8 py-16">
-        <div className="max-w-xl">
-          <h2 className="text-5xl font-bold">Treddy Figuras 3D</h2>
-          <p className="mt-4 text-lg text-[#B5B8C5]">
+      {/* HERO */}
+      <section className="mx-8 flex flex-col md:flex-row justify-between items-center px-35 py-10 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
+        <div className="max-w-xxl">
+          <h2 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
+            Treddy Figuras 3D
+          </h2>
+          <p className="mt-5 text-lg text-[#B5B8C5]">
             Personaliza o crea tu propia figura impresa en 3D
           </p>
-          <button className="mt-6 bg-[#00E6F6] text-black px-6 py-2 rounded-full hover:bg-[#00c8d4] font-medium">
+          <button className="mt-6 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
             Inicia ahora
           </button>
         </div>
@@ -64,7 +63,7 @@ export default function HomePage() {
                       <Image
                         src={figura.imagenUrl}
                         alt={figura.nombre}
-                        width={150}
+                        width={250}
                         height={150}
                         className="mx-auto rounded-md"
                       />
@@ -80,7 +79,14 @@ export default function HomePage() {
                 type="button"
                 className="absolute inset-y-0 left-0 flex items-center justify-center w-12 h-full text-white hover:bg-white/10"
               >
-                <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
               </button>
@@ -91,7 +97,14 @@ export default function HomePage() {
                 type="button"
                 className="absolute inset-y-0 right-0 flex items-center justify-center w-12 h-full text-white hover:bg-white/10"
               >
-                <svg className="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
                   <path d="M9 18l6-6-6-6" />
                 </svg>
               </button>
@@ -102,7 +115,9 @@ export default function HomePage() {
                   <button
                     key={index}
                     onClick={() => goToSlide(index)}
-                    className={`w-3 h-3 rounded-full ${index === currentIndex ? 'bg-[#00E6F6]' : 'bg-gray-400'}`}
+                    className={`w-3 h-3 rounded-full ${
+                      index === currentIndex ? "bg-[#00E6F6]" : "bg-gray-400"
+                    }`}
                   ></button>
                 ))}
               </div>
@@ -113,25 +128,28 @@ export default function HomePage() {
 
       {/* PRODUCTOS POPULARES */}
       <section className="px-8 py-16">
-        <h3 className="text-3xl font-bold mb-10 text-center">
-           Productos Populares
+        <h3 className="text-3xl text-center font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-10">
+          Productos Populares
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {figuras.map((figura: any) => (
+          {figuras.map((figura: any, index: number) => (
             <div
               key={figura.producto_id}
-              className="bg-[#10193F] p-5 rounded-xl text-center shadow-lg hover:scale-105 transition-transform"
+              className={`bg-[#10193F] p-5 rounded-xl text-center shadow-lg hover:scale-105 hover:ring-2 hover:ring-cyan-400 transition-transform
+              ${
+                index === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2" : ""
+              }`}
             >
               <Image
                 src={figura.imagenUrl}
                 alt={figura.nombre}
-                width={120}
-                height={120}
-                className="mx-auto"
+                width={index === 0 ? 450 : 140}
+                height={index === 0 ? 250 : 140}
+                className="mx-auto rounded-md"
               />
-              <p className="mt-3 font-semibold">{figura.nombre}</p>
-              <p className="text-cyan-400">$29.99</p>
-              <button className="mt-3 bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-1 rounded-lg text-black font-medium">
+              <p className="mt-3 font-semibold text-lg">{figura.nombre}</p>
+              <p className="font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">{figura.precio_base}$</p>
+              <button className="mt-3 bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-2 rounded-lg text-black font-medium hover:opacity-90">
                 Ver más
               </button>
             </div>
@@ -140,18 +158,26 @@ export default function HomePage() {
       </section>
 
       {/* SECCIÓN AR */}
-      <section className="px-8 py-16 bg-[#0F173A] flex flex-col md:flex-row justify-between items-center ">
+      <section className="mx-8 px-70 py-8 bg-[#0F173A] flex flex-col md:flex-row justify-between items-center  bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
         <div className="max-w-xl">
-          <h4 className="text-xl font-bold mb-2">Visualiza tu imagen en realidad aumentada</h4>
-          <p className="text-[#B5B8C5]">
-            Usa tu cámara para ver cómo se vería tu figura 3D en un espacio real antes de comprarla. ¡Haz tu compra con total confianza!
+          <h4 className="text-4xl font-bold mb-2 font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
+            Visualiza tu imagen en realidad aumentada
+          </h4>
+          <p className="mt-5 text-lg text-[#B5B8C5]">
+            Usa tu cámara para ver cómo se vería tu figura 3D en un espacio real
+            antes de comprarla. ¡Haz tu compra con total confianza!
           </p>
-          <button className="mt-6 bg-[#00E6F6] text-black px-6 py-2 rounded-full hover:bg-[#00c8d4] font-medium">
+          <button className="mt-6 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
             Pruébalo ahora
           </button>
         </div>
         <div className="mt-10 md:mt-0">
-          <Image src="/treddy-sublogo.png" alt="Treddy Logo" width={250} height={250} />
+          <Image
+            src="/treddy-sublogo.png"
+            alt="Treddy Logo"
+            width={450}
+            height={250}
+          />
         </div>
       </section>
 
