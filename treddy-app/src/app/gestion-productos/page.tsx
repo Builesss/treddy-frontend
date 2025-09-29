@@ -11,17 +11,19 @@ interface Producto {
   nombre: string;
   precio: number;
   imagenUrl: string;
+  categorias?: string[];
 }
 
 export default function ProductManagementPage() {
   const [productos, setProductos] = useState<Producto[]>([
-    { id: 1, nombre: 'Figura Demo', precio: 29.99, imagenUrl: '/treddy-sublogo.png' },
+    { id: 1, nombre: 'Figura One piece', precio: 29.99, imagenUrl: '/treddy-sublogo.png',categorias: ['One Piece', 'Anime'], },
   ]);
 
   const [nuevoProducto, setNuevoProducto] = useState({
     nombre: '',
     precio: '',
     imagenUrl: '',
+    categorias: '',
   });
 
   const [editandoId, setEditandoId] = useState<number | null>(null);
@@ -52,12 +54,15 @@ export default function ProductManagementPage() {
         nombre: nuevoProducto.nombre,
         precio: parseFloat(nuevoProducto.precio),
         imagenUrl: nuevoProducto.imagenUrl || '/treddy-sublogo.png',
+        categorias: nuevoProducto.categorias
+          ? nuevoProducto.categorias.split(',').map((cat) => cat.trim())
+          : [],
       };
       setProductos([...productos, nuevo]);
     }
 
     // Reset form
-    setNuevoProducto({ nombre: '', precio: '', imagenUrl: '' });
+    setNuevoProducto({ nombre: '', precio: '', imagenUrl: '', categorias: '' });
   };
 
   // Eliminar producto
@@ -65,7 +70,7 @@ export default function ProductManagementPage() {
     setProductos(productos.filter((p) => p.id !== id));
     if (editandoId === id) {
       setEditandoId(null);
-      setNuevoProducto({ nombre: '', precio: '', imagenUrl: '' });
+      setNuevoProducto({ nombre: '', precio: '', imagenUrl: '', categorias: '' });
     }
   };
 
@@ -77,6 +82,7 @@ export default function ProductManagementPage() {
         nombre: producto.nombre,
         precio: producto.precio.toString(),
         imagenUrl: producto.imagenUrl,
+        categorias: producto.categorias ? producto.categorias.join(', ') : '',
       });
       setEditandoId(producto.id);
     }
@@ -118,7 +124,14 @@ export default function ProductManagementPage() {
             onChange={(e) => setNuevoProducto({ ...nuevoProducto, imagenUrl: e.target.value })}
             className="w-full mb-3 p-2 rounded bg-[#10193F] border border-gray-600 text-white"
           />
-
+          <input
+            type="text"
+            placeholder="Categorías (separadas por comas)"
+            value={nuevoProducto.categorias}
+            onChange={(e) => setNuevoProducto({ ...nuevoProducto, categorias: e.target.value })}
+            className="w-full mb-3 p-2 rounded bg-[#10193F] border border-gray-600 text-white"
+            
+          />
           <button
             onClick={guardarProducto}
             className="bg-[#00E6F6] text-black px-6 py-2 rounded-full hover:bg-[#00c8d4] font-medium"
@@ -143,8 +156,13 @@ export default function ProductManagementPage() {
               />
               <p className="mt-3 font-semibold">{producto.nombre}</p>
               <p className="text-cyan-400">${producto.precio.toFixed(2)}</p>
-
+                {producto.categorias && (
+              <p className="text-gray-400 text-sm mt-1">
+                {producto.categorias.join(", ")}
+              </p>
+                )}
               <div className="flex justify-center gap-2 mt-3">
+                
                 <button
                   onClick={() => editarProducto(producto.id)}
                   className="bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-1 rounded-lg text-black font-medium"
