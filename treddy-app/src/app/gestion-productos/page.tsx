@@ -1,23 +1,13 @@
-// src/app/products/page.tsx
 'use client';
 
 import { useState } from 'react';
 import Image from 'next/image';
 import Nav from "@/pages/nav";
 import Footer from "@/pages/footer";
+import { useProductos, Producto } from "@/context/ProductosContext";
 
-interface Producto {
-  id: number;
-  nombre: string;
-  precio: number;
-  imagenUrl: string;
-  categorias?: string[];
-}
-
-export default function ProductManagementPage() {
-  const [productos, setProductos] = useState<Producto[]>([
-    { id: 1, nombre: 'Figura One piece', precio: 29.99, imagenUrl: '/treddy-sublogo.png',categorias: ['One Piece', 'Anime'], },
-  ]);
+export default function ProductManagementPreview() {
+  const { productos, setProductos, agregarLog } = useProductos();
 
   const [nuevoProducto, setNuevoProducto] = useState({
     nombre: '',
@@ -28,78 +18,89 @@ export default function ProductManagementPage() {
 
   const [editandoId, setEditandoId] = useState<number | null>(null);
 
-  // Guardar producto (Agregar o Editar)
   const guardarProducto = () => {
     if (!nuevoProducto.nombre || !nuevoProducto.precio) return;
 
+    const productoData: Producto = {
+      id: editandoId || Date.now(),
+      nombre: nuevoProducto.nombre,
+      precio: parseFloat(nuevoProducto.precio),
+      imagenUrl: nuevoProducto.imagenUrl || '/treddy-sublogo.png',
+      categorias: nuevoProducto.categorias
+        ? nuevoProducto.categorias.split(',').map((c) => c.trim())
+        : [],
+    };
+
     if (editandoId) {
-      // 🔄 Actualizar producto existente
-      setProductos((prev) =>
-        prev.map((p) =>
-          p.id === editandoId
-            ? {
-                ...p,
-                nombre: nuevoProducto.nombre,
-                precio: parseFloat(nuevoProducto.precio),
-                imagenUrl: nuevoProducto.imagenUrl || '/treddy-sublogo.png',
-              }
-            : p
-        )
-      );
-      setEditandoId(null); // Salir de modo edición
-    } else {
-      // ➕ Agregar producto nuevo
-      const nuevo = {
+      // Editar producto
+      setProductos(productos.map((p) => (p.id === editandoId ? productoData : p)));
+
+      // Registrar edición
+      agregarLog({
         id: Date.now(),
-        nombre: nuevoProducto.nombre,
-        precio: parseFloat(nuevoProducto.precio),
-        imagenUrl: nuevoProducto.imagenUrl || '/treddy-sublogo.png',
-        categorias: nuevoProducto.categorias
-          ? nuevoProducto.categorias.split(',').map((cat) => cat.trim())
-          : [],
-      };
-      setProductos([...productos, nuevo]);
+        tipo: 'Editar',
+        producto: productoData,
+        fecha: new Date().toLocaleString(),
+      });
+
+      setEditandoId(null);
+    } else {
+      // Agregar producto
+      setProductos([...productos, productoData]);
+
+      // Registrar agregado
+      agregarLog({
+        id: Date.now(),
+        tipo: 'Agregar',
+        producto: productoData,
+        fecha: new Date().toLocaleString(),
+      });
     }
 
-    // Reset form
     setNuevoProducto({ nombre: '', precio: '', imagenUrl: '', categorias: '' });
   };
 
-  // Eliminar producto
   const eliminarProducto = (id: number) => {
+    const prodEliminar = productos.find((p) => p.id === id);
+    if (!prodEliminar) return;
+
     setProductos(productos.filter((p) => p.id !== id));
+
+    // Registrar eliminación
+    agregarLog({
+      id: Date.now(),
+      tipo: 'Eliminar',
+      producto: prodEliminar,
+      fecha: new Date().toLocaleString(),
+    });
+
     if (editandoId === id) {
       setEditandoId(null);
       setNuevoProducto({ nombre: '', precio: '', imagenUrl: '', categorias: '' });
     }
   };
 
-  // Editar producto (cargar en formulario)
   const editarProducto = (id: number) => {
-    const producto = productos.find((p) => p.id === id);
-    if (producto) {
-      setNuevoProducto({
-        nombre: producto.nombre,
-        precio: producto.precio.toString(),
-        imagenUrl: producto.imagenUrl,
-        categorias: producto.categorias ? producto.categorias.join(', ') : '',
-      });
-      setEditandoId(producto.id);
-    }
+    const p = productos.find((prod) => prod.id === id);
+    if (!p) return;
+
+    setNuevoProducto({
+      nombre: p.nombre,
+      precio: p.precio.toString(),
+      imagenUrl: p.imagenUrl,
+      categorias: p.categorias ? p.categorias.join(', ') : '',
+    });
+    setEditandoId(id);
   };
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white">
       <Nav />
 
-      <section className="px-8 py-16">
-        <h2 className="text-4xl font-bold mb-8 text-center">Gestión de Productos</h2>
-
+      <section className="px-8 py-16 grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Formulario */}
-        <div className="bg-[#0F173A] p-6 rounded-xl shadow-lg max-w-xl mx-auto mb-12">
-          <h3 className="text-2xl font-semibold mb-4">
-            {editandoId ? "Editar producto" : "Agregar producto"}
-          </h3>
+        <div className="bg-[#0F173A] p-6 rounded-xl shadow-lg">
+          <h2 className="text-2xl font-semibold mb-4">{editandoId ? "Editar producto" : "Agregar producto"}</h2>
 
           <input
             type="text"
@@ -108,7 +109,6 @@ export default function ProductManagementPage() {
             onChange={(e) => setNuevoProducto({ ...nuevoProducto, nombre: e.target.value })}
             className="w-full mb-3 p-2 rounded bg-[#10193F] border border-gray-600 text-white"
           />
-
           <input
             type="number"
             placeholder="Precio"
@@ -116,7 +116,6 @@ export default function ProductManagementPage() {
             onChange={(e) => setNuevoProducto({ ...nuevoProducto, precio: e.target.value })}
             className="w-full mb-3 p-2 rounded bg-[#10193F] border border-gray-600 text-white"
           />
-
           <input
             type="text"
             placeholder="URL de imagen"
@@ -130,8 +129,8 @@ export default function ProductManagementPage() {
             value={nuevoProducto.categorias}
             onChange={(e) => setNuevoProducto({ ...nuevoProducto, categorias: e.target.value })}
             className="w-full mb-3 p-2 rounded bg-[#10193F] border border-gray-600 text-white"
-            
           />
+
           <button
             onClick={guardarProducto}
             className="bg-[#00E6F6] text-black px-6 py-2 rounded-full hover:bg-[#00c8d4] font-medium"
@@ -140,44 +139,36 @@ export default function ProductManagementPage() {
           </button>
         </div>
 
-        {/* Lista de productos */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {productos.map((producto) => (
-            <div
-              key={producto.id}
-              className="bg-[#10193F] p-5 rounded-xl text-center shadow-lg hover:scale-105 transition-transform"
-            >
-              <Image
-                src={producto.imagenUrl}
-                alt={producto.nombre}
-                width={120}
-                height={120}
-                className="mx-auto"
-              />
-              <p className="mt-3 font-semibold">{producto.nombre}</p>
-              <p className="text-cyan-400">${producto.precio.toFixed(2)}</p>
-                {producto.categorias && (
-              <p className="text-gray-400 text-sm mt-1">
-                {producto.categorias.join(", ")}
-              </p>
-                )}
-              <div className="flex justify-center gap-2 mt-3">
-                
-                <button
-                  onClick={() => editarProducto(producto.id)}
-                  className="bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-1 rounded-lg text-black font-medium"
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => eliminarProducto(producto.id)}
-                  className="bg-gradient-to-r from-pink-500 to-red-500 px-4 py-1 rounded-lg text-black font-medium"
-                >
-                  Eliminar
-                </button>
+        {/* Vista previa de productos */}
+        <div className="overflow-y-auto max-h-[600px]">
+          <h2 className="text-2xl font-semibold mb-4 text-center">Vista Previa</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {productos.map((p) => (
+              <div
+                key={p.id}
+                className="bg-[#10193F] p-5 rounded-xl text-center shadow-lg hover:scale-105 transition-transform"
+              >
+                <Image src={p.imagenUrl} alt={p.nombre} width={120} height={120} className="mx-auto" />
+                <p className="mt-3 font-semibold">{p.nombre}</p>
+                <p className="text-cyan-400">${p.precio.toFixed(2)}</p>
+                {p.categorias && <p className="text-gray-400 text-sm mt-1">{p.categorias.join(", ")}</p>}
+                <div className="flex justify-center gap-2 mt-3">
+                  <button
+                    onClick={() => editarProducto(p.id)}
+                    className="bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-1 rounded-lg text-black font-medium"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => eliminarProducto(p.id)}
+                    className="bg-gradient-to-r from-pink-500 to-red-500 px-4 py-1 rounded-lg text-black font-medium"
+                  >
+                    Eliminar
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
