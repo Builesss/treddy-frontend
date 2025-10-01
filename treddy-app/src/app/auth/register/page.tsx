@@ -60,7 +60,7 @@ export default function RegisterPage() {
     } catch (error) {
       console.error("Error en fetch:", error);
       alert("Error en la conexión con el servidor");
-    }
+    } 
   };
 
   return (
@@ -69,15 +69,15 @@ export default function RegisterPage() {
       <AnimatedBackground />
 
       {/* Contenedor principal */}
-      <div className="relative bg-[#0f1c2b] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg">
+      <div className="relative bg-[#0F173A] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-24 h-24 rounded-full flex justify-center items-center border border-cyan-400">
+          <div className="w-24 h-24 rounded-full flex justify-center items-center border border-cyan-500">
             <span className="text-5xl">🐻</span>
           </div>
           <h2 className="text-2xl font-bold mt-4">Regístrate</h2>
-          <p className="text-sm text-cyan-400 mt-1">
+          <p className="text-sm text-cyan-500 mt-1">
             ¿Ya tienes una cuenta?{" "}
-            <a href="login" className="underline text-cyan-300">
+            <a href="login" className="underline text-cyan-400">
               Inicia Sesión
             </a>
           </p>
@@ -151,7 +151,7 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-2 rounded-lg font-semibold"
+            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
           >
             Registrarse
           </button>
@@ -160,11 +160,11 @@ export default function RegisterPage() {
         <hr className="my-6 border-cyan-700" />
 
         <div className="space-y-3">
-          <button className="w-full flex items-center justify-center space-x-2 bg-cyan-500 py-2 rounded-lg hover:bg-cyan-600">
+          <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
             <span>📧</span>
             <span>Regístrate con Gmail</span>
           </button>
-          <button className="w-full flex items-center justify-center space-x-2 bg-cyan-500 py-2 rounded-lg hover:bg-cyan-600">
+          <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
             <span>🪟</span>
             <span>Regístrate con Microsoft</span>
           </button>

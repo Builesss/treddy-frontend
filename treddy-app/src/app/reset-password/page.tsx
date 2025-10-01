@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
     <div className="relative flex justify-center items-center min-h-screen">
       <AnimatedBackground />
 
-      <div className="bg-[#0f1c2b] text-white p-8 rounded-2xl shadow-lg w-full max-w-md relative z-10">
+      <div className="bg-[#0F173A] text-white p-8 rounded-2xl shadow-lg w-full max-w-md relative z-10">
         <div className="flex flex-col items-center mb-6">
           <span className="text-6xl mb-2">🔑</span>
           <h2 className="text-2xl font-bold text-center">Restablecer contraseña</h2>
@@ -68,7 +68,7 @@ export default function ResetPasswordPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white py-3 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Actualizando..." : "Actualizar contraseña"}
           </button>

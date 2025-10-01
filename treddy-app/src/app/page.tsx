@@ -33,7 +33,7 @@ export default function HomePage() {
       <Nav />
 
       {/* HERO */}
-      <section className="mx-8 flex flex-col md:flex-row justify-between items-center px-35 py-10 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
+      <section className="mx-8 flex flex-col md:flex-row justify-between items-center px-35 py-10 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md mt-10">
         <div className="max-w-xxl">
           <h2 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
             Treddy Figuras 3D

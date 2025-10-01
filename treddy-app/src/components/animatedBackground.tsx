@@ -96,7 +96,7 @@ export default function AnimatedBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10 bg-[#0b1520]"
+      className="fixed inset-0 -z-10 bg-[#0A0F2C]"
     />
   );
 }

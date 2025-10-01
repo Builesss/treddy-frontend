@@ -19,7 +19,7 @@ export default function Catalogo() {
     <main className="min-h-screen bg-[#0A0F2C] text-white ">
      <Nav/>
       
-      <h2 className="text-center text-2xl md:text-5xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight py-10 -mt-10">Catalogo de figuras 3D</h2>
+      <h2 className="text-center text-2xl md:text-5xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight py-10 -mt-5">Catalogo de figuras 3D</h2>
 
       <div className="grid grid-cols-3 gap-6 px-20">
         {figuras.map((figura) => (

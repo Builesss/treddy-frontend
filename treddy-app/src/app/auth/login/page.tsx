@@ -53,15 +53,15 @@ export default function LoginPage() {
       {/* 🎨 Fondo animado */}
       <AnimatedBackground />
 
-      <div className="relative bg-[#0f1c2b] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg">
+      <div className="relative bg-[#0F173A] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-24 h-24 rounded-full flex justify-center items-center border border-cyan-400">
+          <div className="w-24 h-24 rounded-full flex justify-center items-center border border-cyan-500">
             <span className="text-5xl">👨🏻</span>
           </div>
           <h2 className="text-2xl font-bold mt-4">Inicia Sesión</h2>
-          <p className="text-sm text-cyan-400 mt-1">
+          <p className="text-sm text-cyan-500 mt-1">
             ¿Es tu primera vez?{" "}
-            <a href="register" className="underline text-cyan-300">
+            <a href="register" className="underline text-cyan-400">
               Regístrate
             </a>
           </p>
@@ -92,7 +92,7 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <a href="../recover-password" className="text-cyan-400 hover:underline">
+            <a href="../recover-password" className="text-cyan-500 hover:underline">
               ¿Se te olvidó la contraseña?
             </a>
             <div className="flex items-center space-x-2">
@@ -108,7 +108,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-2 rounded-lg font-semibold"
+            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
           >
             Ingresar
           </button>
@@ -117,11 +117,11 @@ export default function LoginPage() {
         <hr className="my-6 border-cyan-700" />
 
         <div className="space-y-3">
-          <button className="w-full flex items-center justify-center space-x-2 bg-cyan-500 py-2 rounded-lg hover:bg-cyan-600">
+          <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
             <span>📧</span>
             <span>Inicia Sesión con Gmail</span>
           </button>
-          <button className="w-full flex items-center justify-center space-x-2 bg-cyan-500 py-2 rounded-lg hover:bg-cyan-600">
+          <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
             <span>🪟</span>
             <span>Inicia Sesión con Microsoft</span>
           </button>
