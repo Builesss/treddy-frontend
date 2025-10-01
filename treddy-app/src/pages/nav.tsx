@@ -11,7 +11,7 @@ export default function Nav() {
         <Link href="/../catalogo" className="hover:text-[#00E6F6]">
           Catalogo
         </Link>
-        <Link href="/../" className="hover:text-[#00E6F6]">
+        <Link href="/../personalizacion" className="hover:text-[#00E6F6]">
           Personalizar
         </Link>
         <Link href="/../" className="hover:text-[#00E6F6]">

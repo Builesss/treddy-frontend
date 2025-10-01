@@ -207,11 +207,10 @@ export default function Personalizador3DIndependiente() {
   return (
     <>
       <Nav />
+      <main className="min-h-screen flex flex-col items-center justify-start bg-[#0A0F2C] -mt-10 -mb-10">
+        <h1 className="text-2xl md:text-5xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight py-10">Personalizador 3D</h1>
 
-      <main className="min-h-screen flex flex-col items-center justify-start bg-[#0f1c2b] py-10">
-        <h1 className="text-3xl font-bold mb-6 text-cyan-400">Personalizador 3D</h1>
-
-        <div className="flex w-full max-w-7xl gap-6 bg-[#162435] p-6 rounded-2xl shadow-lg text-white">
+        <div className="flex w-full max-w-7xl gap-9 bg-[#0F173A]/20 p-6 rounded-2xl shadow-lg text-white">
           {/* Controles */}
           <div className="w-1/3 bg-[#1e2d45] p-6 rounded-xl flex flex-col gap-4 shadow-inner overflow-y-auto max-h-[700px]">
             <h2 className="font-bold mb-2 text-cyan-400">Animación</h2>
@@ -265,7 +264,7 @@ export default function Personalizador3DIndependiente() {
           <div className="w-2/3 flex flex-col items-center justify-center">
             <button
               onClick={() => setMostrar3D(!mostrar3D)}
-              className="mb-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+              className="mt-1 mb-5 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
             >
               {mostrar3D ? 'Ocultar 3D' : 'Mostrar 3D'}
             </button>

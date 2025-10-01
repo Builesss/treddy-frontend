@@ -16,10 +16,10 @@ export default function Catalogo() {
   }, [])
 
   return (
-    <main className="min-h-screen bg-[#0A1A2F] text-white ">
+    <main className="min-h-screen bg-[#0A0F2C] text-white ">
      <Nav/>
       
-      <h2 className="text-center text-2xl font-bold mb-6">CATALOGO DE FIGURAS 3D</h2>
+      <h2 className="text-center text-2xl md:text-5xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight py-10 -mt-10">Catalogo de figuras 3D</h2>
 
       <div className="grid grid-cols-3 gap-6 px-20">
         {figuras.map((figura) => (
@@ -37,8 +37,8 @@ export default function Catalogo() {
               className="mx-auto mb-1 rounded-lg"
             />
             <h3 className="text-white font-semibold text-lg">{figura.nombre}</h3>
-            <p className="text-[#00E6F6] font-bold mt-1">${figura.precio_base}</p>
-            <button className="bg-gray-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-[#00E6F6] hover:text-black transition">
+            <p className="text-[#00E6F6] font-bold mt-2">${figura.precio_base}</p>
+            <button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-6 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg mt-2">
               Carrito de compras
             </button>
           </div>
