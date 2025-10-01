@@ -1,12 +1,10 @@
 import Link from "next/link";
-import Buscador from "@/components/buscador";
 
 export default function Nav() {
   return (
     <header className="flex justify-between items-center px-8 py-6 bg-[#0A0F2C] border-b border-[#1a1f40] mb-10">
       <h1 className="text-2xl font-bold text-[#00E6F6]">TREDDY</h1>
       <nav className="space-x-6">
-       <Buscador/>
         <Link href="/../" className="hover:text-[#00E6F6]">
           Inicio
         </Link>
