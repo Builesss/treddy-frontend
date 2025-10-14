@@ -97,7 +97,11 @@ export default function ProductManagementPreview() {
     <main className="min-h-screen bg-[#0A0F2C] text-white">
       <Nav />
 
-      <section className="px-8 py-16 grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <h2 className="text-center text-2xl md:text-5xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight py-10 -mt-5">
+        Gestion de productos
+      </h2>
+
+      <section className="px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 mt-15">
         {/* Formulario */}
         <div className="bg-[#0F173A] p-6 rounded-xl shadow-lg">
           <h2 className="text-2xl font-semibold mb-4">{editandoId ? "Editar producto" : "Agregar producto"}</h2>

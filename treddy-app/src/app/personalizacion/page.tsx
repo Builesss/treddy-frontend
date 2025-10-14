@@ -207,7 +207,7 @@ export default function Personalizador3DIndependiente() {
   return (
     <>
       <Nav />
-      <main className="min-h-screen flex flex-col items-center justify-start bg-[#0A0F2C] -mb-10">
+      <main className="min-h-screen flex flex-col items-center justify-start bg-[#0A0F2C] -mb-15">
         <h1 className="text-2xl md:text-5xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight py-5 mb-5">Personalizador 3D</h1>
 
         <div className="flex w-full max-w-7xl gap-9 bg-[#0F173A]/20 p-6 rounded-2xl shadow-lg text-white">
