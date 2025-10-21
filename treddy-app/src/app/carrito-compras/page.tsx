@@ -5,32 +5,44 @@ import { getFiguras } from "../../lib/api";
 import Image from "next/image";
 import Nav from "../../pages/nav";
 import Footer from "../../pages/footer";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 export default function Carrito() {
   const [figuras, setFiguras] = useState<any[]>([]);
+  const router = useRouter();
 
-  // Calcular total del carrito
   const total = figuras.reduce(
     (suma: number, figura: any) =>
       suma + Number(figura.precio_base) * Number(figura.cantidad),
     0
   );
 
-  // Obtener figuras desde la API
   useEffect(() => {
     getFiguras()
       .then(setFiguras)
       .catch(console.error);
   }, []);
 
-  // Eliminar producto del carrito
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://sdk.mercadopago.com/js/v2";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
+
   const eliminarFigura = (producto_id: number) => {
     setFiguras((prev) => prev.filter((figura) => figura.producto_id !== producto_id));
   };
 
-  // Actualizar cantidad
   const actualizarCantidad = (producto_id: number, nuevaCantidad: number) => {
-    if (nuevaCantidad < 1) return; // No permitir menos de 1
+    if (nuevaCantidad < 1) return;
     setFiguras((prev) =>
       prev.map((figura) =>
         figura.producto_id === producto_id
@@ -38,6 +50,96 @@ export default function Carrito() {
           : figura
       )
     );
+  };
+
+  const procederAlPago = async () => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      Swal.fire({
+        title: "Inicia sesión",
+        text: "Debes iniciar sesión para realizar una compra",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#00E6F6",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Iniciar sesión",
+        cancelButtonText: "Cancelar",
+        background: "#0F173A",
+        color: "white",
+        customClass: {
+          popup: 'rounded-popup'
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push('/login');
+        }
+      });
+      return;
+    }
+
+    try {
+      Swal.fire({
+        title: 'Procesando...',
+        text: 'Creando preferencia de pago',
+        allowOutsideClick: false,
+        background: "#0F173A",
+        color: "white",
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      const res = await fetch(
+        `https://2f0f3a58c2e0.ngrok-free.app/api/payment/create_preference`,
+        {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            items: figuras.map((figura: any) => ({
+              id: figura.producto_id,
+              title: figura.nombre,
+              quantity: Number(figura.cantidad),
+              currency_id: "COP",
+              unit_price: Number(figura.precio_base),
+            })),
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Error al crear la preferencia de pago");
+      }
+
+      const data = await res.json();
+      console.log("Preferencia creada:", data);
+
+      Swal.close();
+
+      const mp = new (window as any).MercadoPago(
+        process.env.NEXT_PUBLIC_MP_PUBLIC_KEY,
+        { locale: "es-CO" }
+      );
+
+      console.log("Abriendo checkout con preference ID:", data.id);
+      mp.checkout({
+        preference: { id: data.id },
+        autoOpen: true,
+      });
+
+    } catch (error) {
+      console.error("Error en checkout:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Hubo un problema al procesar el pago. Intenta nuevamente.",
+        icon: "error",
+        confirmButtonColor: "#00E6F6",
+        background: "#0F173A",
+        color: "white",
+      });
+    }
   };
 
   return (
@@ -127,7 +229,10 @@ export default function Carrito() {
                 <span>${total}</span>
               </div>
 
-              <button className="mt-6 w-full bg-[#00E6F6] text-black py-2 rounded-full font-medium hover:bg-[#00c8d4]">
+              <button 
+                onClick={procederAlPago}
+                className="mt-6 w-full bg-[#00E6F6] text-black py-2 rounded-full font-medium hover:bg-[#00c8d4]"
+              >
                 Proceder al pago
               </button>
             </>

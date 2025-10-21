@@ -1,12 +1,14 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 
 export default function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const links = [
     { href: "/", label: "Inicio" },
@@ -15,10 +17,20 @@ export default function Nav() {
     { href: "/contacto", label: "Contacto" },
   ];
 
-  const userLinks = [
-    { href: "/carrito-compras", label: "Carrito" },
-    { href: "/perfil", label: "Perfil" },
-  ];
+  // 🔹 Verifica el token al cargar
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(!!token);
+    }
+  }, []);
+
+  // 🔹 Cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    router.push("/auth/login");
+  };
 
   return (
     <header className="bg-[#0A0F2C] border-b border-[#1a1f40] shadow-md">
@@ -45,21 +57,48 @@ export default function Nav() {
           ))}
         </nav>
 
-        {/* Desktop user links */}
-        <div className="hidden md:flex space-x-6">
-          {userLinks.map(({ href, label }) => (
+        {/* Desktop user area */}
+        <div className="hidden md:flex space-x-6 items-center">
+          {/* 🔹 Carrito visible siempre */}
+          <Link
+            href="/carrito-compras"
+            className={`transition-colors ${
+              pathname === "/carrito-compras"
+                ? "text-[#00E6F6] font-semibold"
+                : "text-white hover:text-[#00E6F6]"
+            }`}
+          >
+            Carrito
+          </Link>
+
+          {/* 🔹 Si está logueado, mostrar Perfil y Cerrar sesión */}
+          {isLoggedIn ? (
+            <>
+              <Link
+                href="/perfil"
+                className={`transition-colors ${
+                  pathname === "/perfil"
+                    ? "text-[#00E6F6] font-semibold"
+                    : "text-white hover:text-[#00E6F6]"
+                }`}
+              >
+                Perfil
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-4 py-2 rounded-full font-semibold hover:opacity-90 shadow-md"
+              >
+                Cerrar sesión
+              </button>
+            </>
+          ) : (
             <Link
-              key={href}
-              href={href}
-              className={`transition-colors ${
-                pathname === href
-                  ? "text-[#00E6F6] font-semibold"
-                  : "text-white hover:text-[#00E6F6]"
-              }`}
+              href="/auth/login"
+              className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-6 py-2 rounded-full font-semibold hover:opacity-90 shadow-md"
             >
-              {label}
+              Iniciar sesión
             </Link>
-          ))}
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -75,7 +114,7 @@ export default function Nav() {
       {/* Mobile menu */}
       {open && (
         <div className="md:hidden bg-[#0A0F2C] px-6 pb-6 space-y-4">
-          {[...links, ...userLinks].map(({ href, label }) => (
+          {links.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
@@ -89,6 +128,54 @@ export default function Nav() {
               {label}
             </Link>
           ))}
+
+          {/* 🔹 Carrito siempre disponible en móvil */}
+          <Link
+            href="/carrito-compras"
+            onClick={() => setOpen(false)}
+            className={`block ${
+              pathname === "/carrito-compras"
+                ? "text-[#00E6F6] font-semibold"
+                : "text-white hover:text-[#00E6F6]"
+            }`}
+          >
+            Carrito
+          </Link>
+
+          <div className="border-t border-cyan-800 pt-4 space-y-3">
+            {isLoggedIn ? (
+              <>
+                <Link
+                  href="/perfil"
+                  onClick={() => setOpen(false)}
+                  className={`block ${
+                    pathname === "/perfil"
+                      ? "text-[#00E6F6] font-semibold"
+                      : "text-white hover:text-[#00E6F6]"
+                  }`}
+                >
+                  Perfil
+                </Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setOpen(false);
+                  }}
+                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-6 py-2 rounded-full font-semibold hover:opacity-90 shadow-md"
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/auth/login"
+                onClick={() => setOpen(false)}
+                className="block bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-6 py-2 rounded-full font-semibold text-center hover:opacity-90 shadow-md"
+              >
+                Iniciar sesión
+              </Link>
+            )}
+          </div>
         </div>
       )}
     </header>
