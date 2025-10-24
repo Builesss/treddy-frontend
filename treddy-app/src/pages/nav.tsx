@@ -3,12 +3,21 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
+
+type TokenPayload = {
+  id: number;
+  email: string;
+  role: string;
+  exp: number;
+};
 
 export default function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const links = [
     { href: "/", label: "Inicio" },
@@ -17,18 +26,27 @@ export default function Nav() {
     { href: "/contacto", label: "Contacto" },
   ];
 
-  // 🔹 Verifica el token al cargar
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
-      setIsLoggedIn(!!token);
+
+      if (token) {
+        try {
+          const decoded = jwtDecode<TokenPayload>(token);
+          setIsLoggedIn(true);
+          setIsAdmin(decoded.role === "administrador");
+        } catch (error) {
+          console.error("Error al decodificar token:", error);
+          localStorage.removeItem("token");
+        }
+      }
     }
   }, []);
 
-  // 🔹 Cerrar sesión
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
+    setIsAdmin(false);
     router.push("/auth/login");
   };
 
@@ -59,19 +77,32 @@ export default function Nav() {
 
         {/* Desktop user area */}
         <div className="hidden md:flex space-x-6 items-center">
-          {/* 🔹 Carrito visible siempre */}
-          <Link
-            href="/carrito-compras"
-            className={`transition-colors ${
-              pathname === "/carrito-compras"
-                ? "text-[#00E6F6] font-semibold"
-                : "text-white hover:text-[#00E6F6]"
-            }`}
-          >
-            Carrito
-          </Link>
+          {/* 🔹 Muestra Dashboard si es admin, sino Carrito */}
+          {isAdmin ? (
+            <Link
+              href="/gestion-productos"
+              className={`transition-colors ${
+                pathname === "/gestion-productos"
+                  ? "text-[#00E6F6] font-semibold"
+                  : "text-white hover:text-[#00E6F6]"
+              }`}
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/carrito-compras"
+              className={`transition-colors ${
+                pathname === "/carrito-compras"
+                  ? "text-[#00E6F6] font-semibold"
+                  : "text-white hover:text-[#00E6F6]"
+              }`}
+            >
+              Carrito
+            </Link>
+          )}
 
-          {/* 🔹 Si está logueado, mostrar Perfil y Cerrar sesión */}
+          {/* 🔹 Si está logueado */}
           {isLoggedIn ? (
             <>
               <Link
@@ -129,17 +160,17 @@ export default function Nav() {
             </Link>
           ))}
 
-          {/* 🔹 Carrito siempre disponible en móvil */}
+          {/* 🔹 Carrito o Dashboard en móvil */}
           <Link
-            href="/carrito-compras"
+            href={isAdmin ? "/dashboard" : "/carrito-compras"}
             onClick={() => setOpen(false)}
             className={`block ${
-              pathname === "/carrito-compras"
+              pathname === (isAdmin ? "/dashboard" : "/carrito-compras")
                 ? "text-[#00E6F6] font-semibold"
                 : "text-white hover:text-[#00E6F6]"
             }`}
           >
-            Carrito
+            {isAdmin ? "Dashboard" : "Carrito"}
           </Link>
 
           <div className="border-t border-cyan-800 pt-4 space-y-3">

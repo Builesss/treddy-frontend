@@ -23,9 +23,40 @@ export default function ProductManagementPreview() {
     categorias: "",
   });
 
+  const showTreddyAlert = (
+    type: "success" | "error" | "warning" | "info",
+    title: string,
+    text?: string,
+    options: any = {}
+  ) => {
+    Swal.fire({
+      icon: type,
+      title,
+      text,
+      background: "#0F173A",
+      color: "#E0EAFD",
+      confirmButtonColor: type === "success" ? "#00E6F6" : "#3B82F6",
+      confirmButtonText: "Aceptar",
+      cancelButtonText: "Cancelar",
+      showCancelButton: options.showCancelButton || false,
+      showConfirmButton: options.showConfirmButton !== false,
+      timer: options.timer || (type === "success" ? 1500 : undefined),
+      timerProgressBar: type === "success",
+      customClass: {
+        popup: "rounded-2xl shadow-lg border border-cyan-700",
+        title: "text-cyan-400 font-semibold",
+        confirmButton:
+          "rounded-full px-6 py-2 font-semibold shadow-md bg-gradient-to-r from-cyan-500 to-blue-500",
+        cancelButton:
+          "rounded-full px-6 py-2 font-semibold shadow-md bg-gradient-to-r from-pink-500 to-red-500",
+      },
+      ...options,
+    });
+  };
+
   useEffect(() => {
     cargarFiguras();
-  }, []);
+  },);
 
   const cargarFiguras = async () => {
     try {
@@ -33,23 +64,21 @@ export default function ProductManagementPreview() {
       setFiguras(data);
     } catch (error) {
       console.error(error);
-      Swal.fire({
-        icon: "error",
-        title: "Error al cargar las figuras",
-        text: "No se pudieron obtener las figuras desde el servidor.",
-        confirmButtonColor: "#00E6F6",
-      });
+      showTreddyAlert(
+        "error",
+        "Error al cargar las figuras",
+        "No se pudieron obtener las figuras desde el servidor."
+      );
     }
   };
 
   const guardarFigura = async () => {
     if (!nuevoProducto.nombre || !nuevoProducto.precio) {
-      Swal.fire({
-        icon: "warning",
-        title: "Campos requeridos",
-        text: "Debes ingresar al menos el nombre y el precio.",
-        confirmButtonColor: "#00E6F6",
-      });
+      showTreddyAlert(
+        "warning",
+        "Campos requeridos",
+        "Debes ingresar al menos el nombre y el precio."
+      );
       return;
     }
 
@@ -65,20 +94,10 @@ export default function ProductManagementPreview() {
     try {
       if (editandoId) {
         await updateFigura(editandoId, figuraData);
-        Swal.fire({
-          icon: "success",
-          title: "Figura actualizada",
-          timer: 1500,
-          showConfirmButton: false,
-        });
+        showTreddyAlert("success", "Figura actualizada correctamente");
       } else {
         await createFigura(figuraData);
-        Swal.fire({
-          icon: "success",
-          title: "Figura creada",
-          timer: 1500,
-          showConfirmButton: false,
-        });
+        showTreddyAlert("success", "Figura creada correctamente");
       }
 
       setNuevoProducto({
@@ -91,12 +110,11 @@ export default function ProductManagementPreview() {
       cargarFiguras();
     } catch (error) {
       console.error("Error al guardar figura:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error al guardar",
-        text: "No se pudo guardar la figura.",
-        confirmButtonColor: "#00E6F6",
-      });
+      showTreddyAlert(
+        "error",
+        "Error al guardar",
+        "No se pudo guardar la figura."
+      );
     }
   };
 
@@ -105,32 +123,34 @@ export default function ProductManagementPreview() {
       title: "¿Eliminar figura?",
       text: "Esta acción no se puede deshacer.",
       icon: "warning",
+      background: "#0F173A",
+      color: "#E0EAFD",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
       confirmButtonText: "Sí, eliminar",
       cancelButtonText: "Cancelar",
+      customClass: {
+        popup: "rounded-2xl shadow-lg border border-cyan-700",
+        title: "text-cyan-400 font-semibold",
+        confirmButton:
+          "rounded-full px-6 py-2 font-semibold shadow-md bg-gradient-to-r from-pink-500 to-red-500",
+        cancelButton:
+          "rounded-full px-6 py-2 font-semibold shadow-md bg-gradient-to-r from-cyan-500 to-blue-500",
+      },
     });
 
     if (!confirmar.isConfirmed) return;
 
     try {
       await deleteFigura(id);
-      Swal.fire({
-        icon: "success",
-        title: "Figura eliminada",
-        timer: 1200,
-        showConfirmButton: false,
-      });
+      showTreddyAlert("success", "Figura eliminada correctamente");
       cargarFiguras();
     } catch (error) {
       console.error("Error al eliminar figura:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error al eliminar",
-        text: "No se pudo eliminar la figura.",
-        confirmButtonColor: "#00E6F6",
-      });
+      showTreddyAlert(
+        "error",
+        "Error al eliminar",
+        "No se pudo eliminar la figura."
+      );
     }
   };
 
@@ -192,7 +212,10 @@ export default function ProductManagementPreview() {
             placeholder="Categorías (separadas por comas)"
             value={nuevoProducto.categorias}
             onChange={(e) =>
-              setNuevoProducto({ ...nuevoProducto, categorias: e.target.value })
+              setNuevoProducto({
+                ...nuevoProducto,
+                categorias: e.target.value,
+              })
             }
             className="w-full mb-6 p-3 rounded-lg bg-[#0C1330] border border-[#1a2640] text-white focus:outline-none focus:border-[#00E6F6] transition"
           />
