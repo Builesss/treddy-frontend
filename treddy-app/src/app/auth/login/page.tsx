@@ -47,6 +47,7 @@ export default function LoginPage() {
         body: JSON.stringify({
           email: form.email,
           contrasena: form.contrasena,
+          recordar: form.recordar,
         }),
       });
 
