@@ -132,9 +132,11 @@ export default function Catalogo() {
                 className="mx-auto mb-1 rounded-lg"
               />
               <h3 className="text-white font-semibold text-lg">{figura.nombre}</h3>
-              <p className="text-[#00E6F6] font-bold mt-2">${figura.precio_base}</p>
+                <p className="text-cyan-400 font-bold text-lg">
+                    ${Number(figura.precio_base ?? figura.precio ?? 0).toFixed(2)}
+                  </p>
               <button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-6 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg mt-2">
-                Carrito de compras
+                Ver mas
               </button>
             </div>
           ))
