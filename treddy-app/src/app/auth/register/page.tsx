@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 import AnimatedBackground from "@/components/animatedBackground";
 
 export default function RegisterPage() {
@@ -21,15 +22,38 @@ export default function RegisterPage() {
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
   };
 
+  // 🔹 SweetAlert personalizado con colores Treddy
+  const showAlert = (type: "success" | "error" | "warning", title: string, text?: string) => {
+    Swal.fire({
+      icon: type,
+      title,
+      text,
+      background: "#0F173A",
+      color: "#E0EAFD",
+      confirmButtonColor: type === "success" ? "#00E6F6" : "#3B82F6",
+      confirmButtonText: "Aceptar",
+      showConfirmButton: true,
+      timer: type === "success" ? 1800 : undefined,
+      timerProgressBar: type === "success",
+      customClass: {
+        popup: "rounded-2xl shadow-lg border border-cyan-700",
+        title: "text-cyan-400 font-semibold",
+        confirmButton: "rounded-full px-6 py-2 font-semibold shadow-md",
+      },
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 🔹 Validaciones previas
     if (!form.aceptar) {
-      alert("Debes aceptar los términos y condiciones");
+      showAlert("warning", "Atención", "Debes aceptar los términos y condiciones.");
       return;
     }
+
     if (form.contrasena !== form.confirmarContrasena) {
-      alert("Las contraseñas no coinciden");
+      showAlert("error", "Error", "Las contraseñas no coinciden.");
       return;
     }
 
@@ -46,30 +70,42 @@ export default function RegisterPage() {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.message || "Error en el registro");
+        showAlert("error", "Error en el registro", data.message || "No se pudo registrar el usuario.");
         return;
       }
 
-      const data = await response.json();
-      console.log("Usuario registrado:", data);
-
-      alert("Registro exitoso, ahora puedes iniciar sesión");
-      router.push("/login");
+      Swal.fire({
+        icon: "success",
+        title: "¡Registro exitoso!",
+        text: "Ahora puedes iniciar sesión con tu cuenta.",
+        background: "#0F173A",
+        color: "#E0EAFD",
+        showConfirmButton: false,
+        timer: 1800,
+        timerProgressBar: true,
+        customClass: {
+          popup: "rounded-2xl shadow-lg border border-cyan-700",
+          title: "text-cyan-400 font-semibold",
+        },
+      }).then(() => {
+        router.push("/login");
+      });
     } catch (error) {
       console.error("Error en fetch:", error);
-      alert("Error en la conexión con el servidor");
-    } 
+      showAlert("error", "Error de conexión", "No se pudo conectar con el servidor. Intenta más tarde.");
+    }
   };
 
   return (
     <div className="relative flex justify-center items-center min-h-screen overflow-hidden">
-      {/* Fondo animado */}
+      {/* 🎨 Fondo animado */}
       <AnimatedBackground />
 
-      {/* Contenedor principal */}
-      <div className="relative bg-[#0F173A] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg">
+      {/* 🟦 Contenedor principal */}
+      <div className="relative bg-[#0F173A] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg border border-cyan-700/50">
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full flex justify-center items-center border border-cyan-500">
             <span className="text-5xl">🐻</span>
@@ -84,6 +120,7 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* 🔹 Campos de nombre y apellido */}
           <div className="grid grid-cols-2 gap-3">
             <input
               type="text"
@@ -102,6 +139,8 @@ export default function RegisterPage() {
               className="p-2 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
             />
           </div>
+
+          {/* 🔹 Teléfono y correo */}
           <div className="grid grid-cols-2 gap-3">
             <input
               type="text"
@@ -120,6 +159,8 @@ export default function RegisterPage() {
               className="p-2 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
             />
           </div>
+
+          {/* 🔹 Contraseñas */}
           <div className="grid grid-cols-2 gap-3">
             <input
               type="password"
@@ -139,6 +180,7 @@ export default function RegisterPage() {
             />
           </div>
 
+          {/* 🔹 Checkbox de términos */}
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -146,12 +188,18 @@ export default function RegisterPage() {
               checked={form.aceptar}
               onChange={handleChange}
             />
-            <label className="text-sm">Aceptar términos y condiciones</label>
+            <label className="text-sm">
+              Aceptar{" "}
+              <span className="text-cyan-400 underline cursor-pointer">
+                términos y condiciones
+              </span>
+            </label>
           </div>
 
+          {/* 🔹 Botón de registro */}
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
+            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg transition-transform hover:scale-[1.02]"
           >
             Registrarse
           </button>
@@ -159,6 +207,7 @@ export default function RegisterPage() {
 
         <hr className="my-6 border-cyan-700" />
 
+        {/* 🔹 Botones alternativos */}
         <div className="space-y-3">
           <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
             <span>📧</span>

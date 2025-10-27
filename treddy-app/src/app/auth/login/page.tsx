@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 import AnimatedBackground from "../../../components/animatedBackground";
 
 export default function LoginPage() {
@@ -17,6 +18,26 @@ export default function LoginPage() {
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
   };
 
+  const showAlert = (type: "success" | "error", title: string, text?: string) => {
+    Swal.fire({
+      icon: type,
+      title,
+      text,
+      background: "#0F173A",
+      color: "#E0EAFD",
+      confirmButtonColor: type === "success" ? "#00E6F6" : "#3B82F6",
+      confirmButtonText: "Aceptar",
+      showConfirmButton: type === "error",
+      timer: type === "success" ? 1600 : undefined,
+      timerProgressBar: type === "success",
+      customClass: {
+        popup: "rounded-2xl shadow-lg border border-cyan-700",
+        title: "text-cyan-400 font-semibold",
+        confirmButton: "rounded-full px-6 py-2 font-semibold shadow-md",
+      },
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -26,25 +47,45 @@ export default function LoginPage() {
         body: JSON.stringify({
           email: form.email,
           contrasena: form.contrasena,
+          recordar: form.recordar,
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.message || "Error al iniciar sesión");
+        showAlert(
+          "error",
+          "Error al iniciar sesión",
+          data.message || "Credenciales incorrectas o usuario no encontrado."
+        );
         return;
       }
 
-      const data = await response.json();
-      console.log("Sesión iniciada:", data);
-
       localStorage.setItem("token", data.token);
 
-      alert("Inicio de sesión exitoso");
-      router.push("/");
+      Swal.fire({
+        icon: "success",
+        title: "¡Inicio de sesión exitoso!",
+        background: "#0F173A",
+        color: "#E0EAFD",
+        showConfirmButton: false,
+        timer: 1600,
+        timerProgressBar: true,
+        customClass: {
+          popup: "rounded-2xl shadow-lg border border-cyan-700",
+          title: "text-cyan-400 font-semibold",
+        },
+      }).then(() => {
+        router.push("/");
+      });
     } catch (error) {
       console.error("Error en login:", error);
-      alert("Error en la conexión con el servidor");
+      showAlert(
+        "error",
+        "Error en la conexión",
+        "No se pudo conectar con el servidor. Intenta nuevamente."
+      );
     }
   };
 
@@ -53,7 +94,7 @@ export default function LoginPage() {
       {/* 🎨 Fondo animado */}
       <AnimatedBackground />
 
-      <div className="relative bg-[#0F173A] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg">
+      <div className="relative bg-[#0F173A] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg border border-cyan-700/50">
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full flex justify-center items-center border border-cyan-500">
             <span className="text-5xl">👨🏻</span>
@@ -108,7 +149,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
+            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg transition-transform hover:scale-[1.02]"
           >
             Ingresar
           </button>
