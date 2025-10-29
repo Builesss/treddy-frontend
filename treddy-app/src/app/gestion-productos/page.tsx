@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -56,7 +57,7 @@ export default function ProductManagementPreview() {
 
   useEffect(() => {
     cargarFiguras();
-  },);
+  }, []);
 
   const cargarFiguras = async () => {
     try {
