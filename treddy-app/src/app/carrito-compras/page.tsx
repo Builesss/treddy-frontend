@@ -21,7 +21,11 @@ function resolveImageUrl(prod: any): string {
   const raw = prod?.imagenUrl ?? prod?.imagen ?? "";
   if (!raw) return "/placeholder.png";
 
-  if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")) {
+  if (
+    raw.startsWith("http://") ||
+    raw.startsWith("https://") ||
+    raw.startsWith("/")
+  ) {
     return raw;
   }
 
@@ -41,27 +45,33 @@ export default function Carrito() {
   const router = useRouter();
 
   const total = figuras.reduce(
-    (suma: number, f: FiguraCarrito) => suma + Number(f.precio_base) * Number(f.cantidad),
+    (suma: number, f: FiguraCarrito) =>
+      suma + Number(f.precio_base) * Number(f.cantidad),
     0
   );
 
   const cargarCarrito = async () => {
     try {
       const sessionId = ensureSessionId();
-      const res = await fetch(`http://localhost:4000/api/cart`, {
-        headers: { "x-session-id": sessionId },
-        cache: "no-store",
-      });
+      const res = await fetch(
+        `http://localhost:4000/api/cart?sessionId=${sessionId}`,
+        {
+          cache: "no-store",
+        }
+      );
+
       if (!res.ok) throw new Error("No se pudo obtener el carrito");
       const data = await res.json();
 
-      const mapped: FiguraCarrito[] = (data?.carrito_item || []).map((it: any) => ({
-        producto_id: Number(it.producto_id),
-        nombre: it.productos?.nombre ?? "Producto",
-        imagenUrl: resolveImageUrl(it.productos), 
-        precio_base: Number(it.precio_unitario),
-        cantidad: Number(it.cantidad ?? 1),
-      }));
+      const mapped: FiguraCarrito[] = (data?.carrito_item || []).map(
+        (it: any) => ({
+          producto_id: Number(it.producto_id),
+          nombre: it.productos?.nombre ?? "Producto",
+          imagenUrl: resolveImageUrl(it.productos),
+          precio_base: Number(it.precio_unitario),
+          cantidad: Number(it.cantidad ?? 1),
+        })
+      );
 
       setFiguras(mapped);
     } catch (e) {
@@ -86,10 +96,13 @@ export default function Carrito() {
   const eliminarFigura = async (producto_id: number) => {
     try {
       const sessionId = ensureSessionId();
-      const res = await fetch(`http://localhost:4000/api/cart/items/${producto_id}`, {
-        method: "DELETE",
-        headers: { "x-session-id": sessionId },
-      });
+      const res = await fetch(
+        `http://localhost:4000/api/cart/items/${producto_id}?sessionId=${sessionId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       if (!res.ok) throw new Error("No se pudo eliminar el producto");
       setFiguras((prev) => prev.filter((f) => f.producto_id !== producto_id));
     } catch (e) {
@@ -97,21 +110,33 @@ export default function Carrito() {
     }
   };
 
-  const actualizarCantidad = async (producto_id: number, nuevaCantidad: number) => {
+  const actualizarCantidad = async (
+    producto_id: number,
+    nuevaCantidad: number
+  ) => {
     if (nuevaCantidad < 1) return;
     try {
       const sessionId = ensureSessionId();
-      const res = await fetch(`http://localhost:4000/api/cart/items/${producto_id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "x-session-id": sessionId,
-        },
-        body: JSON.stringify({ cantidad: Number(nuevaCantidad) }),
-      });
+      const res = await fetch(
+        `http://localhost:4000/api/cart/items/${producto_id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            sessionId,
+            cantidad: Number(nuevaCantidad),
+          }),
+        }
+      );
       if (!res.ok) throw new Error("No se pudo actualizar la cantidad");
       setFiguras((prev) =>
-        prev.map((f) => (f.producto_id === producto_id ? { ...f, cantidad: Number(nuevaCantidad) } : f))
+        prev.map((f) =>
+          f.producto_id === producto_id
+            ? { ...f, cantidad: Number(nuevaCantidad) }
+            : f
+        )
       );
     } catch (e) {
       console.error("Error actualizando cantidad:", e);
@@ -134,7 +159,7 @@ export default function Carrito() {
         color: "white",
         customClass: { popup: "rounded-popup" },
       }).then((result) => {
-        if (result.isConfirmed) router.push("/login");
+        if (result.isConfirmed) router.push("auth/login");
       });
       return;
     }
@@ -151,26 +176,32 @@ export default function Carrito() {
         },
       });
 
-      const res = await fetch(`https://2f0f3a58c2e0.ngrok-free.app/api/payment/create_preference`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: figuras.map((f) => ({
-            id: f.producto_id,
-            title: f.nombre,
-            quantity: Number(f.cantidad),
-            currency_id: "COP",
-            unit_price: Number(f.precio_base),
-          })),
-        }),
-      });
+      const res = await fetch(
+        `https://2f0f3a58c2e0.ngrok-free.app/api/payment/create_preference`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: figuras.map((f) => ({
+              id: f.producto_id,
+              title: f.nombre,
+              quantity: Number(f.cantidad),
+              currency_id: "COP",
+              unit_price: Number(f.precio_base),
+            })),
+          }),
+        }
+      );
 
       if (!res.ok) throw new Error("Error al crear la preferencia de pago");
       const data = await res.json();
 
       Swal.close();
 
-      const mp = new (window as any).MercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY, { locale: "es-CO" });
+      const mp = new (window as any).MercadoPago(
+        process.env.NEXT_PUBLIC_MP_PUBLIC_KEY,
+        { locale: "es-CO" }
+      );
       mp.checkout({ preference: { id: data.id }, autoOpen: true });
     } catch (error) {
       console.error("Error en checkout:", error);
@@ -211,27 +242,47 @@ export default function Carrito() {
                     key={figura.producto_id}
                     className="grid grid-cols-6 gap-4 items-center bg-[#1a214f] p-3 rounded-lg text-center"
                   >
-                    <Image src={figura.imagenUrl} alt={figura.nombre} width={250} height={250} className="mx-auto" />
+                    <Image
+                      src={figura.imagenUrl}
+                      alt={figura.nombre}
+                      width={250}
+                      height={250}
+                      className="mx-auto"
+                    />
                     <p>{figura.nombre}</p>
                     <p>${figura.precio_base}</p>
 
                     <div className="flex items-center justify-center space-x-2">
                       <button
-                        onClick={() => actualizarCantidad(figura.producto_id, Number(figura.cantidad) - 1)}
+                        onClick={() =>
+                          actualizarCantidad(
+                            figura.producto_id,
+                            Number(figura.cantidad) - 1
+                          )
+                        }
                         className="bg-[#0F173A] text-white px-2 py-1 rounded-lg hover:bg-[#2b356d]"
                       >
                         -
                       </button>
                       <span>{figura.cantidad}</span>
                       <button
-                        onClick={() => actualizarCantidad(figura.producto_id, Number(figura.cantidad) + 1)}
+                        onClick={() =>
+                          actualizarCantidad(
+                            figura.producto_id,
+                            Number(figura.cantidad) + 1
+                          )
+                        }
                         className="bg-[#00E6F6] text-black px-2 py-1 rounded-lg hover:bg-[#00c8d4]"
                       >
                         +
                       </button>
                     </div>
 
-                    <span>${Number(figura.precio_base) * Number(figura.cantidad || 1)}</span>
+                    <span>
+                      $
+                      {Number(figura.precio_base) *
+                        Number(figura.cantidad || 1)}
+                    </span>
 
                     <button
                       onClick={() => eliminarFigura(figura.producto_id)}

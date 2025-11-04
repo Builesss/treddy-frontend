@@ -54,10 +54,8 @@ export default function TarjetaExpandible({
         })
         .catch((err) => console.error("Error accediendo a la cámara:", err));
     } else {
-      // si se apaga el AR, corta la cámara
       stopCamera();
     }
-    // limpia al desmontar
     return () => stopCamera();
   }, [mostrarAR]);
 
@@ -68,11 +66,9 @@ export default function TarjetaExpandible({
       const sessionId = ensureSessionId();
       const res = await fetch(`http://localhost:4000/api/cart/items`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-session-id": sessionId,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          sessionId, 
           productoId: figura.producto_id,
           cantidad: 1,
         }),
@@ -80,7 +76,6 @@ export default function TarjetaExpandible({
 
       if (!res.ok) throw new Error("No se pudo agregar al carrito");
 
-      // ✅ Toast de agregado y cierre de tarjeta
       await Swal.fire({
         icon: "success",
         title: "Agregado al carrito",
