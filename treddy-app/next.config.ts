@@ -12,19 +12,26 @@ const nextConfig = {
         protocol: "https",
         hostname: "treddy-assets.storage.googleapis.com",
       },
+
       {
         protocol: "https",
         hostname: "*.ngrok-free.app",
       },
+
       {
         protocol: "http",
-        hostname: "localhost", 
+        hostname: "localhost",
+      },
+
+      {
+        protocol: "http",
+        hostname: "136.110.207.221",
       },
     ],
   },
 
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL, 
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
 
   async headers() {
@@ -33,8 +40,14 @@ const nextConfig = {
         source: "/(.*)",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, DELETE, OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, PUT, DELETE, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
         ],
       },
     ];
