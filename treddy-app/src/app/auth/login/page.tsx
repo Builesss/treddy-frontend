@@ -18,7 +18,11 @@ export default function LoginPage() {
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
   };
 
-  const showAlert = (type: "success" | "error", title: string, text?: string) => {
+  const showAlert = (
+    type: "success" | "error",
+    title: string,
+    text?: string
+  ) => {
     Swal.fire({
       icon: type,
       title,
@@ -121,7 +125,9 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block text-sm text-cyan-400 mb-1">Contraseña</label>
+            <label className="block text-sm text-cyan-400 mb-1">
+              Contraseña
+            </label>
             <input
               type="password"
               name="contrasena"
@@ -133,7 +139,10 @@ export default function LoginPage() {
           </div>
 
           <div className="flex items-center justify-between text-sm">
-            <a href="../recover-password" className="text-cyan-500 hover:underline">
+            <a
+              href="../recover-password"
+              className="text-cyan-500 hover:underline"
+            >
               ¿Se te olvidó la contraseña?
             </a>
             <div className="flex items-center space-x-2">
@@ -158,11 +167,22 @@ export default function LoginPage() {
         <hr className="my-6 border-cyan-700" />
 
         <div className="space-y-3">
-          <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
+          <button
+            onClick={() =>
+              (window.location.href = `http://localhost:4000/api/auth/google`)
+            }
+            className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
+          >
             <span>📧</span>
             <span>Inicia Sesión con Gmail</span>
           </button>
-          <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
+
+          <button
+            onClick={() =>
+              (window.location.href = `http://localhost:4000/api/auth/microsoft`)
+            }
+            className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
+          >
             <span>🪟</span>
             <span>Inicia Sesión con Microsoft</span>
           </button>
