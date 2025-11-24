@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Nav from '@/pages/nav'
-import Footer from '@/pages/footer'
-import { Edit3, LogOut, Settings, User, Lock, ShoppingBag, Mail, Phone, Calendar, Shield } from 'lucide-react'
-import { getUserProfile, updateUserProfile, getUserOrders } from '@/lib/api'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Nav from '@/pages/nav';
+import Footer from '@/pages/footer';
+import { Edit3, LogOut, Settings, User, Lock, ShoppingBag, Mail, Phone, Calendar, Shield } from 'lucide-react';
+import Swal from 'sweetalert2';
+import { getUserProfile, updateUserProfile, getUserOrders } from '@/lib/api';
 
 export default function Perfil() {
-  const router = useRouter()
+  const router = useRouter();
   const [usuario, setUsuario] = useState({
     nombre: '',
     apellido: '',
@@ -17,23 +18,22 @@ export default function Perfil() {
     telefono: '',
     rol: '',
     fechaRegistro: '',
-  })
-  const [pedidos, setPedidos] = useState<any[]>([])
-  const [modoEdicion, setModoEdicion] = useState(false)
-  const [loading, setLoading] = useState(true)
+  });
+  const [pedidos, setPedidos] = useState<any[]>([]);
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  // Load profile and orders data
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('token');
     if (!token) {
-      router.push('/auth/login')
-      return
+      router.push('/auth/login');
+      return;
     }
-
     const fetchData = async () => {
       try {
-        const response = await getUserProfile()
-        const userData = response.usuario || response
-
+        const profileRes = await getUserProfile();
+        const userData = profileRes.usuario || profileRes;
         setUsuario({
           nombre: userData.nombre || '',
           apellido: userData.apellido || '',
@@ -41,24 +41,40 @@ export default function Perfil() {
           telefono: userData.telefono || '',
           rol: userData.rol || 'Cliente',
           fechaRegistro: userData.fechaRegistro || '',
-        })
-
-        const ordersData = await getUserOrders()
-        setPedidos(Array.isArray(ordersData) ? ordersData : ordersData.pedidos || [])
+        });
+        const ordersRes = await getUserOrders();
+        let pedidosArray: any[] = [];
+        if (Array.isArray(ordersRes)) {
+          pedidosArray = ordersRes;
+        } else if (ordersRes && Array.isArray(ordersRes.pedidos)) {
+          pedidosArray = ordersRes.pedidos;
+        } else if (ordersRes && Array.isArray(ordersRes.data)) {
+          pedidosArray = ordersRes.data;
+        }
+        setPedidos(pedidosArray);
       } catch (error) {
-        console.error('Error al cargar perfil:', error)
+        console.error('Error al cargar perfil:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al cargar datos',
+          text: 'No se pudieron obtener los datos del perfil.',
+          background: '#0F173A',
+          color: '#E0EAFD',
+          timer: 2000,
+          showConfirmButton: false,
+          customClass: { popup: 'rounded-2xl border border-red-500/30 shadow-2xl shadow-red-500/20' },
+        });
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-
-    fetchData()
-  }, [router])
+    };
+    fetchData();
+  }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
-    router.push('/auth/login')
-  }
+    localStorage.removeItem('token');
+    router.push('/auth/login');
+  };
 
   const handleSave = async () => {
     try {
@@ -66,14 +82,33 @@ export default function Perfil() {
         nombre: usuario.nombre,
         apellido: usuario.apellido,
         telefono: usuario.telefono,
-      })
-      setModoEdicion(false)
-      alert('Cambios guardados exitosamente')
+      });
+      setModoEdicion(false);
+      Swal.fire({
+        icon: 'success',
+        title: 'Cambios guardados exitosamente',
+        background: '#0F173A',
+        color: '#E0EAFD',
+        timer: 1500,
+        showConfirmButton: false,
+        customClass: { popup: 'rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20' },
+      });
     } catch (error) {
-      console.error('Error al actualizar:', error)
-      alert('Error al guardar los cambios')
+      console.error('Error al actualizar:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar los cambios',
+        background: '#0F173A',
+        color: '#E0EAFD',
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: { popup: 'rounded-2xl border border-red-500/30 shadow-2xl shadow-red-500/20' },
+      });
     }
-  }
+  };
+
+  // Avatar initials
+  const iniciales = `${usuario.nombre.charAt(0)}${usuario.apellido.charAt(0)}`.toUpperCase() || 'U';
 
   if (loading) {
     return (
@@ -82,54 +117,43 @@ export default function Perfil() {
         <div className="flex-1 flex items-center justify-center">
           <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
         </div>
+        <Footer />
       </main>
-    )
+    );
   }
-
-  // Obtener iniciales
-  const iniciales = `${usuario.nombre.charAt(0)}${usuario.apellido.charAt(0)}`.toUpperCase() || 'U'
 
   return (
     <main className="flex flex-col min-h-screen bg-[#0A0F2C] text-white">
       <Nav />
 
-      {/* Encabezado */}
+      {/* Header */}
       <section className="mx-8 mt-10 px-8 py-12 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
             Mi Perfil
           </h1>
-          <p className="text-[#B5B8C5] mt-3 text-lg">
-            Administra tu información personal y preferencias de cuenta
-          </p>
+          <p className="text-[#B5B8C5] mt-3 text-lg">Administra tu información personal y preferencias de cuenta</p>
         </div>
       </section>
 
-      {/* Contenedor principal */}
+      {/* Main content */}
       <section className="max-w-6xl mx-auto my-10 px-6 md:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Panel izquierdo - Info básica con avatar de iniciales */}
+          {/* Left panel */}
           <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10 flex flex-col items-center text-center space-y-6">
-            {/* Avatar con iniciales */}
             <div className="relative">
               <div className="w-32 h-32 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
-                <span className="text-4xl font-bold text-black">
-                  {iniciales}
-                </span>
+                <span className="text-4xl font-bold text-black">{iniciales}</span>
               </div>
               <div className="absolute -bottom-2 -right-2 bg-[#00E6F6] rounded-full p-2 shadow-lg">
                 <User className="text-black" size={20} />
               </div>
             </div>
-
-            <div>
-              <h2 className="text-2xl font-bold text-white">{usuario.nombre} {usuario.apellido}</h2>
-              <div className="flex items-center justify-center gap-2 mt-2 text-[#B5B8C5]">
-                <Shield size={16} />
-                <span className="text-sm capitalize">{usuario.rol}</span>
-              </div>
+            <h2 className="text-2xl font-bold text-white">{usuario.nombre} {usuario.apellido}</h2>
+            <div className="flex items-center gap-2 mt-2 text-[#B5B8C5]">
+              <Shield size={16} />
+              <span className="text-sm capitalize">{usuario.rol}</span>
             </div>
-
             <div className="w-full pt-4 border-t border-cyan-500/20 space-y-3">
               <div className="flex items-center gap-3 text-[#B5B8C5] text-sm">
                 <Mail size={18} className="text-cyan-400" />
@@ -144,7 +168,6 @@ export default function Perfil() {
                 <span>Desde {usuario.fechaRegistro}</span>
               </div>
             </div>
-
             <button
               onClick={handleLogout}
               className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-full font-semibold hover:opacity-90 transition shadow-lg"
@@ -153,14 +176,13 @@ export default function Perfil() {
             </button>
           </div>
 
-          {/* Panel central y derecho - Información detallada */}
+          {/* Right panels */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Información personal */}
+            {/* Personal info */}
             <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-bold flex items-center gap-3">
-                  <User className="text-cyan-400" />
-                  Información Personal
+                  <User className="text-cyan-400" /> Información Personal
                 </h3>
                 <button
                   onClick={() => (modoEdicion ? handleSave() : setModoEdicion(true))}
@@ -169,7 +191,6 @@ export default function Perfil() {
                   <Edit3 size={16} /> {modoEdicion ? 'Guardar' : 'Editar'}
                 </button>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="text-sm text-[#B5B8C5] mb-2 block">Nombre</label>
@@ -178,15 +199,12 @@ export default function Perfil() {
                       type="text"
                       className="w-full bg-[#0A0F2C] border border-cyan-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
                       value={usuario.nombre}
-                      onChange={(e) =>
-                        setUsuario({ ...usuario, nombre: e.target.value })
-                      }
+                      onChange={(e) => setUsuario({ ...usuario, nombre: e.target.value })}
                     />
                   ) : (
                     <p className="text-white font-medium bg-[#0A0F2C] rounded-lg px-4 py-3">{usuario.nombre}</p>
                   )}
                 </div>
-
                 <div>
                   <label className="text-sm text-[#B5B8C5] mb-2 block">Apellido</label>
                   {modoEdicion ? (
@@ -194,33 +212,25 @@ export default function Perfil() {
                       type="text"
                       className="w-full bg-[#0A0F2C] border border-cyan-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
                       value={usuario.apellido}
-                      onChange={(e) =>
-                        setUsuario({ ...usuario, apellido: e.target.value })
-                      }
+                      onChange={(e) => setUsuario({ ...usuario, apellido: e.target.value })}
                     />
                   ) : (
                     <p className="text-white font-medium bg-[#0A0F2C] rounded-lg px-4 py-3">{usuario.apellido}</p>
                   )}
                 </div>
-
                 <div>
                   <label className="text-sm text-[#B5B8C5] mb-2 block">Correo electrónico</label>
-                  <p className="text-white font-medium bg-[#0A0F2C] rounded-lg px-4 py-3 opacity-60">
-                    {usuario.email}
-                  </p>
+                  <p className="text-white font-medium bg-[#0A0F2C] rounded-lg px-4 py-3 opacity-60">{usuario.email}</p>
                   <span className="text-xs text-[#B5B8C5] mt-1 block">El email no se puede modificar</span>
                 </div>
-
                 <div>
-                  <label className="text-sm text-[#B5B8C5] mb-2 block">Teléfono</label>
+                  <label className="text-sm text-[#B5C8C5] mb-2 block">Teléfono</label>
                   {modoEdicion ? (
                     <input
                       type="text"
                       className="w-full bg-[#0A0F2C] border border-cyan-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
                       value={usuario.telefono}
-                      onChange={(e) =>
-                        setUsuario({ ...usuario, telefono: e.target.value })
-                      }
+                      onChange={(e) => setUsuario({ ...usuario, telefono: e.target.value })}
                     />
                   ) : (
                     <p className="text-white font-medium bg-[#0A0F2C] rounded-lg px-4 py-3">{usuario.telefono || 'No registrado'}</p>
@@ -229,13 +239,11 @@ export default function Perfil() {
               </div>
             </div>
 
-            {/* Configuración de seguridad */}
+            {/* Security & Settings */}
             <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10">
               <h3 className="text-2xl font-bold flex items-center gap-3 mb-6">
-                <Settings className="text-cyan-400" />
-                Seguridad y Configuración
+                <Settings className="text-cyan-400" /> Seguridad y Configuración
               </h3>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
                   onClick={() => alert('Funcionalidad pendiente: cambiar contraseña')}
@@ -247,7 +255,6 @@ export default function Perfil() {
                     <p className="text-xs text-[#B5B8C5] group-hover:text-black/70">Actualiza tu contraseña</p>
                   </div>
                 </button>
-
                 <button
                   onClick={() => alert('Funcionalidad pendiente: preferencias')}
                   className="group flex items-center gap-3 bg-[#0A0F2C] hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-500 transition-all px-5 py-4 rounded-xl border border-cyan-500/20 hover:border-transparent"
@@ -261,13 +268,11 @@ export default function Perfil() {
               </div>
             </div>
 
-            {/* Historial de compras */}
+            {/* Order history */}
             <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10">
               <h3 className="text-2xl font-bold flex items-center gap-3 mb-6">
-                <ShoppingBag className="text-cyan-400" />
-                Historial de Compras
+                <ShoppingBag className="text-cyan-400" /> Historial de Compras
               </h3>
-
               {pedidos.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -280,18 +285,12 @@ export default function Perfil() {
                       </tr>
                     </thead>
                     <tbody className="text-white">
-                      {pedidos.map((pedido) => (
-                        <tr key={pedido.pedido_id} className="border-t border-cyan-500/10 hover:bg-[#0A0F2C] transition">
-                          <td className="px-4 py-4 font-mono text-cyan-400">ORD-{pedido.pedido_id}</td>
-                          <td className="px-4 py-4 text-[#B5B8C5]">
-                            {new Date(pedido.fecha_pedido).toLocaleDateString()}
-                          </td>
+                      {pedidos.map((pedido, index) => (
+                        <tr key={`${pedido.id}-${index}`} className="border-t border-cyan-500/10 hover:bg-[#0A0F2C] transition">
+                          <td className="px-4 py-4 font-mono text-cyan-400">ORD-{pedido.id}</td>
+                          <td className="px-4 py-4 text-[#B5B8C5]">{new Date(pedido.fecha).toLocaleDateString()}</td>
                           <td className="px-4 py-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              pedido.estado === 'entregado' 
-                                ? 'bg-green-500/20 text-green-400' 
-                                : 'bg-blue-500/20 text-blue-400'
-                            }`}>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${pedido.estado === 'entregado' ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'}`}>
                               {pedido.estado}
                             </span>
                           </td>
@@ -320,5 +319,5 @@ export default function Perfil() {
 
       <Footer />
     </main>
-  )
+  );
 }
