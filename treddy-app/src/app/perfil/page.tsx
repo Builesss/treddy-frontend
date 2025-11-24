@@ -1,175 +1,320 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Nav from '@/pages/nav'
 import Footer from '@/pages/footer'
-import { Edit3, LogOut, Settings, User, Lock, ShoppingBag } from 'lucide-react'
+import { Edit3, LogOut, Settings, User, Lock, ShoppingBag, Mail, Phone, Calendar, Shield } from 'lucide-react'
+import { getUserProfile, updateUserProfile, getUserOrders } from '@/lib/api'
 
 export default function Perfil() {
+  const router = useRouter()
   const [usuario, setUsuario] = useState({
-    nombre: 'Sebastián Builes',
-    email: 'sebas@treddy.com',
-    telefono: '+57 300 123 4567',
-    rol: 'Cliente',
-    fechaRegistro: '2025-01-20',
-    avatar: '/perfil-avatar.png',
+    nombre: '',
+    apellido: '',
+    email: '',
+    telefono: '',
+    rol: '',
+    fechaRegistro: '',
   })
-
+  const [pedidos, setPedidos] = useState<any[]>([])
   const [modoEdicion, setModoEdicion] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      router.push('/auth/login')
+      return
+    }
+
+    const fetchData = async () => {
+      try {
+        const response = await getUserProfile()
+        const userData = response.usuario || response
+
+        setUsuario({
+          nombre: userData.nombre || '',
+          apellido: userData.apellido || '',
+          email: userData.email || '',
+          telefono: userData.telefono || '',
+          rol: userData.rol || 'Cliente',
+          fechaRegistro: userData.fechaRegistro || '',
+        })
+
+        const ordersData = await getUserOrders()
+        setPedidos(Array.isArray(ordersData) ? ordersData : ordersData.pedidos || [])
+      } catch (error) {
+        console.error('Error al cargar perfil:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [router])
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    router.push('/auth/login')
+  }
+
+  const handleSave = async () => {
+    try {
+      await updateUserProfile({
+        nombre: usuario.nombre,
+        apellido: usuario.apellido,
+        telefono: usuario.telefono,
+      })
+      setModoEdicion(false)
+      alert('Cambios guardados exitosamente')
+    } catch (error) {
+      console.error('Error al actualizar:', error)
+      alert('Error al guardar los cambios')
+    }
+  }
+
+  if (loading) {
+    return (
+      <main className="flex flex-col min-h-screen bg-[#0A0F2C] text-white">
+        <Nav />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </main>
+    )
+  }
+
+  // Obtener iniciales
+  const iniciales = `${usuario.nombre.charAt(0)}${usuario.apellido.charAt(0)}`.toUpperCase() || 'U'
 
   return (
     <main className="flex flex-col min-h-screen bg-[#0A0F2C] text-white">
       <Nav />
 
       {/* Encabezado */}
-      <section className="max-w-5xl mx-auto py-12 px-6 md:px-0 text-center">
-        <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-          Mi Perfil
-        </h1>
-        <p className="text-gray-400 mt-2">Administra tu información y preferencias</p>
+      <section className="mx-8 mt-10 px-8 py-12 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
+        <div className="max-w-5xl mx-auto text-center">
+          <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+            Mi Perfil
+          </h1>
+          <p className="text-[#B5B8C5] mt-3 text-lg">
+            Administra tu información personal y preferencias de cuenta
+          </p>
+        </div>
       </section>
 
       {/* Contenedor principal */}
-      <section className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 px-6 md:px-0 mb-10">
-        {/* Panel izquierdo - Avatar e info básica */}
-        <div className="bg-[#0F173A] rounded-2xl p-6 shadow-lg flex flex-col items-center text-center border border-[#1a1f40]">
-          <div className="relative">
-            <Image
-              src={usuario.avatar}
-              alt="Avatar"
-              width={120}
-              height={120}
-              className="rounded-full border-2 border-[#00E6F6]"
-            />
-            <button
-              onClick={() => alert('Funcionalidad pendiente: cambiar foto')}
-              className="absolute bottom-1 right-1 bg-[#00E6F6] text-black rounded-full p-1 hover:opacity-80"
-            >
-              <Edit3 size={16} />
-            </button>
-          </div>
+      <section className="max-w-6xl mx-auto my-10 px-6 md:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Panel izquierdo - Info básica con avatar de iniciales */}
+          <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10 flex flex-col items-center text-center space-y-6">
+            {/* Avatar con iniciales */}
+            <div className="relative">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
+                <span className="text-4xl font-bold text-black">
+                  {iniciales}
+                </span>
+              </div>
+              <div className="absolute -bottom-2 -right-2 bg-[#00E6F6] rounded-full p-2 shadow-lg">
+                <User className="text-black" size={20} />
+              </div>
+            </div>
 
-          <h2 className="text-xl font-bold mt-4">{usuario.nombre}</h2>
-          <p className="text-sm text-gray-400">{usuario.rol}</p>
-
-          <button
-            onClick={() => alert('Cerrar sesión')}
-            className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-5 py-2 rounded-full mt-6 font-semibold hover:opacity-90 transition"
-          >
-            <LogOut size={18} /> Cerrar sesión
-          </button>
-        </div>
-
-        {/* Panel central - Información */}
-        <div className="bg-[#0F173A] rounded-2xl p-6 shadow-lg border border-[#1a1f40] col-span-2">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold flex items-center gap-2">
-              <User /> Información personal
-            </h3>
-            <button
-              onClick={() => setModoEdicion(!modoEdicion)}
-              className="flex items-center gap-1 text-[#00E6F6] hover:underline"
-            >
-              <Edit3 size={16} /> {modoEdicion ? 'Guardar' : 'Editar'}
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
             <div>
-              <p className="text-sm text-gray-400">Nombre</p>
-              {modoEdicion ? (
-                <input
-                  type="text"
-                  className="w-full bg-[#1A214A] rounded-lg p-2 mt-1 text-white"
-                  value={usuario.nombre}
-                  onChange={(e) =>
-                    setUsuario({ ...usuario, nombre: e.target.value })
-                  }
-                />
+              <h2 className="text-2xl font-bold text-white">{usuario.nombre} {usuario.apellido}</h2>
+              <div className="flex items-center justify-center gap-2 mt-2 text-[#B5B8C5]">
+                <Shield size={16} />
+                <span className="text-sm capitalize">{usuario.rol}</span>
+              </div>
+            </div>
+
+            <div className="w-full pt-4 border-t border-cyan-500/20 space-y-3">
+              <div className="flex items-center gap-3 text-[#B5B8C5] text-sm">
+                <Mail size={18} className="text-cyan-400" />
+                <span className="truncate">{usuario.email}</span>
+              </div>
+              <div className="flex items-center gap-3 text-[#B5B8C5] text-sm">
+                <Phone size={18} className="text-cyan-400" />
+                <span>{usuario.telefono || 'Sin teléfono'}</span>
+              </div>
+              <div className="flex items-center gap-3 text-[#B5B8C5] text-sm">
+                <Calendar size={18} className="text-cyan-400" />
+                <span>Desde {usuario.fechaRegistro}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 rounded-full font-semibold hover:opacity-90 transition shadow-lg"
+            >
+              <LogOut size={18} /> Cerrar sesión
+            </button>
+          </div>
+
+          {/* Panel central y derecho - Información detallada */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Información personal */}
+            <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold flex items-center gap-3">
+                  <User className="text-cyan-400" />
+                  Información Personal
+                </h3>
+                <button
+                  onClick={() => (modoEdicion ? handleSave() : setModoEdicion(true))}
+                  className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-5 py-2 rounded-full font-semibold hover:opacity-90 transition shadow-md"
+                >
+                  <Edit3 size={16} /> {modoEdicion ? 'Guardar' : 'Editar'}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm text-[#B5B8C5] mb-2 block">Nombre</label>
+                  {modoEdicion ? (
+                    <input
+                      type="text"
+                      className="w-full bg-[#0A0F2C] border border-cyan-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
+                      value={usuario.nombre}
+                      onChange={(e) =>
+                        setUsuario({ ...usuario, nombre: e.target.value })
+                      }
+                    />
+                  ) : (
+                    <p className="text-white font-medium bg-[#0A0F2C] rounded-lg px-4 py-3">{usuario.nombre}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm text-[#B5B8C5] mb-2 block">Apellido</label>
+                  {modoEdicion ? (
+                    <input
+                      type="text"
+                      className="w-full bg-[#0A0F2C] border border-cyan-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
+                      value={usuario.apellido}
+                      onChange={(e) =>
+                        setUsuario({ ...usuario, apellido: e.target.value })
+                      }
+                    />
+                  ) : (
+                    <p className="text-white font-medium bg-[#0A0F2C] rounded-lg px-4 py-3">{usuario.apellido}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm text-[#B5B8C5] mb-2 block">Correo electrónico</label>
+                  <p className="text-white font-medium bg-[#0A0F2C] rounded-lg px-4 py-3 opacity-60">
+                    {usuario.email}
+                  </p>
+                  <span className="text-xs text-[#B5B8C5] mt-1 block">El email no se puede modificar</span>
+                </div>
+
+                <div>
+                  <label className="text-sm text-[#B5B8C5] mb-2 block">Teléfono</label>
+                  {modoEdicion ? (
+                    <input
+                      type="text"
+                      className="w-full bg-[#0A0F2C] border border-cyan-500/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all"
+                      value={usuario.telefono}
+                      onChange={(e) =>
+                        setUsuario({ ...usuario, telefono: e.target.value })
+                      }
+                    />
+                  ) : (
+                    <p className="text-white font-medium bg-[#0A0F2C] rounded-lg px-4 py-3">{usuario.telefono || 'No registrado'}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Configuración de seguridad */}
+            <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10">
+              <h3 className="text-2xl font-bold flex items-center gap-3 mb-6">
+                <Settings className="text-cyan-400" />
+                Seguridad y Configuración
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                  onClick={() => alert('Funcionalidad pendiente: cambiar contraseña')}
+                  className="group flex items-center gap-3 bg-[#0A0F2C] hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-500 transition-all px-5 py-4 rounded-xl border border-cyan-500/20 hover:border-transparent"
+                >
+                  <Lock size={20} className="text-cyan-400 group-hover:text-black" />
+                  <div className="text-left">
+                    <p className="font-semibold group-hover:text-black">Cambiar contraseña</p>
+                    <p className="text-xs text-[#B5B8C5] group-hover:text-black/70">Actualiza tu contraseña</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => alert('Funcionalidad pendiente: preferencias')}
+                  className="group flex items-center gap-3 bg-[#0A0F2C] hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-500 transition-all px-5 py-4 rounded-xl border border-cyan-500/20 hover:border-transparent"
+                >
+                  <Settings size={20} className="text-cyan-400 group-hover:text-black" />
+                  <div className="text-left">
+                    <p className="font-semibold group-hover:text-black">Preferencias</p>
+                    <p className="text-xs text-[#B5B8C5] group-hover:text-black/70">Configura tu cuenta</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Historial de compras */}
+            <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10">
+              <h3 className="text-2xl font-bold flex items-center gap-3 mb-6">
+                <ShoppingBag className="text-cyan-400" />
+                Historial de Compras
+              </h3>
+
+              {pedidos.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-[#0A0F2C] text-[#B5B8C5]">
+                      <tr>
+                        <th className="px-4 py-3 text-left rounded-tl-lg"># Pedido</th>
+                        <th className="px-4 py-3 text-left">Fecha</th>
+                        <th className="px-4 py-3 text-left">Estado</th>
+                        <th className="px-4 py-3 text-right rounded-tr-lg">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-white">
+                      {pedidos.map((pedido) => (
+                        <tr key={pedido.pedido_id} className="border-t border-cyan-500/10 hover:bg-[#0A0F2C] transition">
+                          <td className="px-4 py-4 font-mono text-cyan-400">ORD-{pedido.pedido_id}</td>
+                          <td className="px-4 py-4 text-[#B5B8C5]">
+                            {new Date(pedido.fecha_pedido).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              pedido.estado === 'entregado' 
+                                ? 'bg-green-500/20 text-green-400' 
+                                : 'bg-blue-500/20 text-blue-400'
+                            }`}>
+                              {pedido.estado}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-right font-semibold">${pedido.total}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
-                <p className="text-white">{usuario.nombre}</p>
+                <div className="text-center py-12">
+                  <ShoppingBag size={48} className="mx-auto text-[#B5B8C5] mb-4" />
+                  <p className="text-[#B5B8C5] text-lg">No tienes compras aún</p>
+                  <button
+                    onClick={() => router.push('/catalogo')}
+                    className="mt-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-6 py-2 rounded-full font-semibold hover:opacity-90"
+                  >
+                    Explorar catálogo
+                  </button>
+                </div>
               )}
             </div>
-
-            <div>
-              <p className="text-sm text-gray-400">Correo electrónico</p>
-              <p>{usuario.email}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-400">Teléfono</p>
-              {modoEdicion ? (
-                <input
-                  type="text"
-                  className="w-full bg-[#1A214A] rounded-lg p-2 mt-1 text-white"
-                  value={usuario.telefono}
-                  onChange={(e) =>
-                    setUsuario({ ...usuario, telefono: e.target.value })
-                  }
-                />
-              ) : (
-                <p>{usuario.telefono}</p>
-              )}
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-400">Fecha de registro</p>
-              <p>{usuario.fechaRegistro}</p>
-            </div>
           </div>
-
-          <hr className="my-6 border-[#1a1f40]" />
-
-          <div className="flex flex-col gap-3">
-            <h3 className="text-xl font-semibold flex items-center gap-2">
-              <Settings /> Configuración
-            </h3>
-            <button
-              onClick={() => alert('Funcionalidad pendiente: cambiar contraseña')}
-              className="flex items-center gap-2 bg-[#1A214A] hover:bg-[#00E6F6] hover:text-black transition px-4 py-2 rounded-lg"
-            >
-              <Lock size={18} /> Cambiar contraseña
-            </button>
-            <button
-              onClick={() => alert('Funcionalidad pendiente: preferencias')}
-              className="flex items-center gap-2 bg-[#1A214A] hover:bg-[#00E6F6] hover:text-black transition px-4 py-2 rounded-lg"
-            >
-              <Settings size={18} /> Preferencias de cuenta
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Historial de pedidos */}
-      <section className="max-w-5xl mx-auto mb-20 px-6 md:px-0">
-        <h3 className="text-2xl font-bold flex items-center gap-2 mb-6">
-          <ShoppingBag /> Historial de compras
-        </h3>
-
-        <div className="overflow-x-auto bg-[#0F173A] rounded-2xl border border-[#1a1f40] shadow-lg">
-          <table className="w-full text-sm text-left text-gray-300">
-            <thead className="bg-[#1A214A] text-gray-400 uppercase">
-              <tr>
-                <th className="px-6 py-3"># Pedido</th>
-                <th className="px-6 py-3">Producto</th>
-                <th className="px-6 py-3">Fecha</th>
-                <th className="px-6 py-3">Estado</th>
-                <th className="px-6 py-3">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[1, 2, 3].map((i) => (
-                <tr key={i} className="border-b border-[#1a1f40] hover:bg-[#1A214A]">
-                  <td className="px-6 py-3">ORD-{1000 + i}</td>
-                  <td className="px-6 py-3">Figura personalizada #{i}</td>
-                  <td className="px-6 py-3">2025-10-12</td>
-                  <td className="px-6 py-3 text-[#00E6F6]">Entregado</td>
-                  <td className="px-6 py-3">$120.000</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </section>
 

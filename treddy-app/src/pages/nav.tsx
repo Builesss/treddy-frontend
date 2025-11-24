@@ -23,7 +23,7 @@ export default function Nav() {
     { href: "/", label: "Inicio" },
     { href: "/catalogo", label: "Catálogo" },
     { href: "/personalizacion", label: "Personalizar" },
-    { href: "/contacto", label: "Contacto" },
+    { href: "/contactanos", label: "Contacto" },
   ];
 
   useEffect(() => {
