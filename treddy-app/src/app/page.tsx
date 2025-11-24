@@ -139,10 +139,10 @@ export default function HomePage() {
           Productos Populares
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {figuras.map((figura: any, index: number) => (
+          {figuras.slice(0, 7).map((figura: any, index: number) => (
             <div
               key={figura.producto_id}
-              className={`bg-[#10193F] p-5 rounded-xl text-center shadow-lg hover:scale-105 hover:ring-2 hover:ring-cyan-400 transition-transform ${
+              className={`group bg-[#10193F] p-5 rounded-xl text-center shadow-lg hover:shadow-cyan-400/30 transition-all duration-300 ${
                 index === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2" : ""
               }`}
             >
@@ -151,7 +151,7 @@ export default function HomePage() {
                 alt={figura.nombre}
                 width={index === 0 ? 450 : 140}
                 height={index === 0 ? 250 : 140}
-                className="mx-auto rounded-md"
+                className="mx-auto rounded-md transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-3"
               />
               <p className="mt-3 font-semibold text-lg">{figura.nombre}</p>
               <p className="font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
