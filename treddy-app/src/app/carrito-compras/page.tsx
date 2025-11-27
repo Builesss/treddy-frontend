@@ -6,6 +6,8 @@ import Nav from "../../pages/nav";
 import Footer from "../../pages/footer";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import { motion, AnimatePresence } from "framer-motion";
+import { Trash2, Plus, Minus, ShoppingCart, CreditCard, Loader2 } from "lucide-react";
 
 function ensureSessionId() {
   let sid = localStorage.getItem("sessionId");
@@ -42,6 +44,8 @@ type FiguraCarrito = {
 
 export default function Carrito() {
   const [figuras, setFiguras] = useState<FiguraCarrito[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<number | null>(null);
   const router = useRouter();
 
   const total = figuras.reduce(
@@ -52,6 +56,7 @@ export default function Carrito() {
 
   const cargarCarrito = async () => {
     try {
+      setLoading(true);
       const sessionId = ensureSessionId();
       const res = await fetch(
         `http://localhost:4000/api/cart?sessionId=${sessionId}`,
@@ -76,6 +81,8 @@ export default function Carrito() {
       setFiguras(mapped);
     } catch (e) {
       console.error("Error cargando carrito:", e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,6 +102,7 @@ export default function Carrito() {
 
   const eliminarFigura = async (producto_id: number) => {
     try {
+      setProcessingId(producto_id);
       const sessionId = ensureSessionId();
       const res = await fetch(
         `http://localhost:4000/api/cart/items/${producto_id}?sessionId=${sessionId}`,
@@ -107,6 +115,8 @@ export default function Carrito() {
       setFiguras((prev) => prev.filter((f) => f.producto_id !== producto_id));
     } catch (e) {
       console.error("Error eliminando producto:", e);
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -116,6 +126,7 @@ export default function Carrito() {
   ) => {
     if (nuevaCantidad < 1) return;
     try {
+      setProcessingId(producto_id);
       const sessionId = ensureSessionId();
       const res = await fetch(
         `http://localhost:4000/api/cart/items/${producto_id}`,
@@ -140,6 +151,8 @@ export default function Carrito() {
       );
     } catch (e) {
       console.error("Error actualizando cantidad:", e);
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -219,95 +232,180 @@ export default function Carrito() {
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white flex flex-col">
       <Nav />
-      <div className="flex-grow flex flex-col items-center justify-center px-4 mt-10">
-        <h2 className="text-2xl font-bold mb-6 text-center">Tu carrito</h2>
+      <div className="flex-grow flex flex-col items-center justify-start px-4 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="w-full max-w-5xl"
+        >
+          <h2 className="text-4xl font-extrabold mb-8 text-center bg-gradient-to-r from-[#00E6F6] to-cyan-400 bg-clip-text text-transparent flex items-center justify-center gap-3">
+            <ShoppingCart className="text-[#00E6F6]" size={32} />
+            Tu Carrito
+          </h2>
 
-        <div className="bg-[#0F173A] w-full max-w-4xl rounded-2xl shadow-lg p-8 py-10 mb-10">
-          {figuras.length === 0 ? (
-            <p className="text-center text-[#B5B8C5]">Tu carrito está vacío.</p>
-          ) : (
-            <>
-              <div className="space-y-4">
-                <div className="grid grid-cols-6 gap-4 p-3 rounded-lg font-semibold text-[#B5B8C5] text-center">
-                  <h1>Imagen</h1>
-                  <h2>Nombre</h2>
-                  <h2>Precio base</h2>
-                  <h2>Cantidad</h2>
-                  <h2>Subtotal</h2>
-                  <h2>Acciones</h2>
+          <div className="bg-[#0F173A]/60 backdrop-blur-xl rounded-3xl border border-[#1a1f40] p-6 md:p-10">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                <Loader2 className="animate-spin text-[#00E6F6]" size={48} />
+                <p className="text-gray-400">Cargando tu carrito...</p>
+              </div>
+            ) : figuras.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="bg-[#1a214f] w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <ShoppingCart size={40} className="text-gray-500" />
+                </div>
+                <p className="text-xl text-[#B5B8C5] mb-6">Tu carrito está vacío.</p>
+                <button
+                  onClick={() => router.push("/catalogo")}
+                  className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full font-bold hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all"
+                >
+                  Explorar Catálogo
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Headers - Desktop Only */}
+                <div className="hidden md:grid grid-cols-12 gap-4 pb-4 border-b border-[#1a1f40] text-gray-400 font-medium text-sm uppercase tracking-wider mb-4">
+                  <div className="col-span-6">Producto</div>
+                  <div className="col-span-2 text-center">Precio</div>
+                  <div className="col-span-2 text-center">Cantidad</div>
+                  <div className="col-span-2 text-center">Total</div>
                 </div>
 
-                {figuras.map((figura) => (
-                  <div
-                    key={figura.producto_id}
-                    className="grid grid-cols-6 gap-4 items-center bg-[#1a214f] p-3 rounded-lg text-center"
-                  >
-                    <Image
-                      src={figura.imagenUrl}
-                      alt={figura.nombre}
-                      width={250}
-                      height={250}
-                      className="mx-auto"
-                    />
-                    <p>{figura.nombre}</p>
-                    <p>${figura.precio_base}</p>
-
-                    <div className="flex items-center justify-center space-x-2">
-                      <button
-                        onClick={() =>
-                          actualizarCantidad(
-                            figura.producto_id,
-                            Number(figura.cantidad) - 1
-                          )
-                        }
-                        className="bg-[#0F173A] text-white px-2 py-1 rounded-lg hover:bg-[#2b356d]"
+                <div className="space-y-4">
+                  <AnimatePresence mode="popLayout">
+                    {figuras.map((figura) => (
+                      <motion.div
+                        key={figura.producto_id}
+                        layout
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        className="group bg-[#131b40] hover:bg-[#1a214f] p-4 rounded-2xl border border-[#1a1f40] hover:border-cyan-500/30 transition-all duration-300 grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative overflow-hidden"
                       >
-                        -
-                      </button>
-                      <span>{figura.cantidad}</span>
-                      <button
-                        onClick={() =>
-                          actualizarCantidad(
-                            figura.producto_id,
-                            Number(figura.cantidad) + 1
-                          )
-                        }
-                        className="bg-[#00E6F6] text-black px-2 py-1 rounded-lg hover:bg-[#00c8d4]"
-                      >
-                        +
-                      </button>
-                    </div>
+                        {/* Mobile: Delete button top right */}
+                        <button
+                          onClick={() => eliminarFigura(figura.producto_id)}
+                          disabled={processingId === figura.producto_id}
+                          className="md:hidden absolute top-4 right-4 text-gray-500 hover:text-red-400 transition-colors"
+                        >
+                          {processingId === figura.producto_id ? (
+                            <Loader2 className="animate-spin" size={20} />
+                          ) : (
+                            <Trash2 size={20} />
+                          )}
+                        </button>
 
-                    <span>
-                      $
-                      {Number(figura.precio_base) *
-                        Number(figura.cantidad || 1)}
-                    </span>
+                        {/* Product Info */}
+                        <div className="col-span-1 md:col-span-6 flex items-center gap-4">
+                          <div className="relative w-24 h-24 bg-[#0A0F2C] rounded-xl p-2 flex-shrink-0">
+                            <Image
+                              src={figura.imagenUrl}
+                              alt={figura.nombre}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-lg text-white mb-1">
+                              {figura.nombre}
+                            </h3>
+                            <p className="text-sm text-gray-400 md:hidden">
+                              ${figura.precio_base.toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
 
-                    <button
-                      onClick={() => eliminarFigura(figura.producto_id)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm"
-                    >
-                      Eliminar
-                    </button>
+                        {/* Price - Desktop */}
+                        <div className="hidden md:block col-span-2 text-center font-medium text-gray-300">
+                          ${figura.precio_base.toLocaleString()}
+                        </div>
+
+                        {/* Quantity Controls */}
+                        <div className="col-span-1 md:col-span-2 flex justify-center">
+                          <div className="flex items-center bg-[#0A0F2C] rounded-full p-1 border border-[#2a3055]">
+                            <button
+                              onClick={() =>
+                                actualizarCantidad(
+                                  figura.producto_id,
+                                  Number(figura.cantidad) - 1
+                                )
+                              }
+                              disabled={processingId === figura.producto_id}
+                              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#1a214f] text-cyan-400 transition-colors disabled:opacity-50"
+                            >
+                              <Minus size={16} />
+                            </button>
+                            <span className="w-8 text-center font-bold text-white">
+                              {processingId === figura.producto_id ? (
+                                <Loader2 className="animate-spin mx-auto" size={14} />
+                              ) : (
+                                figura.cantidad
+                              )}
+                            </span>
+                            <button
+                              onClick={() =>
+                                actualizarCantidad(
+                                  figura.producto_id,
+                                  Number(figura.cantidad) + 1
+                                )
+                              }
+                              disabled={processingId === figura.producto_id}
+                              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#1a214f] text-cyan-400 transition-colors disabled:opacity-50"
+                            >
+                              <Plus size={16} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Total & Actions */}
+                        <div className="col-span-1 md:col-span-2 flex items-center justify-between md:justify-center gap-4">
+                          <span className="font-bold text-[#00E6F6] text-lg">
+                            $
+                            {(
+                              Number(figura.precio_base) * Number(figura.cantidad || 1)
+                            ).toLocaleString()}
+                          </span>
+                          
+                          {/* Desktop Delete */}
+                          <button
+                            onClick={() => eliminarFigura(figura.producto_id)}
+                            disabled={processingId === figura.producto_id}
+                            className="hidden md:flex p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                            title="Eliminar producto"
+                          >
+                            {processingId === figura.producto_id ? (
+                              <Loader2 className="animate-spin" size={20} />
+                            ) : (
+                              <Trash2 size={20} />
+                            )}
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+
+                {/* Summary Section */}
+                <div className="mt-8 pt-8 border-t border-[#1a1f40] flex flex-col md:flex-row justify-end items-center gap-6">
+                  <div className="text-right">
+                    <p className="text-gray-400 mb-1">Total a pagar</p>
+                    <p className="text-4xl font-extrabold text-white">
+                      ${total.toLocaleString()}
+                    </p>
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-6 flex justify-between text-lg font-semibold">
-                <span>Total:</span>
-                <span>${total}</span>
-              </div>
-
-              <button
-                onClick={procederAlPago}
-                className="mt-6 w-full bg-[#00E6F6] text-black py-2 rounded-full font-medium hover:bg-[#00c8d4]"
-              >
-                Proceder al pago
-              </button>
-            </>
-          )}
-        </div>
+                  <button
+                    onClick={procederAlPago}
+                    className="w-full md:w-auto bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-10 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] hover:scale-105 transition-all flex items-center justify-center gap-2"
+                  >
+                    <CreditCard size={24} />
+                    Proceder al Pago
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </motion.div>
       </div>
       <Footer />
     </main>
