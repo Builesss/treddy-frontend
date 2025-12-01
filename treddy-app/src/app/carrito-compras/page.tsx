@@ -230,7 +230,12 @@ export default function Carrito() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0A0F2C] text-white flex flex-col">
+    <main className="min-h-screen bg-[#0A0F2C] text-white overflow-hidden relative">
+      {/* Background Elements */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
+      </div>
       <Nav />
       <div className="flex-grow flex flex-col items-center justify-start px-4 py-12">
         <motion.div

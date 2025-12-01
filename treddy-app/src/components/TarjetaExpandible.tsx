@@ -3,7 +3,8 @@ import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Camera, ShoppingCart, Edit3, Loader2 } from "lucide-react";
+import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 
 type Figura = {
   producto_id: number;
@@ -31,6 +32,7 @@ export default function TarjetaExpandible({
   onClose: () => void;
 }) {
   const [mostrarAR, setMostrarAR] = useState(false);
+  const [mostrarQR, setMostrarQR] = useState(false);
   const [loading, setLoading] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -165,19 +167,48 @@ export default function TarjetaExpandible({
           </button>
 
           {/* AR Toggle Button */}
-          <button
-            onClick={() => setMostrarAR(!mostrarAR)}
-            className={`absolute top-3 left-4 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all duration-300 ${
-              mostrarAR
-                ? "bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30"
-                : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 hover:bg-cyan-500/30"
-            }`}
-          >
-            <Camera size={16} />
-            {mostrarAR ? "Cerrar Cámara" : "AR"}
-          </button>
+          {/* AR & QR Buttons */}
+          <div className="absolute top-3 left-4 z-20 flex gap-2">
+            <button
+              onClick={() => {
+                if (mostrarAR) {
+                  setMostrarAR(false);
+                } else {
+                  setMostrarAR(true);
+                  setMostrarQR(false);
+                }
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all duration-300 ${
+                mostrarAR
+                  ? "bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30"
+                  : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 hover:bg-cyan-500/30"
+              }`}
+            >
+              <Camera size={16} />
+              {mostrarAR ? "Cerrar Cámara" : "3D"}
+            </button>
 
-          {/* Image / AR Section */}
+            <button
+              onClick={() => {
+                if (mostrarQR) {
+                  setMostrarQR(false);
+                } else {
+                  setMostrarQR(true);
+                  setMostrarAR(false);
+                }
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all duration-300 ${
+                mostrarQR
+                  ? "bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30"
+                  : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 hover:bg-cyan-500/30"
+              }`}
+            >
+              <QrCode size={16} />
+              {mostrarQR ? "Cerrar QR" : "QR"}
+            </button>
+          </div>
+
+          {/* Image / AR / QR Section */}
           <div className="relative w-full h-80 bg-gradient-to-b from-[#1a214f] to-[#0F173A] flex items-center justify-center p-6 overflow-hidden mt-14">
             {mostrarAR ? (
               <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
@@ -192,6 +223,15 @@ export default function TarjetaExpandible({
                     Modo Realidad Aumentada
                   </span>
                 </div>
+              </div>
+            ) : mostrarQR ? (
+              <div className="flex flex-col items-center justify-center gap-4 bg-white p-6 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+                <QRCodeSVG
+                  value={figura.imagenUrl || "https://treddy.com"}
+                  size={200}
+                  level={"H"}
+                  includeMargin={true}
+                />
               </div>
             ) : (
               <div className="relative w-full h-full">
@@ -216,12 +256,17 @@ export default function TarjetaExpandible({
                   ${figura.precio_base.toLocaleString()}
                 </span>
                 <span className="text-gray-500 text-sm">|</span>
-                <span className={`text-sm ${figura.stock > 0 ? "text-green-400" : "text-red-400"}`}>
+                <span
+                  className={`text-sm ${
+                    figura.stock > 0 ? "text-green-400" : "text-red-400"
+                  }`}
+                >
                   {figura.stock > 0 ? `Stock: ${figura.stock}` : "Agotado"}
                 </span>
               </div>
               <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
-                {figura.descripcion || "Una increíble figura 3D lista para tu colección."}
+                {figura.descripcion ||
+                  "Una increíble figura 3D lista para tu colección."}
               </p>
             </div>
 
@@ -240,7 +285,7 @@ export default function TarjetaExpandible({
                   </>
                 )}
               </button>
-              
+
               <button
                 onClick={handlePersonalizar}
                 className="w-full bg-[#1a214f] text-white font-semibold py-3 rounded-xl border border-[#2a3055] hover:bg-[#232d66] hover:border-cyan-500/30 transition-all flex items-center justify-center gap-2"

@@ -38,11 +38,16 @@ export default function Catalogo() {
     }
   }, [searchParams, router]);
 
-  const categorias = Array.from(new Set(figuras.map((f) => f.categoria))).filter(Boolean);
+  const categorias = Array.from(
+    new Set(figuras.map((f) => f.categoria))
+  ).filter(Boolean);
 
   const figurasFiltradas = figuras.filter((figura) => {
-    const coincideNombre = figura.nombre.toLowerCase().includes(busqueda.toLowerCase());
-    const coincideCategoria = categoria === "todas" || figura.categoria === categoria;
+    const coincideNombre = figura.nombre
+      .toLowerCase()
+      .includes(busqueda.toLowerCase());
+    const coincideCategoria =
+      categoria === "todas" || figura.categoria === categoria;
     const coincidePrecio =
       figura.precio_base >= precioMin && figura.precio_base <= precioMax;
     return coincideNombre && coincideCategoria && coincidePrecio;
@@ -50,7 +55,10 @@ export default function Catalogo() {
 
   const totalPaginas = Math.ceil(figurasFiltradas.length / productosPorPagina);
   const inicio = (paginaActual - 1) * productosPorPagina;
-  const figurasPagina = figurasFiltradas.slice(inicio, inicio + productosPorPagina);
+  const figurasPagina = figurasFiltradas.slice(
+    inicio,
+    inicio + productosPorPagina
+  );
 
   const cambiarPagina = (nuevaPagina: number) => {
     if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
@@ -60,7 +68,13 @@ export default function Catalogo() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0A0F2C] text-white">
+    <main className="min-h-screen bg-[#0A0F2C] text-white overflow-hidden relative">
+      {/* Background Elements */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
+      </div>
+
       <Nav />
 
       <h2 className="text-center text-2xl md:text-5xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight py-10 -mt-5">
@@ -131,10 +145,12 @@ export default function Catalogo() {
                 height={150}
                 className="mx-auto mb-1 rounded-lg"
               />
-              <h3 className="text-white font-semibold text-lg">{figura.nombre}</h3>
-                <p className="text-cyan-400 font-bold text-lg">
-                    ${Number(figura.precio_base ?? figura.precio ?? 0).toFixed(2)}
-                  </p>
+              <h3 className="text-white font-semibold text-lg">
+                {figura.nombre}
+              </h3>
+              <p className="text-cyan-400 font-bold text-lg">
+                ${Number(figura.precio_base ?? figura.precio ?? 0).toFixed(2)}
+              </p>
               <button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-6 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg mt-2">
                 Ver mas
               </button>
@@ -191,7 +207,10 @@ export default function Catalogo() {
       )}
 
       {seleccionada && (
-        <TarjetaExpandible figura={seleccionada} onClose={() => setSeleccionada(null)} />
+        <TarjetaExpandible
+          figura={seleccionada}
+          onClose={() => setSeleccionada(null)}
+        />
       )}
 
       <Footer />
