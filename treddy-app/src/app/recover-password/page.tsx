@@ -38,11 +38,11 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="relative flex justify-center items-center min-h-screen">
-      {/* Fondo animado */}
+
       <AnimatedBackground />
 
       <div className="bg-[#0F173A] text-white p-8 rounded-2xl shadow-lg w-full max-w-md relative z-10">
-        {/* Encabezado centrado */}
+
         <div className="flex flex-col items-center mb-6">
           <span className="text-6xl mb-2">🐻</span>
           <h2 className="text-2xl font-bold text-center">Recuperar contraseña</h2>
@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
 
-        {/* Formulario */}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"

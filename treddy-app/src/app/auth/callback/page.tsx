@@ -22,7 +22,7 @@ export default function OAuthCallbackPage() {
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Background effects */}
+
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[100px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[100px]" />
@@ -35,7 +35,7 @@ export default function OAuthCallbackPage() {
             <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full animate-pulse" />
           </div>
         </div>
-        
+
         <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4">
           Validando credenciales
         </h2>

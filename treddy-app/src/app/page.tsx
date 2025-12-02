@@ -20,7 +20,7 @@ export default function HomePage() {
     getFiguras().then(setFiguras).catch(console.error);
   }, []);
 
-  // Auto-play effect
+
   useEffect(() => {
     if (figuras.length === 0) return;
     const interval = setInterval(() => {
@@ -47,14 +47,14 @@ export default function HomePage() {
 
   return (
       <main className="min-h-screen bg-[#0A0F2C] text-white overflow-hidden relative">
-      {/* Background Elements */}
+
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
       </div>
       <Nav />
 
-      {/* HERO */}
+
       <section className="mx-8 flex flex-col md:flex-row justify-between items-center border border-[#1a1f40] px-35 py-10 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md mt-10">
         <div className="max-w-xxl">
           <h2 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
@@ -71,7 +71,7 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* CARRUSEL MEJORADO */}
+
         {figuras.length > 0 && (
           <motion.section
             initial={{ opacity: 0, x: 50 }}
@@ -109,7 +109,7 @@ export default function HomePage() {
               </AnimatePresence>
             </div>
 
-            {/* Botones de navegación */}
+
             <button
               onClick={prevSlide}
               className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-[#00E6F6] hover:text-black transition-all duration-300 opacity-0 group-hover:opacity-100"
@@ -124,7 +124,7 @@ export default function HomePage() {
               <ChevronRight size={24} />
             </button>
 
-            {/* Dots */}
+
             <div className="absolute bottom-6 left-0 right-0 flex justify-center space-x-3">
               {figuras.map((_, index) => (
                 <button
@@ -142,7 +142,7 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* PRODUCTOS POPULARES */}
+
       <section className="px-8 py-16">
         <h3 className="text-3xl text-center font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-10">
           Productos Populares
@@ -177,10 +177,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECCIÓN AR */}
-      <section className="mx-8 px-70 py-8 bg-[#0F173A] flex flex-col md:flex-row border border-[#1a1f40] justify-between items-center bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
+
+      <section className="mx-8 px-70 py-8 flex flex-col md:flex-row border border-[#1a1f40] justify-between items-center bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
         <div className="max-w-xl">
-          <h4 className="text-4xl font-bold mb-2 font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
+          <h4 className="text-4xl mb-2 font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
             Visualiza tu imagen en realidad aumentada
           </h4>
           <p className="mt-5 text-lg text-[#B5B8C5]">

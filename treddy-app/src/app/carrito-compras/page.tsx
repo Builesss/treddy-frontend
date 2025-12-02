@@ -231,7 +231,7 @@ export default function Carrito() {
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white overflow-hidden relative">
-      {/* Background Elements */}
+
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
@@ -269,7 +269,7 @@ export default function Carrito() {
               </div>
             ) : (
               <>
-                {/* Headers - Desktop Only */}
+
                 <div className="hidden md:grid grid-cols-12 gap-4 pb-4 border-b border-[#1a1f40] text-gray-400 font-medium text-sm uppercase tracking-wider mb-4">
                   <div className="col-span-6">Producto</div>
                   <div className="col-span-2 text-center">Precio</div>
@@ -288,7 +288,7 @@ export default function Carrito() {
                         exit={{ opacity: 0, x: 20 }}
                         className="group bg-[#131b40] hover:bg-[#1a214f] p-4 rounded-2xl border border-[#1a1f40] hover:border-cyan-500/30 transition-all duration-300 grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative overflow-hidden"
                       >
-                        {/* Mobile: Delete button top right */}
+
                         <button
                           onClick={() => eliminarFigura(figura.producto_id)}
                           disabled={processingId === figura.producto_id}
@@ -301,7 +301,7 @@ export default function Carrito() {
                           )}
                         </button>
 
-                        {/* Product Info */}
+
                         <div className="col-span-1 md:col-span-6 flex items-center gap-4">
                           <div className="relative w-24 h-24 bg-[#0A0F2C] rounded-xl p-2 flex-shrink-0">
                             <Image
@@ -321,12 +321,12 @@ export default function Carrito() {
                           </div>
                         </div>
 
-                        {/* Price - Desktop */}
+
                         <div className="hidden md:block col-span-2 text-center font-medium text-gray-300">
                           ${figura.precio_base.toLocaleString()}
                         </div>
 
-                        {/* Quantity Controls */}
+
                         <div className="col-span-1 md:col-span-2 flex justify-center">
                           <div className="flex items-center bg-[#0A0F2C] rounded-full p-1 border border-[#2a3055]">
                             <button
@@ -363,7 +363,7 @@ export default function Carrito() {
                           </div>
                         </div>
 
-                        {/* Total & Actions */}
+
                         <div className="col-span-1 md:col-span-2 flex items-center justify-between md:justify-center gap-4">
                           <span className="font-bold text-[#00E6F6] text-lg">
                             $
@@ -371,8 +371,8 @@ export default function Carrito() {
                               Number(figura.precio_base) * Number(figura.cantidad || 1)
                             ).toLocaleString()}
                           </span>
-                          
-                          {/* Desktop Delete */}
+
+
                           <button
                             onClick={() => eliminarFigura(figura.producto_id)}
                             disabled={processingId === figura.producto_id}
@@ -391,7 +391,7 @@ export default function Carrito() {
                   </AnimatePresence>
                 </div>
 
-                {/* Summary Section */}
+
                 <div className="mt-8 pt-8 border-t border-[#1a1f40] flex flex-col md:flex-row justify-end items-center gap-6">
                   <div className="text-right">
                     <p className="text-gray-400 mb-1">Total a pagar</p>

@@ -70,7 +70,7 @@ export default function ProductManagementPreview() {
 
     if (!res.ok) throw new Error("Error al subir imagen");
     const data = await res.json();
-    return data.url; 
+    return data.url;
   };
 
   const guardarFigura = async () => {
@@ -83,7 +83,7 @@ export default function ProductManagementPreview() {
 
     try {
       if (imagenFile) {
-        imagenUrl = await subirImagen(imagenFile); 
+        imagenUrl = await subirImagen(imagenFile);
       }
 
       const figuraData = {
@@ -155,7 +155,7 @@ export default function ProductManagementPreview() {
       </h2>
 
       <section className="px-4 md:px-8 grid grid-cols-1 lg:grid-cols-[0.5fr_1.3fr] gap-12 mt-5 transition-all duration-300">
-        {/* FORMULARIO */}
+
         <div className="bg-[#10193F]/60 backdrop-blur-md p-10 rounded-2xl shadow-2xl border border-[#1e2d45] hover:border-cyan-400/30 transition-all duration-300">
           <h2 className="text-2xl font-semibold mb-6 text-cyan-400 border-b border-cyan-400/20 pb-2">
             {editandoId ? "Editar Figura" : "Agregar Figura"}
@@ -177,7 +177,7 @@ export default function ProductManagementPreview() {
             className="w-full mb-4 p-3 rounded-lg bg-[#0C1330] border border-[#1a2640] text-white focus:border-[#00E6F6]"
           />
 
-          {/* selector de imagen */}
+
           <div className="mb-4">
             <label className="block mb-2 text-cyan-400 font-semibold">Imagen del producto</label>
             <input
@@ -219,7 +219,7 @@ export default function ProductManagementPreview() {
           </button>
         </div>
 
-        {/* LISTADO DE FIGURAS */}
+
         <div className="overflow-y-auto overflow-x-visible max-h-[700px] pr-2">
           <h2 className="text-2xl font-semibold mb-6 text-center text-cyan-400">
             Vista previa de figuras

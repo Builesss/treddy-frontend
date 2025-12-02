@@ -95,7 +95,7 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex justify-center items-center min-h-screen overflow-hidden">
-      {/* 🎨 Fondo animado */}
+
       <AnimatedBackground />
 
       <div className="relative bg-[#0F173A] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg border border-cyan-700/50">

@@ -23,7 +23,7 @@ export default function Perfil() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load profile and orders data
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -107,7 +107,7 @@ export default function Perfil() {
     }
   };
 
-  // Avatar initials
+
   const iniciales = `${usuario.nombre.charAt(0)}${usuario.apellido.charAt(0)}`.toUpperCase() || 'U';
 
   if (loading) {
@@ -124,14 +124,14 @@ export default function Perfil() {
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white overflow-hidden relative">
-      {/* Background Elements */}
+
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
       </div>
       <Nav />
 
-      {/* Header */}
+
       <section className="mx-8 mt-10 px-8 py-12 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -141,10 +141,10 @@ export default function Perfil() {
         </div>
       </section>
 
-      {/* Main content */}
+
       <section className="max-w-6xl mx-auto my-10 px-6 md:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left panel */}
+
           <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10 flex flex-col items-center text-center space-y-6">
             <div className="relative">
               <div className="w-32 h-32 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center shadow-lg">
@@ -181,9 +181,9 @@ export default function Perfil() {
             </button>
           </div>
 
-          {/* Right panels */}
+
           <div className="lg:col-span-2 space-y-6">
-            {/* Personal info */}
+
             <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-bold flex items-center gap-3">
@@ -244,7 +244,7 @@ export default function Perfil() {
               </div>
             </div>
 
-            {/* Security & Settings */}
+
             <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10">
               <h3 className="text-2xl font-bold flex items-center gap-3 mb-6">
                 <Settings className="text-cyan-400" /> Seguridad y Configuración
@@ -273,7 +273,7 @@ export default function Perfil() {
               </div>
             </div>
 
-            {/* Order history */}
+
             <div className="bg-[#10193F] rounded-2xl p-8 shadow-lg border border-cyan-500/10">
               <h3 className="text-2xl font-bold flex items-center gap-3 mb-6">
                 <ShoppingBag className="text-cyan-400" /> Historial de Compras

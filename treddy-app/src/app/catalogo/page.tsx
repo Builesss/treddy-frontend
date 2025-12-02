@@ -69,7 +69,7 @@ export default function Catalogo() {
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white overflow-hidden relative">
-      {/* Background Elements */}
+
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
@@ -81,9 +81,9 @@ export default function Catalogo() {
         Catálogo de figuras 3D
       </h2>
 
-      {/* Barra de filtros */}
+
       <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-10 px-5">
-        {/* Buscar */}
+
         <input
           type="text"
           placeholder="Buscar figura..."
@@ -92,11 +92,11 @@ export default function Catalogo() {
           className="w-full md:w-1/3 px-5 py-3 rounded-full text-white border border-cyan-400 shadow-md"
         />
 
-        {/* Categoría */}
+
         <select
           value={categoria}
           onChange={(e) => setCategoria(e.target.value)}
-          className="w-full md:w-1/5 px-4 py-3 rounded-full text-black outline-none shadow-md bg-[#0F173A] text-white border border-[#00E6F6] appearance-none"
+          className="w-full md:w-1/5 px-4 py-3 rounded-full outline-none shadow-md bg-[#0F173A] text-white border border-[#00E6F6] appearance-none"
         >
           <option value="todas">Todas las categorías</option>
           {categorias.map((cat) => (
@@ -106,7 +106,7 @@ export default function Catalogo() {
           ))}
         </select>
 
-        {/* Rango de precios */}
+
         <div className="flex gap-2 items-center">
           <input
             type="number"
@@ -126,7 +126,7 @@ export default function Catalogo() {
         </div>
       </div>
 
-      {/* Grid de productos */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-10 md:px-20">
         {figurasPagina.length > 0 ? (
           figurasPagina.map((figura) => (
@@ -163,17 +163,16 @@ export default function Catalogo() {
         )}
       </div>
 
-      {/* Paginación */}
+
       {totalPaginas > 1 && (
         <div className="flex justify-center mt-10 mb-16 gap-3">
           <button
             onClick={() => cambiarPagina(paginaActual - 1)}
             disabled={paginaActual === 1}
-            className={`px-4 py-2 rounded-lg font-semibold ${
-              paginaActual === 1
-                ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-                : "bg-[#00E6F6] text-black hover:bg-[#00bcd4]"
-            }`}
+            className={`px-4 py-2 rounded-lg font-semibold ${paginaActual === 1
+              ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+              : "bg-[#00E6F6] text-black hover:bg-[#00bcd4]"
+              }`}
           >
             Anterior
           </button>
@@ -182,11 +181,10 @@ export default function Catalogo() {
             <button
               key={i + 1}
               onClick={() => cambiarPagina(i + 1)}
-              className={`px-3 py-2 rounded-lg font-semibold ${
-                paginaActual === i + 1
-                  ? "bg-[#00E6F6] text-black"
-                  : "bg-[#1a1f40] text-white hover:bg-[#00E6F6] hover:text-black"
-              }`}
+              className={`px-3 py-2 rounded-lg font-semibold ${paginaActual === i + 1
+                ? "bg-[#00E6F6] text-black"
+                : "bg-[#1a1f40] text-white hover:bg-[#00E6F6] hover:text-black"
+                }`}
             >
               {i + 1}
             </button>
@@ -195,11 +193,10 @@ export default function Catalogo() {
           <button
             onClick={() => cambiarPagina(paginaActual + 1)}
             disabled={paginaActual === totalPaginas}
-            className={`px-4 py-2 rounded-lg font-semibold ${
-              paginaActual === totalPaginas
-                ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-                : "bg-[#00E6F6] text-black hover:bg-[#00bcd4]"
-            }`}
+            className={`px-4 py-2 rounded-lg font-semibold ${paginaActual === totalPaginas
+              ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+              : "bg-[#00E6F6] text-black hover:bg-[#00bcd4]"
+              }`}
           >
             Siguiente
           </button>

@@ -22,7 +22,7 @@ export default function RegisterPage() {
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
   };
 
-  // 🔹 SweetAlert personalizado con colores Treddy
+
   const showAlert = (type: "success" | "error" | "warning", title: string, text?: string) => {
     Swal.fire({
       icon: type,
@@ -46,7 +46,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 🔹 Validaciones previas
+
     if (!form.aceptar) {
       showAlert("warning", "Atención", "Debes aceptar los términos y condiciones.");
       return;
@@ -101,10 +101,10 @@ export default function RegisterPage() {
 
   return (
     <div className="relative flex justify-center items-center min-h-screen overflow-hidden">
-      {/* 🎨 Fondo animado */}
+
       <AnimatedBackground />
 
-      {/* 🟦 Contenedor principal */}
+
       <div className="relative bg-[#0F173A] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg border border-cyan-700/50">
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full flex justify-center items-center border border-cyan-500">
@@ -120,7 +120,7 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* 🔹 Campos de nombre y apellido */}
+
           <div className="grid grid-cols-2 gap-3">
             <input
               type="text"
@@ -140,7 +140,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* 🔹 Teléfono y correo */}
+
           <div className="grid grid-cols-2 gap-3">
             <input
               type="text"
@@ -160,7 +160,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* 🔹 Contraseñas */}
+
           <div className="grid grid-cols-2 gap-3">
             <input
               type="password"
@@ -180,7 +180,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* 🔹 Checkbox de términos */}
+
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -196,7 +196,7 @@ export default function RegisterPage() {
             </label>
           </div>
 
-          {/* 🔹 Botón de registro */}
+
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg transition-transform hover:scale-[1.02]"
@@ -207,7 +207,7 @@ export default function RegisterPage() {
 
         <hr className="my-6 border-cyan-700" />
 
-        {/* 🔹 Botones alternativos */}
+
         <div className="space-y-3">
           <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
             <span>📧</span>

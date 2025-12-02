@@ -173,7 +173,7 @@ export default function Personalizador3DIndependiente() {
       mesh.material.color.set(config.color)
     } else if (config.modo === 'teñir') {
       if (mesh.material.map) {
-        mesh.material.color.set(config.color) 
+        mesh.material.color.set(config.color)
       } else {
         mesh.material.color.set(config.color)
       }
@@ -208,7 +208,7 @@ export default function Personalizador3DIndependiente() {
     <>
       <Nav />
       <main className="min-h-screen flex flex-col items-center justify-center bg-[#0A0F2C] relative overflow-hidden py-20 -mb-20">
-        {/* Background Elements */}
+
 
         <div className="z-10 w-full max-w-7xl px-4 flex flex-col items-center">
           <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2 tracking-tight text-center">
@@ -219,11 +219,11 @@ export default function Personalizador3DIndependiente() {
           </p>
 
           <div className="flex flex-col lg:flex-row w-full gap-8">
-            {/* Sidebar Controls */}
+
             <div className="w-full lg:w-1/3 flex flex-col gap-6">
               <div className="bg-[#10193F] border border-cyan-500/10 p-6 rounded-3xl shadow-2xl flex flex-col gap-6 h-full max-h-[750px] overflow-y-auto custom-scrollbar">
-                
-                {/* Animation Control */}
+
+
                 <div className="space-y-3">
                   <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
@@ -246,13 +246,13 @@ export default function Personalizador3DIndependiente() {
                   </div>
                 </div>
 
-                {/* Parts List */}
+
                 <div className="space-y-4 flex-1">
                   <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2 top-0 bg-[#10193F]/95 backdrop-blur-sm py-2 z-10">
                     <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                     Personalización
                   </h2>
-                  
+
                   <div className="flex flex-col gap-3">
                     {Object.keys(partes).length === 0 && (
                       <div className="text-center py-10 text-[#B5B8C5] italic border-2 border-dashed border-cyan-500/20 rounded-xl">
@@ -264,17 +264,17 @@ export default function Personalizador3DIndependiente() {
                         <div className="flex justify-between items-center mb-3">
                           <span className="text-sm font-medium text-[#B5B8C5] truncate max-w-[150px]" title={parte}>{parte}</span>
                           <div className="flex items-center gap-2">
-                             <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white/20 shadow-inner cursor-pointer hover:scale-110 transition-transform">
-                                <input
-                                  type="color"
-                                  value={color}
-                                  onChange={(e) => updateParte(parte, { color: e.target.value })}
-                                  className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] cursor-pointer p-0 border-0"
-                                />
-                             </div>
+                            <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white/20 shadow-inner cursor-pointer hover:scale-110 transition-transform">
+                              <input
+                                type="color"
+                                value={color}
+                                onChange={(e) => updateParte(parte, { color: e.target.value })}
+                                className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] cursor-pointer p-0 border-0"
+                              />
+                            </div>
                           </div>
                         </div>
-                        
+
                         <div className="relative">
                           <select
                             value={modo}
@@ -296,7 +296,7 @@ export default function Personalizador3DIndependiente() {
                   </div>
                 </div>
 
-                {/* File Upload & Export */}
+
                 <div className="pt-4 border-t border-cyan-500/20 space-y-4">
                   <label className="block w-full group cursor-pointer">
                     <div className="flex items-center justify-center w-full h-14 px-4 transition bg-[#0A0F2C] border-2 border-dashed border-cyan-500/30 rounded-xl group-hover:border-cyan-500 group-hover:bg-[#0F173A]">
@@ -336,18 +336,18 @@ export default function Personalizador3DIndependiente() {
               </div>
             </div>
 
-            {/* 3D Canvas Area */}
+
             <div className="w-full lg:w-2/3 flex flex-col">
               <div className="relative w-full h-[500px] lg:h-[750px] bg-[#10193F] rounded-3xl border border-cyan-500/10 shadow-2xl overflow-hidden group">
-                
+
                 {!mostrar3D ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-[#0A0F2C] backdrop-blur-sm transition-opacity duration-500">
-                     <div className="w-24 h-24 mb-6 rounded-full bg-gradient-to-tr from-cyan-500/20 to-blue-600/20 flex items-center justify-center animate-pulse">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-                        </svg>
-                     </div>
-                     <button
+                    <div className="w-24 h-24 mb-6 rounded-full bg-gradient-to-tr from-cyan-500/20 to-blue-600/20 flex items-center justify-center animate-pulse">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                      </svg>
+                    </div>
+                    <button
                       onClick={() => setMostrar3D(true)}
                       className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-full transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(6,182,212,0.5)]"
                     >
@@ -355,31 +355,31 @@ export default function Personalizador3DIndependiente() {
                     </button>
                   </div>
                 ) : (
-                   <div className="absolute top-4 right-4 z-20">
-                      <button 
-                        onClick={() => setMostrar3D(false)}
-                        className="p-2 bg-black/50 hover:bg-red-500/80 text-white rounded-full backdrop-blur-md transition-colors"
-                        title="Cerrar visualizador"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                   </div>
+                  <div className="absolute top-4 right-4 z-20">
+                    <button
+                      onClick={() => setMostrar3D(false)}
+                      className="p-2 bg-black/50 hover:bg-red-500/80 text-white rounded-full backdrop-blur-md transition-colors"
+                      title="Cerrar visualizador"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
                 )}
 
                 <div
                   ref={canvasRef}
                   className={`w-full h-full transition-opacity duration-700 ${mostrar3D ? 'opacity-100' : 'opacity-0'}`}
                 />
-                
-                {/* Overlay Gradient for depth */}
+
+
                 <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0A0F2C] via-transparent to-transparent opacity-60" />
               </div>
-              
+
               <div className="mt-4 flex justify-center gap-4 text-[#B5B8C5] text-sm">
-                 <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> Click + Arrastrar para rotar</span>
-                 <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Scroll para zoom</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> Click + Arrastrar para rotar</span>
+                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Scroll para zoom</span>
               </div>
             </div>
           </div>

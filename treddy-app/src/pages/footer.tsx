@@ -5,8 +5,8 @@ export default function Footer() {
   return (
     <footer className="relative bg-[#0F173A] text-white border-[#1a1f40] mt-20 w-full overflow-hidden">
       <div className="relative max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-        
-        {/* Brand Section */}
+
+
         <section className="space-y-6">
           <div className="flex items-center gap-2">
             <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
@@ -29,7 +29,7 @@ export default function Footer() {
           </div>
         </section>
 
-        {/* Navigation */}
+
         <section>
           <h2 className="font-bold text-lg mb-6 text-white flex items-center gap-2">
             <span className="w-1 h-6 bg-cyan-500 rounded-full"></span>
@@ -54,7 +54,7 @@ export default function Footer() {
           </ul>
         </section>
 
-        {/* Legal & Info */}
+
         <section>
           <h2 className="font-bold text-lg mb-6 text-white flex items-center gap-2">
             <span className="w-1 h-6 bg-blue-500 rounded-full"></span>
@@ -76,7 +76,7 @@ export default function Footer() {
           </ul>
         </section>
 
-        {/* Contact */}
+
         <section>
           <h2 className="font-bold text-lg mb-6 text-white flex items-center gap-2">
             <span className="w-1 h-6 bg-purple-500 rounded-full"></span>
@@ -105,7 +105,7 @@ export default function Footer() {
         </section>
       </div>
 
-      {/* Bottom Bar */}
+
       <div className="relative border-t border-white/5 bg-[#0F173A] backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
           <p>© {new Date().getFullYear()} Treddy. Todos los derechos reservados.</p>
