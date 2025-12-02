@@ -13,7 +13,7 @@ export default function SuccessPage() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="bg-[#10193F] p-10 rounded-2xl shadow-lg max-w-md w-full text-center"
       >
-        {/* Icono grande */}
+
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -22,7 +22,7 @@ export default function SuccessPage() {
           <CheckCircleIcon className="w-20 h-20 text-green-400 mx-auto" />
         </motion.div>
 
-        {/* Título */}
+
         <motion.h1
           initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -32,7 +32,7 @@ export default function SuccessPage() {
           ¡Pago Exitoso!
         </motion.h1>
 
-        {/* Mensaje */}
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -42,7 +42,7 @@ export default function SuccessPage() {
           Tu pago fue aprobado correctamente. Gracias por confiar en Treddy 🚀
         </motion.p>
 
-        {/* Botón */}
+
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

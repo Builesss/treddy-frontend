@@ -1,62 +1,120 @@
 import Link from "next/link";
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram, Twitter, Mail, Phone } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0F173A] text-white border-t border-[#1a1f40] mt-15 w-full">
-      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        
-        {/* Sobre nosotros */}
-        <section>
-          <h2 className="font-bold text-lg mb-3 text-[#00E6F6]">Sobre nosotros</h2>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li><Link href="/quienesSomos" className="hover:text-[#00E6F6] transition-colors">Quiénes somos</Link></li>
-            <li><Link href="/terminosCondiciones" className="hover:text-[#00E6F6] transition-colors">Términos y condiciones</Link></li>
-            <li><Link href="/politicasPrivacidad" className="hover:text-[#00E6F6] transition-colors">Políticas de privacidad</Link></li>
-          </ul>
-        </section>
+    <footer className="relative bg-[#0F173A] text-white border-[#1a1f40] mt-20 w-full overflow-hidden">
+      <div className="relative max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
 
-        {/* Navegación */}
-        <section>
-          <h2 className="font-bold text-lg mb-3 text-[#00E6F6]">Navegación</h2>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li><Link href="/catalogo" className="hover:text-[#00E6F6]">Catálogo</Link></li>
-            <li><Link href="/promociones" className="hover:text-[#00E6F6]">Promociones</Link></li>
-            <li><Link href="/loMasVendido" className="hover:text-[#00E6F6]">Lo más vendido</Link></li>
-          </ul>
-        </section>
 
-        {/* Preguntas frecuentes */}
-        <section>
-          <h2 className="font-bold text-lg mb-3 text-[#00E6F6]">Preguntas frecuentes</h2>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li><Link href="/faq#queEsAr" className="hover:text-[#00E6F6]">¿Qué es el AR?</Link></li>
-            <li><Link href="/faq#comoFuncionaAr" className="hover:text-[#00E6F6]">¿Cómo funciona el AR?</Link></li>
-            <li><Link href="/faq#preview3d" className="hover:text-[#00E6F6]">¿Qué es la previsualización 3D?</Link></li>
-          </ul>
-        </section>
-
-        {/* Contacto */}
-        <section>
-          <h2 className="font-bold text-lg mb-3 text-[#00E6F6]">Contáctanos</h2>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li>Correo: <Link href="/contacto#email" className="hover:text-[#00E6F6]">info@treddy.com</Link></li>
-            <li>Teléfono: <Link href="/contacto#telefono" className="hover:text-[#00E6F6]">+57 300 123 4567</Link></li>
-            <li>WhatsApp: <Link href="/contacto#whatsapp" className="hover:text-[#00E6F6]">+57 300 765 4321</Link></li>
-          </ul>
-
-          {/* Redes sociales */}
-          <div className="flex space-x-4 mt-4">
-            <Link href="https://facebook.com" target="_blank" className="hover:text-[#00E6F6]"><Facebook size={20} /></Link>
-            <Link href="https://instagram.com" target="_blank" className="hover:text-[#00E6F6]"><Instagram size={20} /></Link>
-            <Link href="https://twitter.com" target="_blank" className="hover:text-[#00E6F6]"><Twitter size={20} /></Link>
+        <section className="space-y-6">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+              Treddy
+            </span>
           </div>
+          <p className="text-[#B5B8C5] text-sm leading-relaxed">
+            Revolucionando la experiencia de compra con tecnología de realidad aumentada y personalización 3D.
+          </p>
+          <div className="flex space-x-4 pt-2">
+            <Link href="https://facebook.com" target="_blank" className="p-2 rounded-full bg-[#10193F] text-gray-400 hover:text-cyan-400 hover:bg-[#1a2555] transition-all duration-300 group">
+              <Facebook size={18} className="group-hover:scale-110 transition-transform" />
+            </Link>
+            <Link href="https://instagram.com" target="_blank" className="p-2 rounded-full bg-[#10193F] text-gray-400 hover:text-cyan-400 hover:bg-[#1a2555] transition-all duration-300 group">
+              <Instagram size={18} className="group-hover:scale-110 transition-transform" />
+            </Link>
+            <Link href="https://twitter.com" target="_blank" className="p-2 rounded-full bg-[#10193F] text-gray-400 hover:text-cyan-400 hover:bg-[#1a2555] transition-all duration-300 group">
+              <Twitter size={18} className="group-hover:scale-110 transition-transform" />
+            </Link>
+          </div>
+        </section>
+
+
+        <section>
+          <h2 className="font-bold text-lg mb-6 text-white flex items-center gap-2">
+            <span className="w-1 h-6 bg-cyan-500 rounded-full"></span>
+            Explorar
+          </h2>
+          <ul className="space-y-3 text-sm text-[#B5B8C5]">
+            <li>
+              <Link href="/catalogo" className="flex items-center gap-2 hover:text-cyan-400 hover:translate-x-1 transition-all duration-300">
+                <span className="w-1 h-1 rounded-full bg-cyan-500/50"></span> Catálogo
+              </Link>
+            </li>
+            <li>
+              <Link href="/promociones" className="flex items-center gap-2 hover:text-cyan-400 hover:translate-x-1 transition-all duration-300">
+                <span className="w-1 h-1 rounded-full bg-cyan-500/50"></span> Promociones
+              </Link>
+            </li>
+            <li>
+              <Link href="/loMasVendido" className="flex items-center gap-2 hover:text-cyan-400 hover:translate-x-1 transition-all duration-300">
+                <span className="w-1 h-1 rounded-full bg-cyan-500/50"></span> Lo más vendido
+              </Link>
+            </li>
+          </ul>
+        </section>
+
+
+        <section>
+          <h2 className="font-bold text-lg mb-6 text-white flex items-center gap-2">
+            <span className="w-1 h-6 bg-blue-500 rounded-full"></span>
+            Información
+          </h2>
+          <ul className="space-y-3 text-sm text-[#B5B8C5]">
+            <li>
+              <Link href="/quienesSomos" className="hover:text-cyan-400 transition-colors">Quiénes somos</Link>
+            </li>
+            <li>
+              <Link href="/terminosCondiciones" className="hover:text-cyan-400 transition-colors">Términos y condiciones</Link>
+            </li>
+            <li>
+              <Link href="/politicasPrivacidad" className="hover:text-cyan-400 transition-colors">Políticas de privacidad</Link>
+            </li>
+            <li>
+              <Link href="/faq" className="hover:text-cyan-400 transition-colors">Preguntas frecuentes</Link>
+            </li>
+          </ul>
+        </section>
+
+
+        <section>
+          <h2 className="font-bold text-lg mb-6 text-white flex items-center gap-2">
+            <span className="w-1 h-6 bg-purple-500 rounded-full"></span>
+            Contacto
+          </h2>
+          <ul className="space-y-4 text-sm text-[#B5B8C5]">
+            <li className="flex items-start gap-3 group">
+              <div className="mt-1 p-1.5 rounded-lg bg-[#10193F] text-cyan-400 group-hover:bg-cyan-500/10 transition-colors">
+                <Mail size={16} />
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 mb-0.5">Correo electrónico</span>
+                <Link href="/contacto#email" className="text-gray-300 hover:text-white transition-colors">info@treddy.com</Link>
+              </div>
+            </li>
+            <li className="flex items-start gap-3 group">
+              <div className="mt-1 p-1.5 rounded-lg bg-[#10193F] text-cyan-400 group-hover:bg-cyan-500/10 transition-colors">
+                <Phone size={16} />
+              </div>
+              <div>
+                <span className="block text-xs text-gray-500 mb-0.5">Línea de atención</span>
+                <Link href="/contacto#telefono" className="text-gray-300 hover:text-white transition-colors">+57 300 123 4567</Link>
+              </div>
+            </li>
+          </ul>
         </section>
       </div>
 
-      {/* Línea inferior */}
-      <div className="border-t border-[#1a1f40] text-center py-4 text-sm text-gray-400">
-        © {new Date().getFullYear()} <span className="text-[#00E6F6] font-semibold">Treddy</span>. Todos los derechos reservados.
+
+      <div className="relative border-t border-white/5 bg-[#0F173A] backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+          <p>© {new Date().getFullYear()} Treddy. Todos los derechos reservados.</p>
+          <div className="flex gap-6">
+            <span className="hover:text-gray-300 cursor-pointer transition-colors">Privacidad</span>
+            <span className="hover:text-gray-300 cursor-pointer transition-colors">Cookies</span>
+            <span className="hover:text-gray-300 cursor-pointer transition-colors">Legal</span>
+          </div>
+        </div>
       </div>
     </footer>
   );

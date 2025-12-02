@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -7,6 +8,8 @@ import { getFiguras } from "../lib/api";
 import Image from "next/image";
 import Footer from "@/pages/footer";
 import Nav from "@/pages/nav";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function HomePage() {
   const [figuras, setFiguras] = useState<any[]>([]);
@@ -16,6 +19,15 @@ export default function HomePage() {
   useEffect(() => {
     getFiguras().then(setFiguras).catch(console.error);
   }, []);
+
+
+  useEffect(() => {
+    if (figuras.length === 0) return;
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [currentIndex, figuras.length]);
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev === 0 ? figuras.length - 1 : prev - 1));
@@ -34,11 +46,16 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0A0F2C] text-white">
+    <main className="min-h-screen bg-[#0A0F2C] text-white relative">
+
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
+      </div>
       <Nav />
 
-      {/* HERO */}
-      <section className="mx-8 flex flex-col md:flex-row justify-between items-center px-35 py-10 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md mt-10">
+
+      <section className="mx-8 flex flex-col md:flex-row justify-between items-center border border-[#1a1f40] px-35 py-10 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md mt-10">
         <div className="max-w-xxl">
           <h2 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
             Treddy Figuras 3D
@@ -54,86 +71,77 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* CARRUSEL */}
+
         {figuras.length > 0 && (
-          <section className="w-200 bg-[#0F173A] rounded-lg shadow-md my-1 py-5">
-            <div className="relative w-full overflow-hidden rounded-lg">
-              <div
-                className="flex transition-transform duration-500"
-                style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-              >
-                {figuras.map((figura: any) => (
-                  <div
-                    key={figura.producto_id}
-                    className="flex-shrink-0 w-full flex justify-center items-center p-6"
-                  >
-                    <div className="text-center">
-                      <Image
-                        src={figura.imagenUrl}
-                        alt={figura.nombre}
-                        width={250}
-                        height={150}
-                        className="mx-auto rounded-md"
-                      />
-                      <p className="mt-2 font-medium">{figura.nombre}</p>
-                    </div>
+          <motion.section
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="relative w-full md:w-[800px] h-[400px] bg-[#0F173A]/40 backdrop-blur-xl border border-[#1a1f40] rounded-2xl overflow-hidden group"
+          >
+            <div className="absolute inset-0 flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentIndex}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.1 }}
+                  transition={{ duration: 0.5 }}
+                  className="flex flex-col items-center justify-center p-6 text-center"
+                >
+                  <div className="relative w-64 h-64 mb-4 filter">
+                    <Image
+                      src={figuras[currentIndex].imagenUrl}
+                      alt={figuras[currentIndex].nombre}
+                      fill
+                      className="object-contain rounded-lg"
+                    />
                   </div>
-                ))}
-              </div>
-
-              {/* Botones de navegación */}
-              <button
-                onClick={prevSlide}
-                type="button"
-                className="absolute inset-y-0 left-0 flex items-center justify-center w-12 h-full text-white hover:bg-white/10"
-              >
-                <svg
-                  className="w-6 h-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-              </button>
-
-              <button
-                onClick={nextSlide}
-                type="button"
-                className="absolute inset-y-0 right-0 flex items-center justify-center w-12 h-full text-white hover:bg-white/10"
-              >
-                <svg
-                  className="w-6 h-6"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </button>
-
-              {/* Dots */}
-              <div className="absolute bottom-3 left-0 right-0 flex justify-center space-x-2">
-                {figuras.map((_: any, index: number) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={`w-3 h-3 rounded-full ${
-                      index === currentIndex ? "bg-[#00E6F6]" : "bg-gray-400"
-                    }`}
-                  ></button>
-                ))}
-              </div>
+                  <motion.h3
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-2xl font-bold text-white tracking-wide"
+                  >
+                    {figuras[currentIndex].nombre}
+                  </motion.h3>
+                </motion.div>
+              </AnimatePresence>
             </div>
-          </section>
+
+
+            <button
+              onClick={prevSlide}
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-[#00E6F6] hover:text-black transition-all duration-300 opacity-0 group-hover:opacity-100"
+            >
+              <ChevronLeft size={24} />
+            </button>
+
+            <button
+              onClick={nextSlide}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-[#00E6F6] hover:text-black transition-all duration-300 opacity-0 group-hover:opacity-100"
+            >
+              <ChevronRight size={24} />
+            </button>
+
+
+            <div className="absolute bottom-6 left-0 right-0 flex justify-center space-x-3">
+              {figuras.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex
+                      ? "w-8 bg-[#00E6F6] shadow-[0_0_10px_#00E6F6]"
+                      : "w-2 bg-gray-500 hover:bg-gray-400"
+                    }`}
+                />
+              ))}
+            </div>
+          </motion.section>
         )}
       </section>
 
-      {/* PRODUCTOS POPULARES */}
+
       <section className="px-8 py-16">
         <h3 className="text-3xl text-center font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-10">
           Productos Populares
@@ -142,16 +150,15 @@ export default function HomePage() {
           {figuras.slice(0, 7).map((figura: any, index: number) => (
             <div
               key={figura.producto_id}
-              className={`group bg-[#10193F] p-5 rounded-xl text-center shadow-lg hover:shadow-cyan-400/30 transition-all duration-300 ${
-                index === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2" : ""
-              }`}
+              className={`group bg-[#10193F] p-5 rounded-xl text-center shadow-lg border border-[#1a1f40] hover:shadow-cyan-400/30 transition-all duration-300 ${index === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2" : ""
+                }`}
             >
               <Image
                 src={figura.imagenUrl}
                 alt={figura.nombre}
                 width={index === 0 ? 450 : 140}
                 height={index === 0 ? 250 : 140}
-                className="mx-auto rounded-md transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-3"
+                className="mx-auto rounded-md object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
               />
               <p className="mt-3 font-semibold text-lg">{figura.nombre}</p>
               <p className="font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
@@ -168,10 +175,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECCIÓN AR */}
-      <section className="mx-8 px-70 py-8 bg-[#0F173A] flex flex-col md:flex-row justify-between items-center bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
+
+      <section className="mx-8 px-70 py-8 flex flex-col md:flex-row border border-[#1a1f40] justify-between items-center bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
         <div className="max-w-xl">
-          <h4 className="text-4xl font-bold mb-2 font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
+          <h4 className="text-4xl mb-2 font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
             Visualiza tu imagen en realidad aumentada
           </h4>
           <p className="mt-5 text-lg text-[#B5B8C5]">
