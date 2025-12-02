@@ -46,7 +46,7 @@ export default function HomePage() {
   };
 
   return (
-      <main className="min-h-screen bg-[#0A0F2C] text-white overflow-hidden relative">
+    <main className="min-h-screen bg-[#0A0F2C] text-white relative">
 
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
@@ -130,11 +130,10 @@ export default function HomePage() {
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentIndex
+                  className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex
                       ? "w-8 bg-[#00E6F6] shadow-[0_0_10px_#00E6F6]"
                       : "w-2 bg-gray-500 hover:bg-gray-400"
-                  }`}
+                    }`}
                 />
               ))}
             </div>
@@ -151,16 +150,15 @@ export default function HomePage() {
           {figuras.slice(0, 7).map((figura: any, index: number) => (
             <div
               key={figura.producto_id}
-              className={`group bg-[#10193F] p-5 rounded-xl text-center shadow-lg border border-[#1a1f40] hover:shadow-cyan-400/30 transition-all duration-300 ${
-                index === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2" : ""
-              }`}
+              className={`group bg-[#10193F] p-5 rounded-xl text-center shadow-lg border border-[#1a1f40] hover:shadow-cyan-400/30 transition-all duration-300 ${index === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2" : ""
+                }`}
             >
               <Image
                 src={figura.imagenUrl}
                 alt={figura.nombre}
                 width={index === 0 ? 450 : 140}
                 height={index === 0 ? 250 : 140}
-                className="mx-auto rounded-md transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-3"
+                className="mx-auto rounded-md object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
               />
               <p className="mt-3 font-semibold text-lg">{figura.nombre}</p>
               <p className="font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">

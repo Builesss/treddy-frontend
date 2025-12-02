@@ -53,20 +53,19 @@ export default function Nav() {
 
   return (
     <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
       className="bg-[#0A0F2C] border-b border-[#1a1f40] shadow-md sticky top-0 z-50"
     >
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+      <div className="max-w-7xl mx-auto px-6 py-4 grid grid-cols-3 items-center">
 
-        <Link href="/" className="relative group text-2xl font-extrabold text-[#00E6F6]">
-          TREDDY
-          <span className="absolute left-0 right-0 -bottom-1 h-0.5 bg-[#00E6F6] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-        </Link>
+        <div className="justify-self-start">
+          <Link href="/" className="relative group text-2xl font-extrabold text-[#00E6F6]">
+            TREDDY
+            <span className="absolute left-0 right-0 -bottom-1 h-0.5 bg-[#00E6F6] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+          </Link>
+        </div>
 
 
-        <nav className="hidden md:flex space-x-8" aria-label="Main Navigation">
+        <nav className="hidden md:flex space-x-8 justify-self-center" aria-label="Main Navigation">
           {links.map(({ href, label }) => (
             <Link
               key={href}
@@ -75,8 +74,8 @@ export default function Nav() {
             >
               <span
                 className={`transition-colors ${pathname === href
-                    ? "text-[#00E6F6] font-semibold"
-                    : "text-white hover:text-[#00E6F6]"
+                  ? "text-[#00E6F6] font-semibold"
+                  : "text-white hover:text-[#00E6F6]"
                   }`}
               >
                 {label}
@@ -93,14 +92,14 @@ export default function Nav() {
         </nav>
 
 
-        <div className="hidden md:flex space-x-6 items-center">
+        <div className="hidden md:flex space-x-6 items-center justify-self-end">
 
           {isAdmin ? (
             <Link
               href="/gestion-productos"
               className={`flex items-center space-x-2 transition-colors ${pathname === "/gestion-productos"
-                  ? "text-[#00E6F6] font-semibold"
-                  : "text-white hover:text-[#00E6F6]"
+                ? "text-[#00E6F6] font-semibold"
+                : "text-white hover:text-[#00E6F6]"
                 }`}
             >
               <LayoutDashboard size={20} />
@@ -110,8 +109,8 @@ export default function Nav() {
             <Link
               href="/carrito-compras"
               className={`flex items-center space-x-2 transition-colors ${pathname === "/carrito-compras"
-                  ? "text-[#00E6F6] font-semibold"
-                  : "text-white hover:text-[#00E6F6]"
+                ? "text-[#00E6F6] font-semibold"
+                : "text-white hover:text-[#00E6F6]"
                 }`}
             >
               <ShoppingBag size={20} />
@@ -125,8 +124,8 @@ export default function Nav() {
               <Link
                 href="/perfil"
                 className={`flex items-center space-x-2 transition-colors ${pathname === "/perfil"
-                    ? "text-[#00E6F6] font-semibold"
-                    : "text-white hover:text-[#00E6F6]"
+                  ? "text-[#00E6F6] font-semibold"
+                  : "text-white hover:text-[#00E6F6]"
                   }`}
               >
                 <User size={20} />
@@ -151,13 +150,15 @@ export default function Nav() {
         </div>
 
 
-        <button
-          className="md:hidden text-white"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle Menu"
-        >
-          {open ? <X size={28} /> : <Menu size={28} />}
-        </button>
+        <div className="md:hidden justify-self-end">
+          <button
+            className="text-white"
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle Menu"
+          >
+            {open ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
       </div>
 
 
@@ -180,8 +181,8 @@ export default function Nav() {
                 <Link
                   href={href}
                   className={`block ${pathname === href
-                      ? "text-[#00E6F6] font-semibold"
-                      : "text-white hover:text-[#00E6F6]"
+                    ? "text-[#00E6F6] font-semibold"
+                    : "text-white hover:text-[#00E6F6]"
                     }`}
                   onClick={() => setOpen(false)}
                 >
@@ -200,8 +201,8 @@ export default function Nav() {
                 href={isAdmin ? "/dashboard" : "/carrito-compras"}
                 onClick={() => setOpen(false)}
                 className={`flex items-center space-x-2 ${pathname === (isAdmin ? "/dashboard" : "/carrito-compras")
-                    ? "text-[#00E6F6] font-semibold"
-                    : "text-white hover:text-[#00E6F6]"
+                  ? "text-[#00E6F6] font-semibold"
+                  : "text-white hover:text-[#00E6F6]"
                   }`}
               >
                 {isAdmin ? <LayoutDashboard size={20} /> : <ShoppingBag size={20} />}
@@ -216,8 +217,8 @@ export default function Nav() {
                     href="/perfil"
                     onClick={() => setOpen(false)}
                     className={`flex items-center space-x-2 ${pathname === "/perfil"
-                        ? "text-[#00E6F6] font-semibold"
-                        : "text-white hover:text-[#00E6F6]"
+                      ? "text-[#00E6F6] font-semibold"
+                      : "text-white hover:text-[#00E6F6]"
                       }`}
                   >
                     <User size={20} />
