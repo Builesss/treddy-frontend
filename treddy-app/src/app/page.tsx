@@ -9,7 +9,7 @@ import Image from "next/image";
 import Footer from "@/pages/footer";
 import Nav from "@/pages/nav";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
 export default function HomePage() {
   const [figuras, setFiguras] = useState<any[]>([]);
@@ -19,7 +19,6 @@ export default function HomePage() {
   useEffect(() => {
     getFiguras().then(setFiguras).catch(console.error);
   }, []);
-
 
   useEffect(() => {
     if (figuras.length === 0) return;
@@ -47,13 +46,11 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white relative">
-
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
       </div>
       <Nav />
-
 
       <section className="mx-8 flex flex-col md:flex-row justify-between items-center border border-[#1a1f40] px-35 py-10 bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md mt-10">
         <div className="max-w-xxl">
@@ -70,7 +67,6 @@ export default function HomePage() {
             Inicia ahora
           </button>
         </div>
-
 
         {figuras.length > 0 && (
           <motion.section
@@ -109,7 +105,6 @@ export default function HomePage() {
               </AnimatePresence>
             </div>
 
-
             <button
               onClick={prevSlide}
               className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/30 text-white hover:bg-[#00E6F6] hover:text-black transition-all duration-300 opacity-0 group-hover:opacity-100"
@@ -124,16 +119,16 @@ export default function HomePage() {
               <ChevronRight size={24} />
             </button>
 
-
             <div className="absolute bottom-6 left-0 right-0 flex justify-center space-x-3">
               {figuras.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentIndex
                       ? "w-8 bg-[#00E6F6] shadow-[0_0_10px_#00E6F6]"
                       : "w-2 bg-gray-500 hover:bg-gray-400"
-                    }`}
+                  }`}
                 />
               ))}
             </div>
@@ -141,40 +136,66 @@ export default function HomePage() {
         )}
       </section>
 
-
       <section className="px-8 py-16">
         <h3 className="text-3xl text-center font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-10">
           Productos Populares
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {figuras.slice(0, 7).map((figura: any, index: number) => (
-            <div
+            <motion.div
               key={figura.producto_id}
-              className={`group bg-[#10193F] p-5 rounded-xl text-center shadow-lg border border-[#1a1f40] hover:shadow-cyan-400/30 transition-all duration-300 ${index === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2" : ""
-                }`}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -10, transition: { duration: 0.2 } }}
+              className={`group relative bg-[#10193F]/40 backdrop-blur-md p-5 rounded-2xl text-center border border-white/10 hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300 flex flex-col ${
+                index === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2" : ""
+              }`}
             >
-              <Image
-                src={figura.imagenUrl}
-                alt={figura.nombre}
-                width={index === 0 ? 450 : 140}
-                height={index === 0 ? 250 : 140}
-                className="mx-auto rounded-md object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-              />
-              <p className="mt-3 font-semibold text-lg">{figura.nombre}</p>
-              <p className="font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight">
-                {figura.precio_base}$
-              </p>
-              <button
-                onClick={() => handleVerMas(figura.nombre)}
-                className="mt-3 bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-2 rounded-lg text-black font-medium hover:opacity-90"
-              >
-                Ver más
-              </button>
-            </div>
+              <div className="relative z-10 flex flex-col h-full w-full">
+                <div className="relative flex-grow mb-4 w-full flex items-center justify-center overflow-visible">
+                  <Image
+                    src={figura.imagenUrl}
+                    alt={figura.nombre}
+                    width={index === 0 ? 450 : 140}
+                    height={index === 0 ? 250 : 140}
+                    className="mx-auto object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-1"
+                  />
+                </div>
+                <div className="mt-auto w-full">
+                  <p className="uppercase tracking-widest text-[10px] text-cyan-200/60 font-semibold mb-1">
+                    Modelo 3D
+                  </p>
+                  <p
+                    className={`font-bold text-white uppercase tracking-wider group-hover:text-cyan-300 transition-colors ${index === 0 ? "text-3xl" : "text-lg"}`}
+                  >
+                    {figura.nombre}
+                  </p>
+                  <div className="my-2 h-[1px] w-1/2 mx-auto bg-gradient-to-r from-transparent via-gray-600 to-transparent"></div>
+                  <p
+                    className={`font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-3 ${index === 0 ? "text-4xl" : "text-xl"}`}
+                  >
+                    {figura.precio_base}$
+                  </p>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => handleVerMas(figura.nombre)}
+                      className={`group/btn relative overflow-hidden bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 ${index === 0 ? "px-10 py-4 text-xl" : "px-6 py-2"}`}
+                    >
+                      Ver más
+                      <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative Glow */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300 pointer-events-none" />
+            </motion.div>
           ))}
         </div>
       </section>
-
 
       <section className="mx-8 px-70 py-8 flex flex-col md:flex-row border border-[#1a1f40] justify-between items-center bg-[#0F173A]/20 rounded-2xl shadow-2xl backdrop-blur-md">
         <div className="max-w-xl">
@@ -193,7 +214,12 @@ export default function HomePage() {
           </button>
         </div>
         <div className="mt-10 md:mt-0">
-          <Image src="/treddy-sublogo.png" alt="Treddy Logo" width={450} height={250} />
+          <Image
+            src="/treddy-sublogo.png"
+            alt="Treddy Logo"
+            width={450}
+            height={250}
+          />
         </div>
       </section>
 

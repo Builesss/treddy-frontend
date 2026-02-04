@@ -8,7 +8,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import TarjetaExpandible from "../../components/TarjetaExpandible";
 import Nav from "@/pages/nav";
 import Footer from "@/pages/footer";
-import { Search, Filter, DollarSign } from "lucide-react";
+import { Search, Filter, DollarSign, ArrowRight } from "lucide-react";
 
 export default function Catalogo() {
   const [figuras, setFiguras] = useState<any[]>([]);
@@ -40,7 +40,7 @@ export default function Catalogo() {
   }, [searchParams, router]);
 
   const categorias = Array.from(
-    new Set(figuras.map((f) => f.categoria))
+    new Set(figuras.map((f) => f.categoria)),
   ).filter(Boolean);
 
   const figurasFiltradas = figuras.filter((figura) => {
@@ -58,7 +58,7 @@ export default function Catalogo() {
   const inicio = (paginaActual - 1) * productosPorPagina;
   const figurasPagina = figurasFiltradas.slice(
     inicio,
-    inicio + productosPorPagina
+    inicio + productosPorPagina,
   );
 
   const cambiarPagina = (nuevaPagina: number) => {
@@ -70,7 +70,6 @@ export default function Catalogo() {
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white relative">
-
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
@@ -82,10 +81,8 @@ export default function Catalogo() {
         Catálogo de figuras 3D
       </h2>
 
-
       <div className="max-w-6xl mx-auto mb-16 px-4">
         <div className="bg-[#0F173A]/60 backdrop-blur-xl border border-[#1a1f40] p-6 rounded-3xl shadow-2xl flex flex-col lg:flex-row gap-6 items-center justify-between">
-
           <div className="relative w-full lg:w-1/3 group">
             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <Search className="text-cyan-400 w-5 h-5 group-focus-within:text-[#00E6F6] transition-colors" />
@@ -108,16 +105,32 @@ export default function Catalogo() {
               onChange={(e) => setCategoria(e.target.value)}
               className="w-full pl-12 pr-10 py-4 bg-[#0A0F2C]/50 border border-[#1a1f40] rounded-2xl text-white appearance-none cursor-pointer focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
             >
-              <option value="todas" className="bg-[#0F173A] text-white">Todas las categorías</option>
+              <option value="todas" className="bg-[#0F173A] text-white">
+                Todas las categorías
+              </option>
               {categorias.map((cat) => (
-                <option key={cat} value={cat} className="bg-[#0F173A] text-white">
+                <option
+                  key={cat}
+                  value={cat}
+                  className="bg-[#0F173A] text-white"
+                >
                   {cat.charAt(0).toUpperCase() + cat.slice(1)}
                 </option>
               ))}
             </select>
             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-              <svg className="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              <svg
+                className="w-4 h-4 text-cyan-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </div>
           </div>
@@ -142,10 +155,8 @@ export default function Catalogo() {
               />
             </div>
           </div>
-
         </div>
       </div>
-
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-10 md:px-20">
         {figurasPagina.length > 0 ? (
@@ -153,27 +164,50 @@ export default function Catalogo() {
             <div
               key={figura.producto_id}
               onClick={() => setSeleccionada(figura)}
-              className="cursor-pointer bg-[#0F173A] w-full p-4 border border-[#1a1f40] rounded-xl py-5 shadow-lg flex flex-col items-center text-center hover:scale-105 hover:ring-2 hover:ring-cyan-400 transition-transform duration-200"
+              className="group relative cursor-pointer bg-[#10193F]/40 backdrop-blur-md w-full p-5 border border-white/10 rounded-2xl shadow-lg flex flex-col items-center text-center hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300 h-full"
             >
-              <p className="text-[#00E6F6] font-bold mt-1">
-                Disponible: {figura.stock}
-              </p>
-              <Image
-                src={figura.imagenUrl || "/placeholder.png"}
-                alt={figura.nombre}
-                width={200}
-                height={150}
-                className="mx-auto mb-1 rounded-lg object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-              />
-              <h3 className="text-white font-semibold text-lg">
-                {figura.nombre}
-              </h3>
-              <p className="text-cyan-400 font-bold text-lg">
-                ${Number(figura.precio_base ?? figura.precio ?? 0).toFixed(2)}
-              </p>
-              <button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-6 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg mt-2">
-                Ver mas
-              </button>
+              {/* Decorative Glow */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300 pointer-events-none" />
+
+              <div className="relative z-10 flex flex-col h-full w-full">
+                <div className="absolute top-0 right-0 z-20">
+                  <span className="bg-cyan-500/10 text-cyan-400 text-xs font-bold px-2 py-1 rounded-full border border-cyan-500/20">
+                    Stock: {figura.stock}
+                  </span>
+                </div>
+
+                <div className="relative flex-grow mb-4 w-full flex items-center justify-center overflow-visible mt-6">
+                  <Image
+                    src={figura.imagenUrl || "/placeholder.png"}
+                    alt={figura.nombre}
+                    width={200}
+                    height={150}
+                    className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-transform duration-500 ease-in-out group-hover:scale-110 group-hover:rotate-1"
+                  />
+                </div>
+
+                <div className="mt-auto w-full">
+                  <p className="uppercase tracking-widest text-[10px] text-cyan-200/60 font-semibold mb-1">
+                    Modelo 3D
+                  </p>
+                  <h3 className="font-bold text-white uppercase tracking-wider text-xl group-hover:text-cyan-300 transition-colors">
+                    {figura.nombre}
+                  </h3>
+                  <div className="my-3 h-[1px] w-1/2 mx-auto bg-gradient-to-r from-transparent via-cyan-900/50 to-transparent"></div>
+                  <p className="font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-4 text-2xl">
+                    $
+                    {Number(figura.precio_base ?? figura.precio ?? 0).toFixed(
+                      2,
+                    )}
+                  </p>
+                  <div className="flex justify-center">
+                    <button className="group/btn relative overflow-hidden bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 px-6 py-2">
+                      Ver más
+                      <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           ))
         ) : (
@@ -183,16 +217,16 @@ export default function Catalogo() {
         )}
       </div>
 
-
       {totalPaginas > 1 && (
         <div className="flex justify-center mt-10 mb-16 gap-3">
           <button
             onClick={() => cambiarPagina(paginaActual - 1)}
             disabled={paginaActual === 1}
-            className={`px-4 py-2 rounded-lg font-semibold ${paginaActual === 1
-              ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-              : "bg-[#00E6F6] text-black hover:bg-[#00bcd4]"
-              }`}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
+              paginaActual === 1
+                ? "bg-gray-800/50 text-gray-500 border border-gray-700/50 cursor-not-allowed"
+                : "bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600"
+            }`}
           >
             Anterior
           </button>
@@ -201,10 +235,11 @@ export default function Catalogo() {
             <button
               key={i + 1}
               onClick={() => cambiarPagina(i + 1)}
-              className={`px-3 py-2 rounded-lg font-semibold ${paginaActual === i + 1
-                ? "bg-[#00E6F6] text-black"
-                : "bg-[#1a1f40] text-white hover:bg-[#00E6F6] hover:text-black"
-                }`}
+              className={`px-3 py-2 rounded-lg font-semibold transition-all duration-300 ${
+                paginaActual === i + 1
+                  ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-[0_0_15px_rgba(6,182,212,0.5)] border border-cyan-400"
+                  : "bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600"
+              }`}
             >
               {i + 1}
             </button>
@@ -213,10 +248,11 @@ export default function Catalogo() {
           <button
             onClick={() => cambiarPagina(paginaActual + 1)}
             disabled={paginaActual === totalPaginas}
-            className={`px-4 py-2 rounded-lg font-semibold ${paginaActual === totalPaginas
-              ? "bg-gray-600 text-gray-300 cursor-not-allowed"
-              : "bg-[#00E6F6] text-black hover:bg-[#00bcd4]"
-              }`}
+            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 ${
+              paginaActual === totalPaginas
+                ? "bg-gray-800/50 text-gray-500 border border-gray-700/50 cursor-not-allowed"
+                : "bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 text-cyan-400 hover:text-white hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-600"
+            }`}
           >
             Siguiente
           </button>
