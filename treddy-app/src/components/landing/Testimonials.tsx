@@ -81,14 +81,14 @@ export default function Testimonials({
   const totalPages = Math.ceil(testimonials.length / 3);
 
   return (
-    <section className="py-24 px-8 overflow-hidden">
+    <section className="py-24 px-8 overflow-hidden bg-[#030712]">
       <div className="max-w-[1500px] mx-auto">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-6">
             <Star className="w-4 h-4 fill-current" /> +500 Clientes Felices
           </div>
-          <h3 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4">
-            Lo que dicen de nosotros
+          <h3 className="text-4xl md:text-6xl font-black bg-gradient-to-r py-3 from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4 tracking-tighter">
+            LO QUE DICEN DE NOSOTROS
           </h3>
         </div>
 
