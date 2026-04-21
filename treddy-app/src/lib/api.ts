@@ -1,13 +1,15 @@
 export async function getFiguras() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/figuras`, {
-    cache: "no-store",
+    next: { revalidate: 3600 }, // Cache for 1 hour
   });
   if (!res.ok) throw new Error("Error al obtener las figuras");
   return res.json();
 }
 
 export async function getFiguraById(id: number) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/figuras/${id}`);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/figuras/${id}`,
+  );
   if (!res.ok) throw new Error("Error al obtener la figura");
   return res.json();
 }
@@ -37,13 +39,16 @@ export async function updateFigura(
     precio?: number;
     imagenUrl?: string;
     categorias?: string[];
-  }
+  },
 ) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/figuras/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/figuras/${id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  );
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.error || "Error al actualizar la figura");
@@ -52,9 +57,12 @@ export async function updateFigura(
 }
 
 export async function deleteFigura(id: number) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/figuras/${id}`, {
-    method: "DELETE",
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/figuras/${id}`,
+    {
+      method: "DELETE",
+    },
+  );
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.error || "Error al eliminar la figura");
@@ -68,11 +76,14 @@ export async function registerUser(data: {
   email: string;
   contrasena: string;
 }) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  );
   if (!res.ok) throw new Error("Error en el registro");
   return res.json();
 }
@@ -89,11 +100,14 @@ export async function loginUser(data: { email: string; contrasena: string }) {
 
 export async function getUserProfile() {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
+  );
   if (!res.ok) throw new Error("Error al obtener el perfil");
   return res.json();
 }
@@ -104,25 +118,31 @@ export async function updateUserProfile(data: {
   telefono?: string;
 }) {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/user/profile`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
+  );
   if (!res.ok) throw new Error("Error al actualizar el perfil");
   return res.json();
 }
 
 export async function getUserOrders() {
   const token = localStorage.getItem("token");
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/orders`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/user/orders`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
+  );
   if (!res.ok) throw new Error("Error al obtener los pedidos");
   return res.json();
 }
