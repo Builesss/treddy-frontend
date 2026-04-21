@@ -91,7 +91,7 @@ export default function RegisterPage() {
           title: "text-cyan-400 font-semibold",
         },
       }).then(() => {
-        router.push("/login");
+        router.push("/auth/login");
       });
     } catch (error) {
       console.error("Error en fetch:", error);
