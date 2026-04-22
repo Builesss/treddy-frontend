@@ -5,9 +5,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Swal from "sweetalert2";
-import Nav from "@/pages/nav";
-import Footer from "@/pages/footer";
-import { getFiguras, createFigura, updateFigura, deleteFigura } from "@/lib/api";
+import Nav from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import { getFiguras, createFigura, updateFigura, deleteFigura } from "@/services/figuras.service";
 
 export default function ProductManagementPreview() {
   const [figuras, setFiguras] = useState<any[]>([]);

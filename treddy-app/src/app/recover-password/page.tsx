@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import AnimatedBackground from "@/components/animatedBackground";
+import AnimatedBackground from "@/components/ui/AnimatedBackground";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

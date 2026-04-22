@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
-import AnimatedBackground from "../../../components/animatedBackground";
+import AnimatedBackground from "@/components/ui/AnimatedBackground";
 
 export default function LoginPage() {
   const router = useRouter();

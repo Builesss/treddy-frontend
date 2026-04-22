@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Nav from "@/pages/nav";
-import Footer from "@/pages/footer";
+import Nav from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { Mail, Phone, MapPin, Send } from "lucide-react";
 
 export default function ContactanosPage() {

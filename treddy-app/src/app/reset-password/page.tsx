@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import AnimatedBackground from "@/components/animatedBackground";
+import AnimatedBackground from "@/components/ui/AnimatedBackground";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");

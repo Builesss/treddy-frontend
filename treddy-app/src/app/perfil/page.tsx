@@ -3,11 +3,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Nav from '@/pages/nav';
-import Footer from '@/pages/footer';
+import Nav from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { Edit3, LogOut, Settings, User, Lock, ShoppingBag, Mail, Phone, Calendar, Shield } from 'lucide-react';
 import Swal from 'sweetalert2';
-import { getUserProfile, updateUserProfile, getUserOrders } from '@/lib/api';
+import { getUserProfile, updateUserProfile, getUserOrders } from '@/services/user.service';
 
 export default function Perfil() {
   const router = useRouter();

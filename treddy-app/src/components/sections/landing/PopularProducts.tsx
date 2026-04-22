@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { Figura } from "@/lib/types";
+import { Figura } from "@/types";
 
 interface PopularProductsProps {
   figuras: Figura[];

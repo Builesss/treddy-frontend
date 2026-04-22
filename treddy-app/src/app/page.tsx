@@ -3,40 +3,40 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { getFiguras } from "../lib/api";
-import Footer from "@/pages/footer";
-import Nav from "@/pages/nav";
-import { Figura } from "@/lib/types";
+import { getFiguras } from "@/services/figuras.service";
+import Footer from "@/components/layout/Footer";
+import Nav from "@/components/layout/Navbar";
+import { Figura } from "@/types";
 
 // Static imports for above-the-fold content
-import Hero from "@/components/landing/Hero";
-import PopularProducts from "@/components/landing/PopularProducts";
+import Hero from "@/components/sections/landing/Hero";
+import PopularProducts from "@/components/sections/landing/PopularProducts";
 
 // Dynamic imports for below-the-fold content to optimize initial bundle
-const HowItWorks = dynamic(() => import("@/components/landing/HowItWorks"), {
+const HowItWorks = dynamic(() => import("@/components/sections/landing/HowItWorks"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-800/20" />,
 });
 
-const Categories = dynamic(() => import("@/components/landing/Categories"), {
+const Categories = dynamic(() => import("@/components/sections/landing/Categories"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-800/20" />,
 });
 
-const WhyChooseUs = dynamic(() => import("@/components/landing/WhyChooseUs"), {
+const WhyChooseUs = dynamic(() => import("@/components/sections/landing/WhyChooseUs"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-800/20" />,
 });
 
 const Testimonials = dynamic(
-  () => import("@/components/landing/Testimonials"),
+  () => import("@/components/sections/landing/Testimonials"),
   {
     loading: () => <div className="h-96 animate-pulse bg-gray-800/20" />,
   },
 );
 
-const ARSection = dynamic(() => import("@/components/landing/ARSection"), {
+const ARSection = dynamic(() => import("@/components/sections/landing/ARSection"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-800/20" />,
 });
 
-const Newsletter = dynamic(() => import("@/components/landing/Newsletter"), {
+const Newsletter = dynamic(() => import("@/components/sections/landing/Newsletter"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-800/20" />,
 });
 

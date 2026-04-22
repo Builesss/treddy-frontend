@@ -6,8 +6,8 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import Nav from '@/pages/nav'
-import Footer from '@/pages/footer'
+import Nav from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
 
 type ParteConfig = {
   color: string

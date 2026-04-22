@@ -2,12 +2,12 @@
 "use client";
 
 import Image from "next/image";
-import { getFiguras } from "@/lib/api";
+import { getFiguras } from "@/services/figuras.service";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import TarjetaExpandible from "../../components/TarjetaExpandible";
-import Nav from "@/pages/nav";
-import Footer from "@/pages/footer";
+import TarjetaExpandible from "@/components/ui/TarjetaExpandible";
+import Nav from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { Search, Filter, DollarSign, ArrowRight } from "lucide-react";
 
 export default function Catalogo() {

@@ -2,8 +2,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Nav from "../../pages/nav";
-import Footer from "../../pages/footer";
+import Nav from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";

@@ -4,7 +4,7 @@ import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Figura } from "@/lib/types";
+import { Figura } from "@/types";
 
 interface HeroProps {
   figuras: Figura[];
