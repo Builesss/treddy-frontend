@@ -8,7 +8,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import TarjetaExpandible from "@/components/ui/TarjetaExpandible";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { Search, Filter, DollarSign, ArrowRight } from "lucide-react";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { Search, Filter, DollarSign, ArrowRight, Tag } from "lucide-react";
 
 export default function Catalogo() {
   const [figuras, setFiguras] = useState<any[]>([]);
@@ -18,8 +19,10 @@ export default function Catalogo() {
   const router = useRouter();
 
   const initialSearch = searchParams?.get("search") || "";
+  const initialCategory = searchParams?.get("category") || "todas";
+
   const [busqueda, setBusqueda] = useState<string>(initialSearch);
-  const [categoria, setCategoria] = useState<string>("todas");
+  const [categoria, setCategoria] = useState<string>(initialCategory);
   const [precioMin, setPrecioMin] = useState<number>(0);
   const [precioMax, setPrecioMax] = useState<number>(1000000);
   const [paginaActual, setPaginaActual] = useState<number>(1);
@@ -31,13 +34,35 @@ export default function Catalogo() {
   }, []);
 
   useEffect(() => {
-    const valor = searchParams?.get("search");
-    if (valor) {
-      setBusqueda(valor);
+    const valorBusqueda = searchParams?.get("search");
+    const valorCategoria = searchParams?.get("category");
 
-      router.replace("/catalogo", { scroll: false });
+    if (valorBusqueda) {
+      setBusqueda(valorBusqueda);
     }
-  }, [searchParams, router]);
+    if (valorCategoria) {
+      setCategoria(valorCategoria);
+    }
+
+    if (valorBusqueda || valorCategoria) {
+      // Opcional: limpiar la URL si se desea, pero para sincronización es mejor dejarla
+      // router.replace("/catalogo", { scroll: false });
+    }
+  }, [searchParams]);
+
+  const handleCategoriaChange = (nuevaCategoria: string) => {
+    setCategoria(nuevaCategoria);
+    setPaginaActual(1);
+    
+    // Actualizar URL
+    const params = new URLSearchParams(searchParams?.toString());
+    if (nuevaCategoria === "todas") {
+      params.delete("category");
+    } else {
+      params.set("category", nuevaCategoria);
+    }
+    router.replace(`/catalogo?${params.toString()}`, { scroll: false });
+  };
 
   const categorias = Array.from(
     new Set(figuras.map((f) => f.categoria)),
@@ -77,82 +102,90 @@ export default function Catalogo() {
 
       <Nav />
 
-      <h2 className="text-center text-2xl md:text-5xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight py-10 -mt-5">
-        Catálogo de figuras 3D
-      </h2>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Header & Breadcrumbs */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <Breadcrumbs 
+            items={[
+              { label: "Catálogo", href: "/catalogo", active: categoria === "todas" },
+              ...(categoria !== "todas" ? [{ label: categoria.charAt(0).toUpperCase() + categoria.slice(1), active: true }] : [])
+            ]} 
+          />
+          <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+            Descubre nuestras <span className="text-cyan-400">Figuras 3D</span>
+          </h1>
+        </div>
 
-      <div className="max-w-6xl mx-auto mb-16 px-4">
-        <div className="bg-[#0F173A]/60 backdrop-blur-xl border border-[#1a1f40] p-6 rounded-3xl shadow-2xl flex flex-col lg:flex-row gap-6 items-center justify-between">
-          <div className="relative w-full lg:w-1/3 group">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <Search className="text-cyan-400 w-5 h-5 group-focus-within:text-[#00E6F6] transition-colors" />
-            </div>
-            <input
-              type="text"
-              placeholder="Buscar figura..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              className="w-full pl-12 pr-6 py-4 bg-[#0A0F2C]/50 border border-[#1a1f40] rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
-            />
-          </div>
-
-          <div className="relative w-full lg:w-1/4 group">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <Filter className="text-cyan-400 w-5 h-5 group-focus-within:text-[#00E6F6] transition-colors" />
-            </div>
-            <select
-              value={categoria}
-              onChange={(e) => setCategoria(e.target.value)}
-              className="w-full pl-12 pr-10 py-4 bg-[#0A0F2C]/50 border border-[#1a1f40] rounded-2xl text-white appearance-none cursor-pointer focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
+        {/* Integrated Filter Panel */}
+        <div className="bg-[#0F173A]/60 backdrop-blur-xl border border-[#1a1f40] p-6 rounded-3xl shadow-2xl mb-12">
+          {/* Category Tabs */}
+          <div className="flex space-x-3 overflow-x-auto pb-6 scrollbar-hide border-b border-white/5 mb-6">
+            <button
+              onClick={() => handleCategoriaChange("todas")}
+              className={`px-6 py-2 rounded-xl font-semibold transition-all duration-300 border whitespace-nowrap ${
+                categoria === "todas"
+                  ? "bg-cyan-500 text-black border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                  : "bg-[#0A0F2C]/50 text-gray-400 border-[#1a1f40] hover:border-cyan-500/30 hover:text-cyan-300"
+              }`}
             >
-              <option value="todas" className="bg-[#0F173A] text-white">
-                Todas las categorías
-              </option>
-              {categorias.map((cat) => (
-                <option
-                  key={cat}
-                  value={cat}
-                  className="bg-[#0F173A] text-white"
-                >
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-              <svg
-                className="w-4 h-4 text-cyan-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              Todas las figuras
+            </button>
+            {categorias.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => handleCategoriaChange(cat)}
+                className={`px-6 py-2 rounded-xl font-semibold transition-all duration-300 border whitespace-nowrap ${
+                  categoria === cat
+                    ? "bg-cyan-500 text-black border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                    : "bg-[#0A0F2C]/50 text-gray-400 border-[#1a1f40] hover:border-cyan-500/30 hover:text-cyan-300"
+                }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </button>
+            ))}
           </div>
 
-          <div className="flex items-center gap-4 w-full lg:w-auto bg-[#0A0F2C]/50 border border-[#1a1f40] rounded-2xl p-2 px-4">
-            <DollarSign className="text-cyan-400 w-5 h-5" />
-            <div className="flex items-center gap-2">
+          {/* Search & Price Row */}
+          <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+            <div className="relative w-full lg:flex-1 group">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Search className="text-cyan-400 w-5 h-5 group-focus-within:text-[#00E6F6] transition-colors" />
+              </div>
               <input
-                type="number"
-                placeholder="Min"
-                value={precioMin}
-                onChange={(e) => setPrecioMin(Number(e.target.value))}
-                className="w-20 bg-transparent text-white placeholder-gray-500 focus:outline-none text-center font-medium"
+                type="text"
+                placeholder="¿Qué figura buscas hoy?..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                className="w-full pl-12 pr-6 py-4 bg-[#0A0F2C]/40 border border-[#1a1f40] rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all"
               />
-              <span className="text-gray-500">-</span>
-              <input
-                type="number"
-                placeholder="Max"
-                value={precioMax}
-                onChange={(e) => setPrecioMax(Number(e.target.value))}
-                className="w-20 bg-transparent text-white placeholder-gray-500 focus:outline-none text-center font-medium"
-              />
+            </div>
+
+            <div className="flex items-center gap-6 w-full lg:w-auto">
+              <div className="flex items-center gap-3 bg-[#0A0F2C]/40 border border-[#1a1f40] rounded-2xl p-2 px-4 flex-1 lg:flex-none">
+                <DollarSign className="text-cyan-400 w-5 h-5" />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={precioMin}
+                    onChange={(e) => setPrecioMin(Number(e.target.value))}
+                    className="w-20 bg-transparent text-white placeholder-gray-600 focus:outline-none text-center font-medium"
+                  />
+                  <span className="text-gray-700">|</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={precioMax}
+                    onChange={(e) => setPrecioMax(Number(e.target.value))}
+                    className="w-20 bg-transparent text-white placeholder-gray-600 focus:outline-none text-center font-medium"
+                  />
+                </div>
+              </div>
+              
+              <div className="hidden lg:flex items-center text-gray-500 text-sm gap-2">
+                <Filter size={16} />
+                <span>{figurasFiltradas.length} resultados</span>
+              </div>
             </div>
           </div>
         </div>

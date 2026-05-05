@@ -110,7 +110,7 @@ export default function Hero({
                   transition={{ duration: 0.6, type: "spring", damping: 20 }}
                   className="flex flex-col items-center justify-center text-center w-full h-full"
                 >
-                  <div className="relative w-full h-full max-h-[350px] aspect-square mb-6">
+                  <div className="relative w-full h-full max-h-[330px] aspect-square mb-10 -mt-8">
                     <Image
                       src={figuras[currentIndex].imagenUrl}
                       alt={figuras[currentIndex].nombre}
