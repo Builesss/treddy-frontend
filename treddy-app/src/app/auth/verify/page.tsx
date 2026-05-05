@@ -65,30 +65,32 @@ function VerifyContent() {
     <div className="relative flex justify-center items-center min-h-screen overflow-hidden">
       <AnimatedBackground />
 
-      <div className="relative bg-[#0F173A] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg border border-cyan-700/50 text-center">
-        <div className="flex flex-col items-center mb-6">
-          <div className="w-24 h-24 rounded-full flex justify-center items-center border border-cyan-500 mb-4">
-            <span className="text-5xl">
-              {status === "loading" ? "⏳" : status === "success" ? "✅" : "❌"}
-            </span>
+      {status !== "success" && (
+        <div className="relative bg-[#0F173A] text-white p-10 rounded-2xl shadow-lg w-full max-w-lg border border-cyan-700/50 text-center">
+          <div className="flex flex-col items-center mb-6">
+            <div className="w-24 h-24 rounded-full flex justify-center items-center border border-cyan-500 mb-4">
+              <span className="text-5xl">
+                {status === "loading" ? "⏳" : "❌"}
+              </span>
+            </div>
+            <h2 className="text-2xl font-bold mt-4">
+              {status === "loading" ? "Verificando..." : "Error de Verificación"}
+            </h2>
+            <p className="text-lg text-cyan-400 mt-2">
+              {message}
+            </p>
           </div>
-          <h2 className="text-2xl font-bold mt-4">
-            {status === "loading" ? "Verificando..." : status === "success" ? "¡Éxito!" : "Error de Verificación"}
-          </h2>
-          <p className="text-lg text-cyan-400 mt-2">
-            {message}
-          </p>
-        </div>
 
-        {status !== "loading" && (
-          <button
-            onClick={() => router.push("/auth/login")}
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg transition-transform hover:scale-[1.02] mt-4"
-          >
-            Ir al Login
-          </button>
-        )}
-      </div>
+          {status === "error" && (
+            <button
+              onClick={() => router.push("/auth/login")}
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg transition-transform hover:scale-[1.02] mt-4"
+            >
+              Ir al Login
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
