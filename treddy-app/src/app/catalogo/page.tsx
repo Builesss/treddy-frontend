@@ -9,7 +9,7 @@ import TarjetaExpandible from "@/components/ui/TarjetaExpandible";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
-import { Search, Filter, DollarSign, ArrowRight, Tag } from "lucide-react";
+import { Search, Filter, DollarSign, ArrowRight } from "lucide-react";
 
 export default function Catalogo() {
   const [figuras, setFiguras] = useState<any[]>([]);

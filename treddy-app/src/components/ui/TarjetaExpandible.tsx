@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare } from "lucide-react";
@@ -154,7 +154,7 @@ export default function TarjetaExpandible({
     };
   }, [mostrarAR]);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     if (!figura) return;
     try {
       setLoadingReviews(true);
@@ -169,13 +169,13 @@ export default function TarjetaExpandible({
     } finally {
       setLoadingReviews(false);
     }
-  };
+  }, [figura]);
 
   useEffect(() => {
     if (figura?.producto_id) {
       fetchReviews();
     }
-  }, [figura?.producto_id]);
+  }, [figura?.producto_id, fetchReviews]);
 
   if (!figura) return null;
 
@@ -284,12 +284,13 @@ export default function TarjetaExpandible({
         color: "white",
         customClass: { popup: "rounded-2xl border border-cyan-500/30" },
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Error posting review:", e);
+      const errorMessage = e instanceof Error ? e.message : "Ocurrió un error inesperado.";
       Swal.fire({
         icon: "error",
         title: "No se pudo guardar",
-        text: e.message || "Ocurrió un error inesperado.",
+        text: errorMessage,
         confirmButtonColor: "#EF4444",
         background: "#0F173A",
         color: "white",

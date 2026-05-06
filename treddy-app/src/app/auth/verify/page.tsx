@@ -52,7 +52,7 @@ function VerifyContent() {
           router.push("/auth/login");
         });
 
-      } catch (error) {
+      } catch {
         setStatus("error");
         setMessage("Error de conexión al servidor.");
       }
