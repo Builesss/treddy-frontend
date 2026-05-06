@@ -8,11 +8,11 @@ export default function ARSection() {
   const router = useRouter();
 
   return (
-    <section className="py-24 px-8 relative overflow-hidden bg-[#0A0F2C]">
+    <section className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden bg-[#0A0F2C]">
       {/* Background Glow */}
       <div className="absolute top-1/2 right-0 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] translate-x-1/2 pointer-events-none" />
 
-      <div className="max-w-[1600px] mx-auto border border-white/10 p-12 md:p-20 bg-[#0F173A]/10 rounded-[40px] shadow-2xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-16 relative z-10">
+      <div className="max-w-[1600px] mx-auto border border-white/10 p-6 sm:p-12 md:p-20 bg-[#0F173A]/10 rounded-3xl sm:rounded-[40px] shadow-2xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-10 sm:gap-16 relative z-10">
         <div className="max-w-xl text-center md:text-left">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -22,10 +22,10 @@ export default function ARSection() {
             <span className="text-cyan-400 font-black tracking-[0.3em] uppercase text-sm mb-4 block">
               Tecnología Inmersiva
             </span>
-            <h4 className="text-4xl md:text-7xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-8">
+            <h4 className="text-3xl sm:text-4xl md:text-7xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-6 sm:mb-8">
               REALIDAD AUMENTADA
             </h4>
-            <p className="text-xl text-[#B5B8C5] mb-10 leading-relaxed font-medium">
+            <p className="text-base sm:text-xl text-[#B5B8C5] mb-8 sm:mb-10 leading-relaxed font-medium">
               ¿No estás seguro del tamaño? Usa tu cámara para proyectar la
               figura en tu espacio real. Visualiza cada detalle antes de que
               llegue a tu puerta.

@@ -28,7 +28,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-24 px-8 relative overflow-hidden bg-[#0A0F2C]">
+    <section className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden bg-[#0A0F2C]">
       {/* Animated Path Decoration (Desktop Only) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-2 relative hidden md:block">
         <svg
@@ -66,7 +66,7 @@ export default function HowItWorks() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-6xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-6"
+            className="text-3xl sm:text-4xl md:text-6xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-6"
           >
             NUESTRO PROCESO
           </motion.h3>
@@ -81,7 +81,7 @@ export default function HowItWorks() {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-12">
           {steps.map((step, idx) => (
             <motion.div
               key={idx}

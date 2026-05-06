@@ -13,7 +13,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="px-8 py-24 relative overflow-hidden bg-[#030712]">
+    <section className="px-4 sm:px-8 py-16 sm:py-24 relative overflow-hidden bg-[#030712]">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         whileInView={{ opacity: 1, scale: 1 }}
@@ -25,7 +25,7 @@ export default function Newsletter() {
           <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[150px] translate-y-1/2 -translate-x-1/2 opacity-50" />
         </div>
 
-        <div className="relative p-12 md:p-24 flex flex-col items-center text-center z-10">
+        <div className="relative p-6 sm:p-12 md:p-24 flex flex-col items-center text-center z-10">
           <AnimatePresence mode="wait">
             {!isSubscribed ? (
               <motion.div
@@ -42,7 +42,7 @@ export default function Newsletter() {
                   </span>
                 </div>
 
-                <h3 className="text-4xl md:text-7xl font-black text-white mb-8 leading-[1.1] tracking-tighter">
+                <h3 className="text-3xl sm:text-4xl md:text-7xl font-black text-white mb-6 sm:mb-8 leading-[1.1] tracking-tighter">
                   ÚNETE AL CLUB <br />{" "}
                   <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                     MÁS EXCLUSIVO

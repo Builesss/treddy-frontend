@@ -32,7 +32,7 @@ export default function Categories() {
   };
 
   return (
-    <section className="py-24 px-8 relative overflow-hidden bg-[#030712]">
+    <section className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden bg-[#030712]">
       {/* Background Ornaments */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
@@ -44,7 +44,7 @@ export default function Categories() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <h3 className="text-4xl md:text-6xl font-black bg-gradient-to-r py-3 from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2 tracking-tighter">
+            <h3 className="text-3xl sm:text-4xl md:text-6xl font-black bg-gradient-to-r py-3 from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2 tracking-tighter">
               EXPLORA COLECCIONES
             </h3>
             <p className="text-[#B5B8C5] text-xl font-medium">

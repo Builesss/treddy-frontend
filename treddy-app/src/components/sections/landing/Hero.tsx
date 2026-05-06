@@ -46,7 +46,7 @@ export default function Hero({
   };
 
   return (
-    <section className="pt-32 pb-24 px-8 relative overflow-hidden">
+    <section className="pt-20 sm:pt-32 pb-12 sm:pb-24 px-4 sm:px-8 relative overflow-hidden">
       {/* Decorative Background Elements */}
       <div className="absolute top-1/4 left-10 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl animate-pulse pointer-events-none" />
       <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-1000 pointer-events-none" />
@@ -55,18 +55,18 @@ export default function Hero({
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-[1600px] mx-auto border border-white/10 p-14 bg-[#0F173A]/20 rounded-[40px] shadow-2xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-12 relative z-10"
+        className="max-w-[1600px] mx-auto border border-white/10 p-6 sm:p-14 bg-[#0F173A]/20 rounded-3xl sm:rounded-[40px] shadow-2xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-8 sm:gap-12 relative z-10"
       >
         <div className="max-w-xl text-center md:text-left">
           <motion.h2
             variants={itemVariants}
-            className="text-2xl md:text-7xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-6 ml-10"
+            className="text-3xl sm:text-5xl md:text-7xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-4 sm:mb-6 md:ml-10"
           >
             Treddy Figuras 3D
           </motion.h2>
           <motion.p
             variants={itemVariants}
-            className="text-xl text-[#B5B8C5] mb-8 leading-relaxed ml-10"
+            className="text-base sm:text-xl text-[#B5B8C5] mb-6 sm:mb-8 leading-relaxed md:ml-10"
           >
             Personaliza o crea tu propia figura impresa en 3D con tecnología de
             vanguardia y acabados profesionales.
@@ -76,7 +76,7 @@ export default function Hero({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push("/catalogo")}
-            className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-10 py-4 rounded-full hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] font-bold shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all ml-10"
+            className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 sm:px-10 py-3 sm:py-4 rounded-full hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] font-bold shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all md:ml-10 text-sm sm:text-base"
           >
             Inicia ahora
           </motion.button>
@@ -87,7 +87,7 @@ export default function Hero({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="relative w-full md:w-[700px] h-[550px] bg-[#0F173A]/40 backdrop-blur-xl border border-white/10 rounded-[2.5rem] overflow-hidden group shadow-2xl flex flex-col"
+            className="relative w-full md:w-[700px] h-[350px] sm:h-[450px] md:h-[550px] bg-[#0F173A]/40 backdrop-blur-xl border border-white/10 rounded-3xl sm:rounded-[2.5rem] overflow-hidden group shadow-2xl flex flex-col"
           >
             {/* Slide Progress Bar */}
             <div className="absolute top-0 left-0 w-full h-1 bg-white/5 z-20">
@@ -128,7 +128,7 @@ export default function Hero({
                     <p className="text-cyan-400 text-sm font-bold tracking-[0.2em] uppercase mb-2">
                       Destacado
                     </p>
-                    <h3 className="text-4xl font-black text-white tracking-tight uppercase">
+                    <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight uppercase">
                       {figuras[currentIndex].nombre}
                     </h3>
                   </motion.div>
@@ -138,14 +138,14 @@ export default function Hero({
 
             <button
               onClick={prevSlide}
-              className="absolute left-6 top-1/2 -translate-y-1/2 p-4 rounded-full bg-black/40 text-white border border-white/5 hover:bg-cyan-500 hover:text-black hover:border-transparent transition-all duration-300 opacity-0 group-hover:opacity-100 z-10 backdrop-blur-md"
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 p-2 sm:p-4 rounded-full bg-black/40 text-white border border-white/5 hover:bg-cyan-500 hover:text-black hover:border-transparent transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 z-10 backdrop-blur-md"
             >
               <ChevronLeft size={24} />
             </button>
 
             <button
               onClick={nextSlide}
-              className="absolute right-6 top-1/2 -translate-y-1/2 p-4 rounded-full bg-black/40 text-white border border-white/5 hover:bg-cyan-500 hover:text-black hover:border-transparent transition-all duration-300 opacity-0 group-hover:opacity-100 z-10 backdrop-blur-md"
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 p-2 sm:p-4 rounded-full bg-black/40 text-white border border-white/5 hover:bg-cyan-500 hover:text-black hover:border-transparent transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 z-10 backdrop-blur-md"
             >
               <ChevronRight size={24} />
             </button>

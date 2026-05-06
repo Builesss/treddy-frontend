@@ -61,12 +61,12 @@ export default function WhyChooseUs() {
   ];
 
   return (
-    <section className="py-32 px-8 relative overflow-hidden bg-[#0A0F2C]">
+    <section className="py-16 sm:py-32 px-4 sm:px-8 relative overflow-hidden bg-[#0A0F2C]">
       {/* Background Decorative Gradient */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-blue-900/10 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="max-w-[1600px] mx-auto border border-white/10 p-12 md:p-20 bg-[#0F173A]/10 rounded-[40px] shadow-2xl backdrop-blur-md relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+      <div className="max-w-[1600px] mx-auto border border-white/10 p-6 sm:p-12 md:p-20 bg-[#0F173A]/10 rounded-3xl sm:rounded-[40px] shadow-2xl backdrop-blur-md relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-24 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -76,7 +76,7 @@ export default function WhyChooseUs() {
             <div className="flex items-center gap-2 text-cyan-400 font-bold uppercase tracking-widest text-sm mb-6">
               <Sparkles className="w-5 h-5" /> EXCELENCIA TREDDY
             </div>
-            <h3 className="text-4xl md:text-7xl font-black text-white mb-10 leading-[1.1] tracking-tighter">
+            <h3 className="text-3xl sm:text-4xl md:text-7xl font-black text-white mb-6 sm:mb-10 leading-[1.1] tracking-tighter">
               ¿QUÉ NOS HACE <br />
               <span className="bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent">
                 DIFERENTES?
@@ -95,7 +95,7 @@ export default function WhyChooseUs() {
                   key={idx}
                   variants={itemVariants}
                   whileHover={{ y: -5, scale: 1.02 }}
-                  className={`p-8 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-xl transition-all group ${feature.glow}`}
+                  className={`p-5 sm:p-8 rounded-2xl sm:rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-xl transition-all group ${feature.glow}`}
                 >
                   <div
                     className={`w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center mb-6 border border-white/5 group-hover:scale-110 transition-transform ${feature.color}`}
@@ -130,7 +130,7 @@ export default function WhyChooseUs() {
                 alt="3D Engineering Detail"
                 width={800}
                 height={1000}
-                className="w-full object-cover h-[700px] grayscale group-hover:grayscale-0 transition-all duration-[2s] ease-out group-hover:scale-110"
+                className="w-full object-cover h-[350px] sm:h-[500px] lg:h-[700px] grayscale group-hover:grayscale-0 transition-all duration-[2s] ease-out group-hover:scale-110"
               />
 
               {/* Floating Tech Badges */}

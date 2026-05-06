@@ -55,17 +55,18 @@ export default function Nav() {
     <motion.header
       className="bg-[#0A0F2C] border-b border-[#1a1f40] shadow-md sticky top-0 z-50"
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 grid grid-cols-3 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
 
-        <div className="justify-self-start">
-          <Link href="/" className="relative group text-2xl font-extrabold text-[#00E6F6]">
+        {/* Logo */}
+        <div className="flex-shrink-0">
+          <Link href="/" className="relative group text-xl sm:text-2xl font-extrabold text-[#00E6F6]">
             TREDDY
             <span className="absolute left-0 right-0 -bottom-1 h-0.5 bg-[#00E6F6] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
           </Link>
         </div>
 
-
-        <nav className="hidden md:flex space-x-8 justify-self-center" aria-label="Main Navigation">
+        {/* Desktop Nav Links */}
+        <nav className="hidden md:flex space-x-8" aria-label="Main Navigation">
           {links.map(({ href, label }) => (
             <Link
               key={href}
@@ -91,8 +92,8 @@ export default function Nav() {
           ))}
         </nav>
 
-
-        <div className="hidden md:flex space-x-6 items-center justify-self-end">
+        {/* Desktop Right Actions */}
+        <div className="hidden md:flex space-x-6 items-center">
 
           {isAdmin ? (
             <Link
@@ -149,14 +150,23 @@ export default function Nav() {
           )}
         </div>
 
-
-        <div className="md:hidden justify-self-end">
+        {/* Mobile: Cart icon + Hamburger */}
+        <div className="flex md:hidden items-center gap-3">
+          {!isAdmin && (
+            <Link
+              href="/carrito-compras"
+              className="text-white hover:text-[#00E6F6] transition-colors"
+              aria-label="Carrito"
+            >
+              <ShoppingBag size={24} />
+            </Link>
+          )}
           <button
-            className="text-white"
+            className="text-white p-1"
             onClick={() => setOpen(!open)}
             aria-label="Toggle Menu"
           >
-            {open ? <X size={28} /> : <Menu size={28} />}
+            {open ? <X size={26} /> : <Menu size={26} />}
           </button>
         </div>
       </div>
@@ -180,7 +190,7 @@ export default function Nav() {
               >
                 <Link
                   href={href}
-                  className={`block ${pathname === href
+                  className={`block py-2 ${pathname === href
                     ? "text-[#00E6F6] font-semibold"
                     : "text-white hover:text-[#00E6F6]"
                     }`}
@@ -200,7 +210,7 @@ export default function Nav() {
               <Link
                 href={isAdmin ? "/dashboard" : "/carrito-compras"}
                 onClick={() => setOpen(false)}
-                className={`flex items-center space-x-2 ${pathname === (isAdmin ? "/dashboard" : "/carrito-compras")
+                className={`flex items-center space-x-2 py-2 ${pathname === (isAdmin ? "/dashboard" : "/carrito-compras")
                   ? "text-[#00E6F6] font-semibold"
                   : "text-white hover:text-[#00E6F6]"
                   }`}
@@ -216,7 +226,7 @@ export default function Nav() {
                   <Link
                     href="/perfil"
                     onClick={() => setOpen(false)}
-                    className={`flex items-center space-x-2 ${pathname === "/perfil"
+                    className={`flex items-center space-x-2 py-2 ${pathname === "/perfil"
                       ? "text-[#00E6F6] font-semibold"
                       : "text-white hover:text-[#00E6F6]"
                       }`}
