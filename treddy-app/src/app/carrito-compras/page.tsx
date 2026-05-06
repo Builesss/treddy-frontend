@@ -180,6 +180,29 @@ export default function Carrito() {
       return;
     }
 
+    // Decode JWT to check verification status
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (payload.estado === "Pendiente") {
+        Swal.fire({
+          title: "Verifica tu correo",
+          html: "Debes verificar tu correo electrónico antes de realizar una compra.<br><br>Revisa tu bandeja de entrada (y spam) para encontrar el enlace de verificación.",
+          icon: "warning",
+          confirmButtonColor: "#00E6F6",
+          confirmButtonText: "Entendido",
+          background: "#0F173A",
+          color: "white",
+          customClass: {
+            popup: "rounded-2xl border border-cyan-500/30",
+            title: "text-cyan-400 font-semibold",
+          },
+        });
+        return;
+      }
+    } catch {
+      // If token can't be decoded, continue with the purchase attempt
+    }
+
     try {
       Swal.fire({
         title: "Procesando...",
