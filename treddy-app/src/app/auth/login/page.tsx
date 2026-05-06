@@ -45,7 +45,8 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:4000/api/auth/login", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -168,9 +169,10 @@ export default function LoginPage() {
 
         <div className="space-y-3">
           <button
-            onClick={() =>
-              (window.location.href = `http://localhost:4000/api/auth/google`)
-            }
+            onClick={() => {
+              const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
+              window.location.href = `${apiUrl}/api/auth/google`;
+            }}
             className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
           >
             <span>📧</span>
@@ -178,9 +180,10 @@ export default function LoginPage() {
           </button>
 
           <button
-            onClick={() =>
-              (window.location.href = `http://localhost:4000/api/auth/microsoft`)
-            }
+            onClick={() => {
+              const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
+              window.location.href = `${apiUrl}/api/auth/microsoft`;
+            }}
             className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
           >
             <span>🪟</span>

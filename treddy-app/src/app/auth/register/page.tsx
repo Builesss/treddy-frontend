@@ -58,7 +58,8 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:4000/api/auth/register", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
+      const response = await fetch(`${apiUrl}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

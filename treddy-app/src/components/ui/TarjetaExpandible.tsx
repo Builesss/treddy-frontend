@@ -158,7 +158,7 @@ export default function TarjetaExpandible({
     if (!figura) return;
     try {
       setLoadingReviews(true);
-      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/$/, "");
+      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com").replace(/\/$/, "");
       const res = await fetch(`${BACK_BASE}/api/resenas/${figura.producto_id}`);
       if (res.ok) {
         const data = await res.json();
@@ -183,7 +183,8 @@ export default function TarjetaExpandible({
     try {
       setLoading(true);
       const sessionId = ensureSessionId();
-      const res = await fetch(`http://localhost:4000/api/cart/items`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
+      const res = await fetch(`${apiUrl}/api/cart/items`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -252,7 +253,7 @@ export default function TarjetaExpandible({
     }
 
     try {
-      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/$/, "");
+      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com").replace(/\/$/, "");
       const res = await fetch(`${BACK_BASE}/api/resenas/${figura.producto_id}`, {
         method: "POST",
         headers: { 

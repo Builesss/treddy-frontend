@@ -22,7 +22,7 @@ function VerifyContent() {
 
     const verifyToken = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
         const response = await fetch(`${apiUrl}/api/auth/verify-email?token=${token}`);
         const data = await response.json();
 

@@ -58,8 +58,9 @@ export default function Carrito() {
     try {
       setLoading(true);
       const sessionId = ensureSessionId();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
       const res = await fetch(
-        `http://localhost:4000/api/cart?sessionId=${sessionId}`,
+        `${apiUrl}/api/cart?sessionId=${sessionId}`,
         {
           cache: "no-store",
         }
@@ -104,8 +105,9 @@ export default function Carrito() {
     try {
       setProcessingId(producto_id);
       const sessionId = ensureSessionId();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
       const res = await fetch(
-        `http://localhost:4000/api/cart/items/${producto_id}?sessionId=${sessionId}`,
+        `${apiUrl}/api/cart/items/${producto_id}?sessionId=${sessionId}`,
         {
           method: "DELETE",
         }
@@ -128,8 +130,9 @@ export default function Carrito() {
     try {
       setProcessingId(producto_id);
       const sessionId = ensureSessionId();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
       const res = await fetch(
-        `http://localhost:4000/api/cart/items/${producto_id}`,
+        `${apiUrl}/api/cart/items/${producto_id}`,
         {
           method: "PATCH",
           headers: {
@@ -189,8 +192,9 @@ export default function Carrito() {
         },
       });
 
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
       const res = await fetch(
-        `https://2f0f3a58c2e0.ngrok-free.app/api/payment/create_preference`,
+        `${apiUrl}/api/payment/create_preference`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

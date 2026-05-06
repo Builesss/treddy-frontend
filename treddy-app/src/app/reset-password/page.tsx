@@ -22,7 +22,8 @@ export default function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4000/api/user/reset-password", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
+      const response = await fetch(`${apiUrl}/api/user/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword: password }),
