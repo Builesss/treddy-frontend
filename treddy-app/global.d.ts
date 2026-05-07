@@ -5,4 +5,5 @@ interface Window {
   ) => {
     checkout: (options: { preference: { id: string }; autoOpen: boolean }) => void;
   };
+  google: any;
 }

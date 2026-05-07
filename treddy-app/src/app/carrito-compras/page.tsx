@@ -204,56 +204,8 @@ export default function Carrito() {
     }
 
     try {
-      Swal.fire({
-        title: "Procesando...",
-        text: "Creando preferencia de pago",
-        allowOutsideClick: false,
-        background: "#0F173A",
-        color: "white",
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-
-      // Decodificar el token para obtener el userId
-      let userId = null;
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        userId = payload.id || payload.userId || payload.sub;
-      } catch (e) {
-        console.error("Error al decodificar el token para userId:", e);
-      }
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
-      const res = await fetch(
-        `${apiUrl}/api/payment/create_preference`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            items: figuras.map((f) => ({
-              id: f.producto_id,
-              title: f.nombre,
-              quantity: Number(f.cantidad),
-              currency_id: "COP",
-              unit_price: Number(f.precio_base),
-            })),
-            userId: userId, // Enviar el userId al backend
-            sessionId: ensureSessionId(), // Enviar el sessionId al backend
-          }),
-        }
-      );
-
-      if (!res.ok) throw new Error("Error al crear la preferencia de pago");
-      const data = await res.json();
-
-      Swal.close();
-
-      const mp = new (window as any).MercadoPago(
-        process.env.NEXT_PUBLIC_MP_PUBLIC_KEY,
-        { locale: "es-CO" }
-      );
-      mp.checkout({ preference: { id: data.id }, autoOpen: true });
+      // En lugar de ir a MercadoPago directo, redirigimos a la selección de dirección
+      router.push("/checkout/address");
     } catch (error) {
       console.error("Error en checkout:", error);
       Swal.fire({

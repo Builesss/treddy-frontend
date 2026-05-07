@@ -30,7 +30,7 @@ export default function HowItWorks() {
   return (
     <section className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden bg-[#0A0F2C]">
       {/* Animated Path Decoration (Desktop Only) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-2 relative hidden md:block">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-2 hidden md:block">
         <svg
           className="absolute inset-0 w-full overflow-visible"
           viewBox="0 0 1000 100"
