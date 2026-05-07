@@ -239,6 +239,7 @@ export default function Carrito() {
               unit_price: Number(f.precio_base),
             })),
             userId: userId, // Enviar el userId al backend
+            sessionId: ensureSessionId(), // Enviar el sessionId al backend
           }),
         }
       );
