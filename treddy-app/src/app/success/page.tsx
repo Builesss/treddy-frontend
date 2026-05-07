@@ -39,7 +39,30 @@ export default function SuccessPage() {
           transition={{ delay: 0.9, duration: 0.6 }}
           className="mt-3 text-gray-300"
         >
-          Tu pago fue aprobado correctamente. Gracias por confiar en Treddy 🚀
+          Tu pago fue aprobado correctamente.
+        </motion.p>
+
+        {typeof window !== "undefined" && new URLSearchParams(window.location.search).get("external_reference") && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.1 }}
+            className="mt-4 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg"
+          >
+            <p className="text-sm text-cyan-400">Número de Orden:</p>
+            <p className="text-xl font-mono font-bold text-white">
+              {new URLSearchParams(window.location.search).get("external_reference")}
+            </p>
+          </motion.div>
+        )}
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.3, duration: 0.6 }}
+          className="mt-4 text-xs text-gray-400"
+        >
+          Gracias por confiar en Treddy 🚀
         </motion.p>
 
 
