@@ -466,7 +466,7 @@ export default function Perfil() {
                       setCancelModal({ open: false, pedidoId: null });
                       setMotivoSeleccionado('');
                     }}
-                    className="flex-1 bg-transparent border border-gray-600 text-white py-3 rounded-xl hover:bg-gray-800 transition font-medium"
+                    className="flex-1 bg-[#0A0F2C] border border-cyan-500/30 text-cyan-400 py-3 rounded-xl hover:bg-cyan-500/10 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all font-medium"
                   >
                     Volver
                   </button>
