@@ -89,17 +89,6 @@ export default function Hero({
             transition={{ duration: 0.8 }}
             className="relative w-full md:w-[700px] h-[350px] sm:h-[450px] md:h-[550px] bg-[#0F173A]/40 backdrop-blur-xl border border-white/10 rounded-3xl sm:rounded-[2.5rem] overflow-hidden group shadow-2xl flex flex-col"
           >
-            {/* Slide Progress Bar */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-white/5 z-20">
-              <motion.div
-                key={currentIndex}
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 5, ease: "linear" }}
-                className="h-full bg-gradient-to-r from-cyan-400 to-blue-500"
-              />
-            </div>
-
             <div className="flex-grow flex items-center justify-center p-8">
               <AnimatePresence mode="wait">
                 <motion.div
