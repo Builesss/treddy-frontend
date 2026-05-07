@@ -215,6 +215,15 @@ export default function Carrito() {
         },
       });
 
+      // Decodificar el token para obtener el userId
+      let userId = null;
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        userId = payload.id || payload.userId || payload.sub;
+      } catch (e) {
+        console.error("Error al decodificar el token para userId:", e);
+      }
+
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
       const res = await fetch(
         `${apiUrl}/api/payment/create_preference`,
@@ -229,6 +238,7 @@ export default function Carrito() {
               currency_id: "COP",
               unit_price: Number(f.precio_base),
             })),
+            userId: userId, // Enviar el userId al backend
           }),
         }
       );
