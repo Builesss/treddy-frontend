@@ -46,3 +46,21 @@ export async function getUserOrders() {
   if (!res.ok) throw new Error("Error al obtener los pedidos");
   return res.json();
 }
+
+export async function cancelOrder(orderId: number, motivo: string) {
+  const token = localStorage.getItem("token");
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/orders/${orderId}/cancel`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ motivo }),
+    },
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Error al cancelar el pedido");
+  return data;
+}
