@@ -18,7 +18,7 @@ function ensureSessionId() {
 }
 
 const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com").replace(/\/$/, "");
-function resolveImageUrl(prod: any): string {
+function resolveImageUrl(prod: { imagenUrl?: string; imagen?: string }): string {
   const raw = prod?.imagenUrl ?? prod?.imagen ?? "";
   if (!raw) return "/placeholder.png";
   if (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("/")) {
@@ -27,12 +27,29 @@ function resolveImageUrl(prod: any): string {
   return `${BACK_BASE}/images/${raw}`;
 }
 
+interface CartItem {
+  id: number;
+  title: string;
+  imagenUrl: string;
+  unit_price: number;
+  quantity: number;
+}
+
+interface Direccion {
+  id: string;
+  alias?: string;
+  calle: string;
+  numero: string;
+  ciudad: string;
+  departamento: string;
+}
+
 export default function CheckoutSummary() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
-  const [figuras, setFiguras] = useState<any[]>([]);
-  const [direccion, setDireccion] = useState<any>(null);
+  const [figuras, setFiguras] = useState<CartItem[]>([]);
+  const [direccion, setDireccion] = useState<Direccion | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
   // Totales
@@ -62,7 +79,7 @@ export default function CheckoutSummary() {
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       setUserId(payload.id || payload.userId || payload.sub);
-    } catch (e) {
+    } catch {
       router.push("/auth/login");
       return;
     }
@@ -84,7 +101,7 @@ export default function CheckoutSummary() {
       if (!res.ok) throw new Error("Error cargando carrito");
       const data = await res.json();
       
-      const mapped = (data?.carrito_item || []).map((it: any) => ({
+      const mapped = (data?.carrito_item || []).map((it: { producto_id: any; productos: any; precio_unitario: any; cantidad: any }) => ({
         id: Number(it.producto_id),
         title: it.productos?.nombre ?? "Producto",
         imagenUrl: resolveImageUrl(it.productos),
@@ -94,17 +111,17 @@ export default function CheckoutSummary() {
 
       setFiguras(mapped);
 
-      const sub = mapped.reduce((sum: number, f: any) => sum + f.unit_price * f.quantity, 0);
+      const sub = mapped.reduce((sum: number, f: CartItem) => sum + f.unit_price * f.quantity, 0);
       setSubtotal(sub);
       
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
-  const enmascararDireccion = (dir: string) => {
+  const enmascararDireccion = (dir: string | undefined) => {
     if (!dir) return "";
     if (dir.length <= 6) return dir;
     return dir.substring(0, 4) + "****" + dir.substring(dir.length - 2);
@@ -138,6 +155,7 @@ export default function CheckoutSummary() {
       Swal.close();
 
       // Abrir MercadoPago
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mp = new (window as any).MercadoPago(process.env.NEXT_PUBLIC_MP_PUBLIC_KEY, { locale: "es-CO" });
       mp.checkout({ preference: { id: data.preferenceId }, autoOpen: true });
 
