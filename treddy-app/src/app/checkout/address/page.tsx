@@ -7,9 +7,20 @@ import Swal from "sweetalert2";
 import { Loader2, MapPin, Plus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface Direccion {
+  id: string;
+  alias: string;
+  calle: string;
+  numero: string;
+  ciudad: string;
+  departamento: string;
+  codigo_postal: string;
+  principal: boolean;
+}
+
 export default function CheckoutAddress() {
   const router = useRouter();
-  const [direcciones, setDirecciones] = useState<any[]>([]);
+  const [direcciones, setDirecciones] = useState<Direccion[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   
@@ -26,6 +37,7 @@ export default function CheckoutAddress() {
   });
 
   const inputRef = useRef<HTMLInputElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const autocompleteRef = useRef<any>(null);
 
   useEffect(() => {
@@ -40,7 +52,7 @@ export default function CheckoutAddress() {
       const uid = payload.id || payload.userId || payload.sub;
       setUserId(uid);
       cargarDirecciones(uid);
-    } catch (e) {
+    } catch {
       router.push("/auth/login");
     }
   }, [router]);
@@ -54,8 +66,8 @@ export default function CheckoutAddress() {
         const data = await res.json();
         setDirecciones(data);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -67,7 +79,7 @@ export default function CheckoutAddress() {
 
     // Load Google Maps Script if not loaded
     const scriptId = "google-maps-script";
-    let isLoaded = !!document.getElementById(scriptId);
+    const isLoaded = !!document.getElementById(scriptId);
 
     const initAutocomplete = () => {
       if (window.google && inputRef.current) {
@@ -86,7 +98,7 @@ export default function CheckoutAddress() {
           let departamento = "";
           let codigo_postal = "";
 
-          place.address_components.forEach((component: any) => {
+          place.address_components.forEach((component: { long_name: string; types: string[] }) => {
             const types = component.types;
             if (types.includes("route")) calle = component.long_name;
             if (types.includes("street_number")) numero = component.long_name;
