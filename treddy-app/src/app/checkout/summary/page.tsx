@@ -101,7 +101,12 @@ export default function CheckoutSummary() {
       if (!res.ok) throw new Error("Error cargando carrito");
       const data = await res.json();
       
-      const mapped = (data?.carrito_item || []).map((it: { producto_id: any; productos: any; precio_unitario: any; cantidad: any }) => ({
+      const mapped = (data?.carrito_item || []).map((it: { 
+        producto_id: number | string; 
+        productos: { nombre?: string; imagenUrl?: string; imagen?: string }; 
+        precio_unitario: number | string; 
+        cantidad: number | string 
+      }) => ({
         id: Number(it.producto_id),
         title: it.productos?.nombre ?? "Producto",
         imagenUrl: resolveImageUrl(it.productos),
