@@ -12,8 +12,8 @@ interface VisualizadorARProps {
   onSessionChange?: (active: boolean) => void;
 }
 
-export default function VisualizadorAR({ 
-  modelUrl = "../../public/HORNET.glb", 
+export default function VisualizadorAR({
+  modelUrl = "../../public/HORNET.glb",
   className = "w-full h-full bg-black/20 rounded-xl",
   onSessionChange
 }: VisualizadorARProps) {
@@ -30,8 +30,8 @@ export default function VisualizadorAR({
     const camera = new THREE.PerspectiveCamera(70, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.01, 20);
 
     // Renderer con fondo transparente
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
       alpha: true,
       powerPreference: "high-performance"
     });
@@ -60,12 +60,12 @@ export default function VisualizadorAR({
     containerRef.current.appendChild(renderer.domElement);
 
     // Botón AR (ahora dentro del contenedor para mejor control de eventos)
-    const arButton = ARButton.createButton(renderer, { 
+    const arButton = ARButton.createButton(renderer, {
       requiredFeatures: ["local"],
       optionalFeatures: ["hit-test", "dom-overlay"],
       domOverlay: { root: containerRef.current }
     });
-    
+
     // Estilizar un poco el botón de Three.js para que encaje con la estética
     arButton.style.bottom = "20px";
     arButton.style.backgroundColor = "#06b6d4";
@@ -75,14 +75,6 @@ export default function VisualizadorAR({
     arButton.style.fontWeight = "bold";
     arButton.style.padding = "12px 24px";
     arButton.style.zIndex = "1000"; // Asegurar que esté por encima de todo
-    
-    // Prevenir que el click en el botón AR cierre el modal por accidente
-    const stopPropagation = (e: Event) => e.stopPropagation();
-    arButton.addEventListener("click", stopPropagation);
-    arButton.addEventListener("pointerdown", stopPropagation);
-    arButton.addEventListener("pointerup", stopPropagation);
-    arButton.addEventListener("touchstart", stopPropagation);
-    arButton.addEventListener("touchend", stopPropagation);
 
     containerRef.current.appendChild(arButton);
 
@@ -107,7 +99,7 @@ export default function VisualizadorAR({
     const loader = new GLTFLoader();
     loader.load(modelUrl, (gltf) => {
       const model = gltf.scene;
-      
+
       // Centrar el modelo en su propio origen
       const box = new THREE.Box3().setFromObject(model);
       const center = box.getCenter(new THREE.Vector3());
@@ -118,14 +110,14 @@ export default function VisualizadorAR({
       const maxDim = Math.max(size.x, size.y, size.z);
       const scale = 0.7 / maxDim;
       model.scale.set(scale, scale, scale);
-      
+
       // Posición final: 1.5 metros enfrente y en el "suelo" relativo
       // En AR 'local', el origen es donde empezó la sesión
       const container = new THREE.Group();
       container.add(model);
-      container.position.set(0, 0, -1.5); 
+      container.position.set(0, 0, -1.5);
       scene.add(container);
-      
+
     }, undefined, (error) => {
       console.error("Error cargando el modelo desde la base de datos:", error);
     });
