@@ -1,6 +1,7 @@
 "use client";
+
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare } from "lucide-react";
@@ -19,6 +20,7 @@ type Figura = {
 };
 
 function ensureSessionId() {
+  if (typeof window === "undefined") return ""; 
   let sid = localStorage.getItem("sessionId");
   if (!sid) {
     sid = crypto.randomUUID();
@@ -54,7 +56,6 @@ export default function TarjetaExpandible({
     checkMobile();
     window.addEventListener("resize", checkMobile);
     
-    // Default behavior: Show the normal image first
     setMostrarAR(false);
     setMostrarRealAR(false);
     setMostrarQR(false);
@@ -62,11 +63,9 @@ export default function TarjetaExpandible({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-
-
-
-  const fetchReviews = async () => {
-    if (!figura) return;
+  // SOLUCIÓN AL WARNING DE DEPENDENCIAS: Envolver en useCallback
+  const fetchReviews = useCallback(async () => {
+    if (!figura?.producto_id) return;
     try {
       setLoadingReviews(true);
       const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/$/, "");
@@ -80,13 +79,11 @@ export default function TarjetaExpandible({
     } finally {
       setLoadingReviews(false);
     }
-  };
+  }, [figura?.producto_id]);
 
   useEffect(() => {
-    if (figura?.producto_id) {
-      fetchReviews();
-    }
-  }, [figura?.producto_id]);
+    fetchReviews();
+  }, [fetchReviews]);
 
   if (!figura) return null;
 
@@ -117,10 +114,9 @@ export default function TarjetaExpandible({
         customClass: { popup: "rounded-2xl border border-cyan-500/30" },
       });
 
-
       onClose();
-    } catch (e) {
-      console.error("Error al agregar al carrito:", e);
+    } catch (error) {
+      console.error("Error al agregar al carrito:", error);
       Swal.fire({
         icon: "error",
         title: "Ups...",
@@ -159,6 +155,7 @@ export default function TarjetaExpandible({
         background: "#0F173A",
         color: "white",
       });
+      setIsSubmittingReview(false);
       return;
     }
 
@@ -195,12 +192,13 @@ export default function TarjetaExpandible({
         color: "white",
         customClass: { popup: "rounded-2xl border border-cyan-500/30" },
       });
-    } catch (e: any) {
+    } catch (e: unknown) { // SOLUCIÓN AL ERROR DE 'any'
+      const errorMessage = e instanceof Error ? e.message : "Ocurrió un error inesperado";
       console.error("Error posting review:", e);
       Swal.fire({
         icon: "error",
         title: "No se pudo guardar",
-        text: e.message || "Ocurrió un error inesperado.",
+        text: errorMessage,
         confirmButtonColor: "#EF4444",
         background: "#0F173A",
         color: "white",
@@ -217,9 +215,7 @@ export default function TarjetaExpandible({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={() => {
-            onClose();
-          }}
+          onClick={onClose}
           className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         />
 
@@ -231,9 +227,7 @@ export default function TarjetaExpandible({
           className="relative bg-[#0F173A]/90 border border-cyan-500/30 rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col no-scrollbar"
         >
           <button
-            onClick={() => {
-              onClose();
-            }}
+            onClick={onClose}
             className="absolute top-2 right-4 z-20 p-2 bg-black/20 hover:bg-red-500/80 rounded-full text-white transition-all duration-300"
           >
             <X size={20} />
@@ -300,7 +294,7 @@ export default function TarjetaExpandible({
                 <VisualizadorAR modelUrl={figura.modeloUrl || "/HORNET.glb"} />
               </div>
             ) : mostrarQR ? (
-              <div className="flex flex-col items-center justify-center gap-4 bg-#0F173A p-6 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+              <div className="flex flex-col items-center justify-center gap-4 bg-white p-6 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
                 <QRCodeSVG
                   value={figura.imagenUrl || "https://treddy.com"}
                   size={200}
@@ -322,7 +316,6 @@ export default function TarjetaExpandible({
           </div>
 
           <div className="p-6 flex flex-col gap-4">
-            {/* TABS */}
             <div className="flex gap-2 bg-[#1a214f] p-1 rounded-xl">
               <button onClick={() => setTab("detalles")} className={`flex-1 py-2 rounded-lg font-medium text-sm transition-all ${tab === "detalles" ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-gray-400 hover:text-white"}`}>Detalles</button>
               <button onClick={() => setTab("resenas")} className={`flex-1 py-2 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-1 ${tab === "resenas" ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-gray-400 hover:text-white"}`}>
@@ -333,24 +326,14 @@ export default function TarjetaExpandible({
             {tab === "detalles" ? (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold text-white mb-1">
-                    {figura.nombre}
-                  </h2>
+                  <h2 className="text-2xl font-bold text-white mb-1">{figura.nombre}</h2>
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <span className="text-cyan-400 font-bold text-xl">
-                      ${figura.precio_base.toLocaleString()}
-                    </span>
+                    <span className="text-cyan-400 font-bold text-xl">${figura.precio_base.toLocaleString()}</span>
                     <span className="text-gray-500 text-sm">|</span>
-                    <span
-                      className={`text-sm ${figura.stock > 0 ? "text-green-400" : "text-red-400"
-                        }`}
-                    >
-                      {figura.stock > 0 ? `Stock: ${figura.stock}` : "Agotado"}
-                    </span>
+                    <span className={`text-sm ${figura.stock > 0 ? "text-green-400" : "text-red-400"}`}>{figura.stock > 0 ? `Stock: ${figura.stock}` : "Agotado"}</span>
                   </div>
                   <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
-                    {figura.descripcion ||
-                      "Una increíble figura 3D lista para tu colección."}
+                    {figura.descripcion || "Una increíble figura 3D lista para tu colección."}
                   </p>
                 </div>
 
@@ -360,22 +343,14 @@ export default function TarjetaExpandible({
                     disabled={figura.stock <= 0 || loading}
                     className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black font-bold py-3 rounded-xl hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {loading ? (
-                      <Loader2 className="animate-spin" size={20} />
-                    ) : (
-                      <>
-                        <ShoppingCart size={20} />
-                        {figura.stock > 0 ? "Agregar al Carrito" : "Sin Stock"}
-                      </>
-                    )}
+                    {loading ? <Loader2 className="animate-spin" size={20} /> : <><ShoppingCart size={20} /> {figura.stock > 0 ? "Agregar al Carrito" : "Sin Stock"}</>}
                   </button>
 
                   <button
                     onClick={handlePersonalizar}
                     className="w-full bg-[#1a214f] text-white font-semibold py-3 rounded-xl border border-[#2a3055] hover:bg-[#232d66] hover:border-cyan-500/30 transition-all flex items-center justify-center gap-2"
                   >
-                    <Edit3 size={20} />
-                    Personalizar
+                    <Edit3 size={20} /> Personalizar
                   </button>
                 </div>
               </motion.div>
@@ -391,10 +366,10 @@ export default function TarjetaExpandible({
                   <textarea 
                     value={newComment} 
                     onChange={(e) => setNewComment(e.target.value)} 
-                    placeholder="Escribe tu reseña sobre el producto..." 
-                    className="w-full bg-[#0A0F2C] border border-[#2a3055] rounded-lg p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 resize-none h-24 mb-3 transition-all"
+                    placeholder="Escribe tu reseña..." 
+                    className="w-full bg-[#0A0F2C] border border-[#2a3055] rounded-lg p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 resize-none h-24 mb-3"
                   />
-                  <button onClick={handleSubmitReview} disabled={!newComment.trim() || isSubmittingReview} className="w-full bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-2.5 rounded-lg transition-all text-sm flex items-center justify-center gap-2">
+                  <button onClick={handleSubmitReview} disabled={!newComment.trim() || isSubmittingReview} className="w-full bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 disabled:opacity-50 font-semibold py-2.5 rounded-lg transition-all text-sm flex items-center justify-center gap-2">
                     {isSubmittingReview ? <Loader2 className="animate-spin" size={16} /> : <MessageSquare size={16} />}
                     {isSubmittingReview ? "Publicando..." : "Publicar reseña"}
                   </button>
