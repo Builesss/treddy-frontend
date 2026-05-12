@@ -5,6 +5,7 @@ export interface Figura {
   nombre: string;
   precio_base: number;
   imagenUrl: string;
+  modeloUrl?: string;
   categorias?: string[];
   categoria?: string;
   stock?: number;

@@ -1,18 +1,18 @@
 "use client";
 import Image from "next/image";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import Visualizador3D from "./Visualizador3D";
+import VisualizadorAR from "./VisualizadorAR";
 
 type Figura = {
   producto_id: number;
   nombre: string;
   imagenUrl: string;
+  modeloUrl?: string;
   precio_base: number;
   descripcion: string;
   stock: number;
@@ -35,6 +35,7 @@ export default function TarjetaExpandible({
   onClose: () => void;
 }) {
   const [mostrarAR, setMostrarAR] = useState(false);
+  const [mostrarRealAR, setMostrarRealAR] = useState(false);
   const [mostrarQR, setMostrarQR] = useState(false);
   const [loading, setLoading] = useState(false);
   
@@ -44,121 +45,31 @@ export default function TarjetaExpandible({
   const [newComment, setNewComment] = useState("");
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-
-
-
-  const canvasRef = useRef<HTMLDivElement | null>(null);
-  const modelRef = useRef<THREE.Object3D | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const controlsRef = useRef<OrbitControls | null>(null);
-  const requestRef = useRef<number | null>(null);
-
-
-  const MODEL_URL = "/HORNET.glb";
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    if (!mostrarAR || !canvasRef.current) return;
-
-    const width = canvasRef.current.clientWidth;
-    const height = canvasRef.current.clientHeight;
-
-
-    if (rendererRef.current) {
-      rendererRef.current.dispose();
-      if (rendererRef.current.domElement.parentElement) {
-        rendererRef.current.domElement.parentElement.removeChild(rendererRef.current.domElement);
-      }
-    }
-
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    canvasRef.current.innerHTML = "";
-    canvasRef.current.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
-
-
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
-
-
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 1, 3);
-    cameraRef.current = camera;
-
-
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
-    scene.add(hemiLight);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(5, 10, 7.5);
-    scene.add(dirLight);
-
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.enablePan = false;
-    controlsRef.current = controls;
-
-
-    const loader = new GLTFLoader();
-    loader.load(
-      MODEL_URL,
-      (gltf) => {
-        if (modelRef.current) scene.remove(modelRef.current);
-        modelRef.current = gltf.scene;
-
-
-        const box = new THREE.Box3().setFromObject(modelRef.current);
-        const size = box.getSize(new THREE.Vector3()).length();
-        const center = box.getCenter(new THREE.Vector3());
-
-        const scaleFactor = 1.5 / size;
-        modelRef.current.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-
-        modelRef.current.position.x = -center.x * scaleFactor;
-        modelRef.current.position.y = -center.y * scaleFactor;
-        modelRef.current.position.z = -center.z * scaleFactor;
-
-        scene.add(modelRef.current);
-      },
-      undefined,
-      (err) => console.error("Error loading GLB:", err)
-    );
-
-
-    const animate = () => {
-      requestRef.current = requestAnimationFrame(animate);
-      if (controlsRef.current) controlsRef.current.update();
-      if (rendererRef.current && sceneRef.current && cameraRef.current) {
-        rendererRef.current.render(sceneRef.current, cameraRef.current);
-      }
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
     };
-    animate();
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    
+    // Default behavior: Show the normal image first
+    setMostrarAR(false);
+    setMostrarRealAR(false);
+    setMostrarQR(false);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
 
-    return () => {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      if (rendererRef.current) {
-        rendererRef.current.dispose();
-        rendererRef.current.forceContextLoss();
-      }
-      if (controlsRef.current) controlsRef.current.dispose();
-      if (modelRef.current && sceneRef.current) {
-        sceneRef.current.remove(modelRef.current);
-      }
-    };
-  }, [mostrarAR]);
 
-  const fetchReviews = useCallback(async () => {
+
+  const fetchReviews = async () => {
     if (!figura) return;
     try {
       setLoadingReviews(true);
-      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com").replace(/\/$/, "");
+      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/$/, "");
       const res = await fetch(`${BACK_BASE}/api/resenas/${figura.producto_id}`);
       if (res.ok) {
         const data = await res.json();
@@ -169,13 +80,13 @@ export default function TarjetaExpandible({
     } finally {
       setLoadingReviews(false);
     }
-  }, [figura]);
+  };
 
   useEffect(() => {
     if (figura?.producto_id) {
       fetchReviews();
     }
-  }, [figura?.producto_id, fetchReviews]);
+  }, [figura?.producto_id]);
 
   if (!figura) return null;
 
@@ -183,8 +94,7 @@ export default function TarjetaExpandible({
     try {
       setLoading(true);
       const sessionId = ensureSessionId();
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
-      const res = await fetch(`${apiUrl}/api/cart/items`, {
+      const res = await fetch(`http://localhost:4000/api/cart/items`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -253,7 +163,7 @@ export default function TarjetaExpandible({
     }
 
     try {
-      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com").replace(/\/$/, "");
+      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/$/, "");
       const res = await fetch(`${BACK_BASE}/api/resenas/${figura.producto_id}`, {
         method: "POST",
         headers: { 
@@ -285,13 +195,12 @@ export default function TarjetaExpandible({
         color: "white",
         customClass: { popup: "rounded-2xl border border-cyan-500/30" },
       });
-    } catch (e: unknown) {
+    } catch (e: any) {
       console.error("Error posting review:", e);
-      const errorMessage = e instanceof Error ? e.message : "Ocurrió un error inesperado.";
       Swal.fire({
         icon: "error",
         title: "No se pudo guardar",
-        text: errorMessage,
+        text: e.message || "Ocurrió un error inesperado.",
         confirmButtonColor: "#EF4444",
         background: "#0F173A",
         color: "white",
@@ -331,49 +240,64 @@ export default function TarjetaExpandible({
           </button>
 
           <div className="absolute top-3 left-4 z-20 flex gap-2">
+            {!isMobile && (
+              <button
+                onClick={() => {
+                  setMostrarQR(!mostrarQR);
+                  setMostrarAR(false);
+                  setMostrarRealAR(false);
+                }}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all duration-300 ${mostrarQR
+                    ? "bg-cyan-500 text-black border border-cyan-400"
+                    : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 hover:bg-cyan-500/30"
+                  }`}
+              >
+                <QrCode size={16} />
+                {mostrarQR ? "Cerrar QR" : "QR"}
+              </button>
+            )}
+
             <button
               onClick={() => {
-                if (mostrarAR) {
-                  setMostrarAR(false);
-                } else {
-                  setMostrarAR(true);
-                  setMostrarQR(false);
-                }
+                setMostrarAR(!mostrarAR);
+                setMostrarQR(false);
+                setMostrarRealAR(false);
               }}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all duration-300 ${mostrarAR
-                  ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 hover:bg-cyan-500/30"
+                  ? "bg-cyan-500 text-black border border-cyan-400"
                   : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 hover:bg-cyan-500/30"
                 }`}
             >
               <Camera size={16} />
-              {mostrarAR ? "Cerrar 3D" : "3D"}
+              {mostrarAR ? "Cerrar 3D" : "Ver 3D"}
             </button>
 
-            <button
-              onClick={() => {
-                if (mostrarQR) {
-                  setMostrarQR(false);
-                } else {
-                  setMostrarQR(true);
+            {isMobile && (
+              <button
+                onClick={() => {
+                  setMostrarRealAR(!mostrarRealAR);
                   setMostrarAR(false);
-                }
-              }}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all duration-300 ${mostrarQR
-                  ? "bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30"
-                  : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 hover:bg-cyan-500/30"
-                }`}
-            >
-              <QrCode size={16} />
-              {mostrarQR ? "Cerrar QR" : "QR"}
-            </button>
+                  setMostrarQR(false);
+                }}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all duration-300 ${mostrarRealAR
+                    ? "bg-cyan-500 text-black border border-cyan-400"
+                    : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 hover:bg-cyan-500/30"
+                  }`}
+              >
+                <Camera size={16} />
+                {mostrarRealAR ? "Cerrar AR" : "Ver en mi espacio (AR)"}
+              </button>
+            )}
           </div>
 
           <div className="relative w-full h-80 bg-gradient-to-b from-[#1a214f] to-[#0F173A] flex items-center justify-center p-6 overflow-hidden mt-14">
             {mostrarAR ? (
               <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-                <div ref={canvasRef} className="w-full h-full" />
-                <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
-                </div>
+                <Visualizador3D modelUrl={figura.modeloUrl || "/HORNET.glb"} />
+              </div>
+            ) : mostrarRealAR ? (
+              <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.3)] bg-black/20">
+                <VisualizadorAR modelUrl={figura.modeloUrl || "/HORNET.glb"} />
               </div>
             ) : mostrarQR ? (
               <div className="flex flex-col items-center justify-center gap-4 bg-#0F173A p-6 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
