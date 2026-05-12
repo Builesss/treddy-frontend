@@ -219,7 +219,7 @@ export default function TarjetaExpandible({
           onClick={(e) => {
             if (e.target === e.currentTarget && !arActivo) onClose();
           }}
-          className={`absolute inset-0 bg-black/80 backdrop-blur-sm ${arActivo ? 'pointer-events-none' : ''}`}
+          className={`absolute inset-0 bg-black/80 backdrop-blur-sm`}
         />
 
         <motion.div
