@@ -229,7 +229,6 @@ export default function TarjetaExpandible({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          onClick={(e) => e.stopPropagation()}
           className={`relative bg-[#0F173A]/90 border border-cyan-500/30 rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col no-scrollbar transition-all duration-300 ${arActivo ? 'bg-transparent border-none shadow-none max-h-screen max-w-none w-screen h-screen overflow-visible' : ''}`}
         >
           {!arActivo && (

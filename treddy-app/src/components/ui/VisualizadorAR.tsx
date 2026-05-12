@@ -14,7 +14,7 @@ interface VisualizadorARProps {
 
 export default function VisualizadorAR({
   modelUrl = "../../public/HORNET.glb",
-  className = "w-full h-full bg-black/20 rounded-xl",
+  className = "w-full h-full bg-black/20 rounded-xl touch-none",
   onSessionChange
 }: VisualizadorARProps) {
   const containerRef = useRef<HTMLDivElement>(null);
