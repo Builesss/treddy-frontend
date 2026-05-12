@@ -90,9 +90,9 @@ export default function VisualizadorAR({
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.minDistance = 1;
+    controls.minDistance = 0.5; // Permitir acercarse un poco más
     controls.maxDistance = 10;
-    controls.target.set(0, 0, -2);
+    controls.target.set(0, 0, -1.5);
 
     // Posicionar cámara inicialmente
     camera.position.set(0, 1.6, 0);
