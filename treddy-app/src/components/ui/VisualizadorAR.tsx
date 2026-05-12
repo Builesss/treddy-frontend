@@ -9,11 +9,13 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 interface VisualizadorARProps {
   modelUrl?: string;
   className?: string;
+  onSessionChange?: (active: boolean) => void;
 }
 
 export default function VisualizadorAR({ 
   modelUrl = "../../public/HORNET.glb", 
-  className = "w-full h-full bg-black/20 rounded-xl" 
+  className = "w-full h-full bg-black/20 rounded-xl",
+  onSessionChange
 }: VisualizadorARProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -31,6 +33,20 @@ export default function VisualizadorAR({
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.xr.enabled = true;
+
+    // Manejar inicio y fin de sesión AR
+    const onSessionStart = () => {
+      if (onSessionChange) onSessionChange(true);
+      document.body.classList.add("ar-session-active");
+    };
+
+    const onSessionEnd = () => {
+      if (onSessionChange) onSessionChange(false);
+      document.body.classList.remove("ar-session-active");
+    };
+
+    renderer.xr.addEventListener("sessionstart", onSessionStart);
+    renderer.xr.addEventListener("sessionend", onSessionEnd);
 
     // Ajustar tamaño dinámico al contenedor
     const { clientWidth, clientHeight } = containerRef.current;
@@ -98,13 +114,16 @@ export default function VisualizadorAR({
     });
 
     return () => {
+      renderer.xr.removeEventListener("sessionstart", onSessionStart);
+      renderer.xr.removeEventListener("sessionend", onSessionEnd);
       renderer.setAnimationLoop(null);
       renderer.dispose();
       if (containerRef.current) containerRef.current.innerHTML = "";
       if (arButton && arButton.parentNode) arButton.parentNode.removeChild(arButton);
       controls.dispose();
+      document.body.classList.remove("ar-session-active");
     };
-  }, [modelUrl]);
+  }, [modelUrl, onSessionChange]);
 
   return (
     <div ref={containerRef} className={className} />
