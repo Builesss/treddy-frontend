@@ -29,9 +29,14 @@ export default function VisualizadorAR({
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(70, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.01, 20);
 
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    // Renderer con fondo transparente
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      alpha: true,
+      powerPreference: "high-performance"
+    });
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setClearColor(0x000000, 0); // Totalmente transparente
     renderer.xr.enabled = true;
 
     // Manejar inicio y fin de sesión AR
@@ -54,11 +59,11 @@ export default function VisualizadorAR({
 
     containerRef.current.appendChild(renderer.domElement);
 
-    // Botón AR (fuera del contenedor)
+    // Botón AR (ahora dentro del contenedor para mejor control de eventos)
     const arButton = ARButton.createButton(renderer, { 
       requiredFeatures: ["local"],
       optionalFeatures: ["hit-test", "dom-overlay"],
-      domOverlay: { root: document.body }
+      domOverlay: { root: containerRef.current }
     });
     
     // Estilizar un poco el botón de Three.js para que encaje con la estética
@@ -69,8 +74,17 @@ export default function VisualizadorAR({
     arButton.style.borderRadius = "9999px";
     arButton.style.fontWeight = "bold";
     arButton.style.padding = "12px 24px";
+    arButton.style.zIndex = "1000"; // Asegurar que esté por encima de todo
     
-    document.body.appendChild(arButton);
+    // Prevenir que el click en el botón AR cierre el modal por accidente
+    const stopPropagation = (e: Event) => e.stopPropagation();
+    arButton.addEventListener("click", stopPropagation);
+    arButton.addEventListener("pointerdown", stopPropagation);
+    arButton.addEventListener("pointerup", stopPropagation);
+    arButton.addEventListener("touchstart", stopPropagation);
+    arButton.addEventListener("touchend", stopPropagation);
+
+    containerRef.current.appendChild(arButton);
 
     // Controles de órbita para PC/Vista 3D
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -92,28 +106,51 @@ export default function VisualizadorAR({
     // Modelo
     const loader = new GLTFLoader();
     loader.load(modelUrl, (gltf) => {
-      // Centrar y escalar automáticamente el modelo
       const model = gltf.scene;
       
+      // Centrar el modelo en su propio origen
       const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      model.position.sub(center);
+
+      // Escalar para que quepa en un cubo de ~0.7m
       const size = box.getSize(new THREE.Vector3());
       const maxDim = Math.max(size.x, size.y, size.z);
-      const scale = 0.8 / maxDim;
-      
+      const scale = 0.7 / maxDim;
       model.scale.set(scale, scale, scale);
-      model.position.set(0, -0.5, -2);
-      scene.add(model);
+      
+      // Posición final: 1.5 metros enfrente y en el "suelo" relativo
+      // En AR 'local', el origen es donde empezó la sesión
+      const container = new THREE.Group();
+      container.add(model);
+      container.position.set(0, 0, -1.5); 
+      scene.add(container);
+      
     }, undefined, (error) => {
       console.error("Error cargando el modelo desde la base de datos:", error);
     });
 
+    // Manejar redimensionamiento
+    const resizeObserver = new ResizeObserver(() => {
+      if (!containerRef.current || renderer.xr.isPresenting) return;
+      const { clientWidth, clientHeight } = containerRef.current;
+      camera.aspect = clientWidth / clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(clientWidth, clientHeight);
+    });
+    if (containerRef.current) resizeObserver.observe(containerRef.current);
+
     // Animación
     renderer.setAnimationLoop(() => {
-      controls.update();
+      // No actualizar controles si estamos en AR, Three.js maneja la cámara
+      if (!renderer.xr.isPresenting) {
+        controls.update();
+      }
       renderer.render(scene, camera);
     });
 
     return () => {
+      resizeObserver.disconnect();
       renderer.xr.removeEventListener("sessionstart", onSessionStart);
       renderer.xr.removeEventListener("sessionend", onSessionEnd);
       renderer.setAnimationLoop(null);
