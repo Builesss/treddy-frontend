@@ -51,6 +51,9 @@ export default function CheckoutSummary() {
   const [figuras, setFiguras] = useState<CartItem[]>([]);
   const [direccion, setDireccion] = useState<Direccion | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [isCouponApplied, setIsCouponApplied] = useState(false);
 
   // Totales
   const [subtotal, setSubtotal] = useState(0);
@@ -126,6 +129,31 @@ export default function CheckoutSummary() {
     }
   };
 
+  const handleApplyCoupon = () => {
+    if (couponCode.trim().toUpperCase() === "TREDDYMAKER10") {
+      const discountVal = subtotal * 0.15;
+      setDiscount(discountVal);
+      setIsCouponApplied(true);
+      Swal.fire({
+        icon: "success",
+        title: "¡Cupón aplicado!",
+        text: "Has recibido un 15% de descuento en tu compra.",
+        background: "#0F173A",
+        color: "white",
+        timer: 2000,
+        showConfirmButton: false
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Cupón inválido",
+        text: "El código ingresado no existe o ha expirado.",
+        background: "#0F173A",
+        color: "white"
+      });
+    }
+  };
+
   const enmascararDireccion = (dir: string | undefined) => {
     if (!dir) return "";
     if (dir.length <= 6) return dir;
@@ -150,7 +178,8 @@ export default function CheckoutSummary() {
           items: figuras,
           userId,
           sessionId: ensureSessionId(),
-          direccionId: direccion?.id
+          direccionId: direccion?.id,
+          discount: discount
         })
       });
 
@@ -185,8 +214,9 @@ export default function CheckoutSummary() {
     );
   }
 
-  const impuestos = subtotal * impuestoRate;
-  const totalPagar = subtotal + impuestos + costoEnvio;
+  const subtotalConDescuento = subtotal - discount;
+  const impuestos = subtotalConDescuento * impuestoRate;
+  const totalPagar = subtotalConDescuento + impuestos + costoEnvio;
 
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white">
@@ -249,11 +279,39 @@ export default function CheckoutSummary() {
             >
               <h3 className="text-xl font-bold mb-6 text-center">Desglose Fiscal</h3>
               
+              {/* Cupón Input */}
+              <div className="mb-6 pb-6 border-b border-[#2a3055]">
+                <label className="text-sm text-gray-400 mb-2 block">¿Tienes un cupón?</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    placeholder="Ej: TREDDY..."
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    disabled={isCouponApplied}
+                    className="flex-grow bg-[#0A0F2C] border border-[#2a3055] rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-cyan-500 disabled:opacity-50"
+                  />
+                  <button 
+                    onClick={handleApplyCoupon}
+                    disabled={isCouponApplied || !couponCode}
+                    className="bg-cyan-600 hover:bg-cyan-500 text-black px-4 py-2 rounded-xl text-sm font-bold transition-colors disabled:opacity-50"
+                  >
+                    {isCouponApplied ? "Aplicado" : "Aplicar"}
+                  </button>
+                </div>
+              </div>
+
               <div className="space-y-3 text-sm mb-6 pb-6 border-b border-[#2a3055]">
                 <div className="flex justify-between text-gray-300">
                   <span>Base Imponible (Subtotal)</span>
                   <span>${subtotal.toLocaleString()}</span>
                 </div>
+                {isCouponApplied && (
+                  <div className="flex justify-between text-green-400 font-medium">
+                    <span>Descuento (15%)</span>
+                    <span>-${discount.toLocaleString()}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-gray-300">
                   <span>Impuestos (19%)</span>
                   <span>${impuestos.toLocaleString()}</span>
