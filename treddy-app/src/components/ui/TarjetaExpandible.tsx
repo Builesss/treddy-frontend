@@ -229,7 +229,11 @@ export default function TarjetaExpandible({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative bg-[#0F173A]/90 border border-cyan-500/30 rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col no-scrollbar"
+          className={`relative flex flex-col no-scrollbar transition-all duration-300 ${
+            arActivo 
+              ? 'bg-transparent border-none shadow-none max-h-screen max-w-none w-screen h-screen overflow-visible' 
+              : 'bg-[#0F173A]/90 border border-cyan-500/30 rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto'
+          }`}
         >
           <button
             onClick={() => {
@@ -297,8 +301,8 @@ export default function TarjetaExpandible({
                 <Visualizador3D modelUrl={figura.modeloUrl || "/HORNET.glb"} />
               </div>
             ) : mostrarRealAR ? (
-              <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.3)] bg-black/20">
-                <VisualizadorAR modelUrl={figura.modeloUrl || "/HORNET.glb"} />
+              <div className={`relative w-full h-full overflow-hidden transition-all ${arActivo ? 'fixed inset-0 z-0' : 'rounded-2xl border-2 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.3)] bg-black/20'}`}>
+                <VisualizadorAR modelUrl={figura.modeloUrl || "/HORNET.glb"} onSessionChange={setArActivo} />
               </div>
             ) : mostrarQR ? (
               <div className="flex flex-col items-center justify-center gap-4 bg-#0F173A p-6 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
