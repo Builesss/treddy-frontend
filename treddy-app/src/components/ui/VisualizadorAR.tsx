@@ -43,11 +43,18 @@ export default function VisualizadorAR({
     if (!containerRef.current) return
 
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+    const width = containerRef.current.clientWidth
+    const height = containerRef.current.clientHeight
+    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
     
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.xr.enabled = true
     renderer.setPixelRatio(window.devicePixelRatio)
+    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight)
+    
+    // Limpiar y añadir el canvas al DOM
+    containerRef.current.innerHTML = ""
+    containerRef.current.appendChild(renderer.domElement)
     rendererRef.current = renderer
 
     scene.add(new THREE.AmbientLight(0xffffff, 1.2))
@@ -126,21 +133,29 @@ export default function VisualizadorAR({
       renderer.render(scene, camera)
     })
 
+    // Ajustar al redimensionar
+    const handleResize = () => {
+      if (!containerRef.current || !rendererRef.current) return
+      const width = containerRef.current.clientWidth
+      const height = containerRef.current.clientHeight
+      camera.aspect = width / height
+      camera.updateProjectionMatrix()
+      rendererRef.current.setSize(width, height)
+    }
+    window.addEventListener('resize', handleResize)
+
     return () => {
+      window.removeEventListener('resize', handleResize)
       canvas.removeEventListener('touchstart', handleTouchStart)
       canvas.removeEventListener('touchmove', handleTouchMove)
       canvas.removeEventListener('touchend', handleTouchEnd)
       
       if (rendererRef.current) {
-        // Detener animación
         rendererRef.current.setAnimationLoop(null)
-        
-        // Finalizar sesión XR si existe
         const session = rendererRef.current.xr.getSession()
         if (session) {
           session.end().catch(() => {})
         }
-        
         rendererRef.current.dispose()
       }
     }
@@ -151,7 +166,10 @@ export default function VisualizadorAR({
     if (!rendererRef.current || !xr) return
 
     try {
-      // Usamos la API nativa de WebXR para mayor robustez con botones personalizados
+      // Notificar al padre ANTES de solicitar la sesión para que el DOM se prepare (transparencias)
+      if (onSessionChange) onSessionChange(true)
+      setIsAR(true)
+
       const sessionInit = { 
         requiredFeatures: ["local"],
         optionalFeatures: ["dom-overlay", "hit-test"],
@@ -160,10 +178,6 @@ export default function VisualizadorAR({
       
       const session = await (navigator as any).xr.requestSession('immersive-ar', sessionInit)
       
-      // Notificar al padre que AR está activo
-      setIsAR(true)
-      if (onSessionChange) onSessionChange(true)
-
       // Escuchar el final de la sesión
       session.addEventListener('end', () => {
         setIsAR(false)
@@ -173,6 +187,7 @@ export default function VisualizadorAR({
       rendererRef.current.xr.setSession(session)
     } catch (error) {
       console.error("Error al iniciar la sesión AR:", error)
+      setIsAR(false)
       if (onSessionChange) onSessionChange(false)
     }
   }
