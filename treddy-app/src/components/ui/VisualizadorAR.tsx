@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from "react"
 import * as THREE from "three"
-import { ARButton } from "three/examples/jsm/webxr/ARButton.js"
+
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 import { motion } from "framer-motion"
 import { Camera, Loader2, Maximize2 } from "lucide-react"
@@ -126,22 +126,32 @@ export default function VisualizadorAR({ modelUrl = "/HORNET.glb" }: Visualizado
       canvas.removeEventListener('touchstart', handleTouchStart)
       canvas.removeEventListener('touchmove', handleTouchMove)
       canvas.removeEventListener('touchend', handleTouchEnd)
-      renderer.dispose()
+      
+      if (rendererRef.current) {
+        rendererRef.current.setAnimationLoop(null)
+        rendererRef.current.dispose()
+      }
     }
   }, [modelUrl])
 
-  const startAR = () => {
-    if (!rendererRef.current) return
+  const startAR = async () => {
+    const xr = (navigator as any).xr
+    if (!rendererRef.current || !xr) return
 
-    // Usamos el helper de Three.js pero configurando dom-overlay
-    const arButton = ARButton.createButton(rendererRef.current, { 
-      requiredFeatures: ["local"],
-      optionalFeatures: ["dom-overlay"],
-      domOverlay: { root: document.body }
-    })
-    
-    // Disparamos el clic del botón oculto para iniciar la sesión
-    arButton.click()
+    try {
+      // Usamos la API nativa de WebXR para mayor robustez con botones personalizados
+      const sessionInit = { 
+        requiredFeatures: ["local"],
+        optionalFeatures: ["dom-overlay", "hit-test"],
+        domOverlay: { root: document.body }
+      }
+      
+      const session = await (navigator as any).xr.requestSession('immersive-ar', sessionInit)
+      rendererRef.current.xr.setSession(session)
+    } catch (error) {
+      console.error("Error al iniciar la sesión AR:", error)
+      // Opcional: podrías mostrar un aviso al usuario aquí
+    }
   }
 
   if (arSupported === false) {
