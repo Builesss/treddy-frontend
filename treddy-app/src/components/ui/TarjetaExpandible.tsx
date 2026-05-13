@@ -59,7 +59,7 @@ export default function TarjetaExpandible({
   const requestRef = useRef<number | null>(null);
 
 
-  const MODEL_URL = "/HORNET.glb";
+
 
   useEffect(() => {
     if (!mostrarAR || !canvasRef.current) return;
@@ -108,7 +108,14 @@ export default function TarjetaExpandible({
 
 
     const loader = new GLTFLoader();
-    const modelToLoad = figura.modelo3dUrl || figura.modelo_3d_path || MODEL_URL;
+    const modelToLoad = figura.modelo3dUrl || figura.modelo_3d_path;
+
+    if (!modelToLoad) {
+      if (canvasRef.current) {
+        canvasRef.current.innerHTML = "";
+      }
+      return;
+    }
 
     loader.load(
       modelToLoad,
@@ -376,9 +383,14 @@ export default function TarjetaExpandible({
           <div className="relative w-full h-80 bg-gradient-to-b from-[#1a214f] to-[#0F173A] flex items-center justify-center p-6 overflow-hidden mt-14">
             {mostrarAR ? (
               <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-                <div ref={canvasRef} className="w-full h-full" />
-                <div className="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
-                </div>
+                {figura.modelo3dUrl || figura.modelo_3d_path ? (
+                  <div ref={canvasRef} className="w-full h-full" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
+                    <p className="text-cyan-400 font-medium text-lg">No hay modelo disponible</p>
+                    <p className="text-gray-400 text-sm mt-2">Esta figura aún no cuenta con una visualización 3D.</p>
+                  </div>
+                )}
               </div>
             ) : mostrarQR ? (
               <div className="flex flex-col items-center justify-center gap-4 bg-#0F173A p-6 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
