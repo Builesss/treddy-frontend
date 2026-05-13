@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare, BoxSelect } from "lucide-react";
@@ -40,6 +41,9 @@ export default function TarjetaExpandible({
   const [mostrarAR, setMostrarAR] = useState(false);
   const [mostrarQR, setMostrarQR] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const hasModel = !!(figura.modelo3dUrl || figura.modelo_3d_path);
   
   const [tab, setTab] = useState<"detalles" | "resenas">("detalles");
   const [reviews, setReviews] = useState<{ resena_id: string; rating: number; comentario: string; fecha: string; autor: string }[]>([]);
@@ -237,14 +241,19 @@ export default function TarjetaExpandible({
   };
 
   const handlePersonalizar = () => {
-    Swal.fire({
-      title: "Próximamente",
-      text: "La personalización estará disponible muy pronto.",
-      icon: "info",
-      confirmButtonColor: "#00E6F6",
-      background: "#0F173A",
-      color: "white",
-    });
+    if (hasModel) {
+      const url = figura.modelo3dUrl || figura.modelo_3d_path;
+      router.push(`/personalizacion?modelUrl=${encodeURIComponent(url as string)}`);
+    } else {
+      Swal.fire({
+        title: "No disponible",
+        text: "Este producto no cuenta con un modelo 3D para personalizar.",
+        icon: "warning",
+        confirmButtonColor: "#00E6F6",
+        background: "#0F173A",
+        color: "white",
+      });
+    }
   };
 
   const handleSubmitReview = async () => {
@@ -483,6 +492,7 @@ export default function TarjetaExpandible({
 
                   <Button
                     onClick={handlePersonalizar}
+                    disabled={!hasModel}
                     variant="secondary"
                     className="w-full"
                     icon={<Edit3 size={20} />}

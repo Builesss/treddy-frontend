@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
@@ -15,6 +16,23 @@ type ParteConfig = {
 }
 
 export default function Personalizador3DIndependiente() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0A0F2C] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-cyan-400 font-medium animate-pulse">Cargando personalizador...</p>
+        </div>
+      </div>
+    }>
+      <CustomizerContent />
+    </Suspense>
+  )
+}
+
+function CustomizerContent() {
+  const searchParams = useSearchParams()
+  const initialModelUrl = searchParams.get('modelUrl')
   const [mostrar3D, setMostrar3D] = useState(false)
   const [animation, setAnimation] = useState<'none' | 'rotate'>('none')
   const [modelUrl, setModelUrl] = useState<string | null>(null)
@@ -25,6 +43,13 @@ export default function Personalizador3DIndependiente() {
   const sceneRef = useRef<THREE.Scene | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
   const controlsRef = useRef<OrbitControls | null>(null)
+
+  useEffect(() => {
+    if (initialModelUrl) {
+      setModelUrl(initialModelUrl)
+      setMostrar3D(true)
+    }
+  }, [initialModelUrl])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

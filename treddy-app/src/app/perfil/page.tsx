@@ -466,21 +466,25 @@ export default function Perfil() {
                       setCancelModal({ open: false, pedidoId: null });
                       setMotivoSeleccionado('');
                     }}
-                    className="flex-1 bg-[#0A0F2C] border border-cyan-500/30 text-cyan-400 py-3 rounded-xl hover:bg-cyan-500/10 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all font-medium"
+                    className="flex-1 bg-[#0A0F2C] border border-cyan-500/30 text-cyan-400 py-3 px-4 rounded-xl hover:bg-cyan-500/10 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all font-medium text-sm md:text-base"
                   >
                     Volver
                   </button>
                   <button
                     onClick={handleCancelOrder}
                     disabled={!motivoSeleccionado || cancelando}
-                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-xl font-bold hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-4 rounded-xl font-bold hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base leading-tight"
                   >
-                    {cancelando ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <XCircle size={18} />
-                    )}
-                    {cancelando ? 'Cancelando...' : 'Confirmar Cancelación'}
+                    <div className="shrink-0">
+                      {cancelando ? (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <XCircle size={18} />
+                      )}
+                    </div>
+                    <span>
+                      {cancelando ? 'Cancelando...' : 'Confirmar Cancelación'}
+                    </span>
                   </button>
                 </div>
               </div>
