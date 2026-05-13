@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import Swal from "sweetalert2";
 import { Loader2, MapPin, Plus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,8 +38,13 @@ export default function CheckoutAddress() {
   });
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const autocompleteRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const markerRef = useRef<any>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -73,64 +79,189 @@ export default function CheckoutAddress() {
     }
   };
 
-  // Google Maps Autocomplete
+  // Inicializar Autocomplete y Mapa cuando el modal se abre
   useEffect(() => {
-    if (!showModal) return;
+    if (!showModal || !window.google) return;
 
-    // Load Google Maps Script if not loaded
-    const scriptId = "google-maps-script";
-    const isLoaded = !!document.getElementById(scriptId);
+    const initMapAndAutocomplete = () => {
+      if (!inputRef.current || !mapContainerRef.current) return;
 
-    const initAutocomplete = () => {
-      if (window.google && inputRef.current) {
-        autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
-          types: ["address"],
-          componentRestrictions: { country: "co" } // Limitar a Colombia
-        });
+      // Estilo oscuro para el mapa
+      const darkMapStyle = [
+        { elementType: "geometry", stylers: [{ color: "#0F173A" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#0F173A" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        {
+          featureType: "administrative.locality",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d59563" }],
+        },
+        {
+          featureType: "poi",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d59563" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "geometry",
+          stylers: [{ color: "#263c3f" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#6b9a76" }],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry",
+          stylers: [{ color: "#38414e" }],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry.stroke",
+          stylers: [{ color: "#212a37" }],
+        },
+        {
+          featureType: "road",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#9ca5b3" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "geometry",
+          stylers: [{ color: "#746855" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "geometry.stroke",
+          stylers: [{ color: "#1f2835" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#f3d19c" }],
+        },
+        {
+          featureType: "transit",
+          elementType: "geometry",
+          stylers: [{ color: "#2f3948" }],
+        },
+        {
+          featureType: "transit.station",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d59563" }],
+        },
+        {
+          featureType: "water",
+          elementType: "geometry",
+          stylers: [{ color: "#17263c" }],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#515c6d" }],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.stroke",
+          stylers: [{ color: "#17263c" }],
+        },
+      ];
 
-        autocompleteRef.current.addListener("place_changed", () => {
-          const place = autocompleteRef.current.getPlace();
-          if (!place.address_components) return;
+      // Inicializar Mapa
+      const defaultPos = { lat: 4.5709, lng: -74.2973 }; // Colombia
+      mapRef.current = new window.google.maps.Map(mapContainerRef.current, {
+        center: defaultPos,
+        zoom: 5,
+        styles: darkMapStyle,
+        disableDefaultUI: true,
+        zoomControl: true,
+      });
 
-          let calle = "";
-          let numero = "";
-          let ciudad = "";
-          let departamento = "";
-          let codigo_postal = "";
+      // Inicializar Marcador
+      markerRef.current = new window.google.maps.Marker({
+        map: mapRef.current,
+        draggable: true,
+        animation: window.google.maps.Animation.DROP,
+      });
 
-          place.address_components.forEach((component: { long_name: string; types: string[] }) => {
-            const types = component.types;
-            if (types.includes("route")) calle = component.long_name;
-            if (types.includes("street_number")) numero = component.long_name;
-            if (types.includes("locality")) ciudad = component.long_name;
-            if (types.includes("administrative_area_level_1")) departamento = component.long_name;
-            if (types.includes("postal_code")) codigo_postal = component.long_name;
-          });
+      // Inicializar Autocomplete
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
+        types: ["address"],
+        componentRestrictions: { country: "co" }
+      });
 
-          setNuevaDir(prev => ({
-            ...prev,
-            calle: calle || place.name || "",
-            numero,
-            ciudad,
-            departamento,
-            codigo_postal
-          }));
-        });
-      }
+      // Listener para Autocomplete
+      autocompleteRef.current.addListener("place_changed", () => {
+        const place = autocompleteRef.current.getPlace();
+        if (!place.geometry || !place.geometry.location) return;
+
+        // Actualizar Mapa y Marcador
+        mapRef.current.setCenter(place.geometry.location);
+        mapRef.current.setZoom(17);
+        markerRef.current.setPosition(place.geometry.location);
+        markerRef.current.setVisible(true);
+
+        actualizarCamposDesdePlace(place);
+      });
+
+      // Listener para arrastre de marcador (Geocodificación Inversa)
+      markerRef.current.addListener("dragend", () => {
+        const pos = markerRef.current.getPosition();
+        if (pos) {
+          reverseGeocode(pos);
+        }
+      });
     };
 
-    if (isLoaded) {
-      initAutocomplete();
-    } else {
-      const script = document.createElement("script");
-      script.id = scriptId;
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = initAutocomplete;
-      document.body.appendChild(script);
-    }
+    // Pequeño delay para asegurar que el DOM esté listo
+    const timeout = setTimeout(initMapAndAutocomplete, 100);
+    return () => clearTimeout(timeout);
   }, [showModal]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const reverseGeocode = (latlng: any) => {
+    const geocoder = new window.google.maps.Geocoder();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    geocoder.geocode({ location: latlng }, (results: any, status: any) => {
+      if (status === "OK" && results[0]) {
+        actualizarCamposDesdePlace(results[0]);
+        if (inputRef.current) {
+          inputRef.current.value = results[0].formatted_address;
+        }
+      }
+    });
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const actualizarCamposDesdePlace = (place: any) => {
+    let calle = "";
+    let numero = "";
+    let ciudad = "";
+    let departamento = "";
+    let codigo_postal = "";
+
+    if (place.address_components) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      place.address_components.forEach((component: any) => {
+        const types = component.types;
+        if (types.includes("route")) calle = component.long_name;
+        if (types.includes("street_number")) numero = component.long_name;
+        if (types.includes("locality")) ciudad = component.long_name;
+        if (types.includes("administrative_area_level_1")) departamento = component.long_name;
+        if (types.includes("postal_code")) codigo_postal = component.long_name;
+      });
+    }
+
+    setNuevaDir(prev => ({
+      ...prev,
+      calle: calle || place.name || prev.calle,
+      numero: numero || prev.numero,
+      ciudad: ciudad || prev.ciudad,
+      departamento: departamento || prev.departamento,
+      codigo_postal: codigo_postal || prev.codigo_postal
+    }));
+  };
 
   const guardarDireccion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -259,8 +390,15 @@ export default function CheckoutAddress() {
                       ref={inputRef}
                       type="text" 
                       placeholder="Empieza a escribir..."
-                      className="w-full bg-[#131b40] border border-[#2a3055] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full bg-[#131b40] border border-[#2a3055] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 mb-4"
                     />
+                    <div 
+                      ref={mapContainerRef} 
+                      className="w-full h-48 md:h-64 rounded-xl border border-[#2a3055] overflow-hidden bg-[#0A0F2C]"
+                    />
+                    <p className="text-[10px] text-gray-500 mt-2 text-center italic">
+                      Puedes arrastrar el marcador en el mapa para ajustar tu ubicación exacta.
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#2a3055]">
@@ -313,6 +451,12 @@ export default function CheckoutAddress() {
       </AnimatePresence>
 
       <Footer />
+      
+      {/* Script de Google Maps cargado de forma optimizada */}
+      <Script 
+        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
+        strategy="afterInteractive"
+      />
     </main>
   );
 }
