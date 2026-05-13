@@ -56,7 +56,6 @@ export default function VisualizadorAR({
     renderer.setPixelRatio(window.devicePixelRatio)
     renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight)
     
-    // Limpiar y añadir el canvas al DOM
     containerRef.current.innerHTML = ""
     containerRef.current.appendChild(renderer.domElement)
     rendererRef.current = renderer
@@ -93,13 +92,10 @@ export default function VisualizadorAR({
       if (e.touches.length === 1) {
         const touchX = e.touches[0].pageX
         const touchY = e.touches[0].pageY
-
         const deltaX = touchX - state.lastTouchX
         const deltaY = touchY - state.lastTouchY
-
         modelRef.current.position.x += deltaX * 0.003
         modelRef.current.position.y -= deltaY * 0.003
-
         state.lastTouchX = touchX
         state.lastTouchY = touchY
       } 
@@ -108,7 +104,6 @@ export default function VisualizadorAR({
         const dX = e.touches[0].pageX - e.touches[1].pageX
         const dY = e.touches[0].pageY - e.touches[1].pageY
         const currentDist = Math.sqrt(dX * dX + dY * dY)
-
         if (state.initialDist === 0) {
           state.initialDist = currentDist
           state.initialScale = modelRef.current.scale.x
@@ -133,14 +128,13 @@ export default function VisualizadorAR({
       renderer.render(scene, camera)
     })
 
-    // Ajustar al redimensionar
     const handleResize = () => {
       if (!containerRef.current || !rendererRef.current) return
-      const width = containerRef.current.clientWidth
-      const height = containerRef.current.clientHeight
-      camera.aspect = width / height
+      const w = containerRef.current.clientWidth
+      const h = containerRef.current.clientHeight
+      camera.aspect = w / h
       camera.updateProjectionMatrix()
-      rendererRef.current.setSize(width, height)
+      rendererRef.current.setSize(w, h)
     }
     window.addEventListener('resize', handleResize)
 
@@ -149,13 +143,10 @@ export default function VisualizadorAR({
       canvas.removeEventListener('touchstart', handleTouchStart)
       canvas.removeEventListener('touchmove', handleTouchMove)
       canvas.removeEventListener('touchend', handleTouchEnd)
-      
       if (rendererRef.current) {
         rendererRef.current.setAnimationLoop(null)
         const session = rendererRef.current.xr.getSession()
-        if (session) {
-          session.end().catch(() => {})
-        }
+        if (session) session.end().catch(() => {})
         rendererRef.current.dispose()
       }
     }
@@ -165,7 +156,6 @@ export default function VisualizadorAR({
     if (!rendererRef.current || !arSupported) return
 
     try {
-      // Notificar al padre ANTES de solicitar la sesión para que el DOM se prepare (transparencias)
       if (onSessionChange) onSessionChange(true)
       setIsAR(true)
 
@@ -175,9 +165,8 @@ export default function VisualizadorAR({
         domOverlay: { root: document.body }
       }
       
-      const session = await (navigator as any).xr.requestSession('immersive-ar', sessionInit)
+      const session = await (navigator as XRNavigator).xr.requestSession('immersive-ar', sessionInit)
       
-      // Escuchar el final de la sesión
       session.addEventListener('end', () => {
         setIsAR(false)
         if (onSessionChange) onSessionChange(false)
@@ -209,7 +198,6 @@ export default function VisualizadorAR({
       {!isAR && (
         <>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
-          
           <div className="z-10 flex flex-col items-center gap-6 p-8 text-center">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -221,14 +209,12 @@ export default function VisualizadorAR({
                 <Camera size={40} className="text-cyan-400" />
               </div>
             </motion.div>
-
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-white">Visualizador AR</h3>
               <p className="text-sm text-cyan-100/60 max-w-[200px]">
                 Coloca este modelo en tu espacio real usando tu cámara móvil.
               </p>
             </div>
-
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -237,7 +223,6 @@ export default function VisualizadorAR({
               className="group relative px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl text-black font-bold flex items-center gap-3 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all overflow-hidden disabled:opacity-50"
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              
               {loading ? (
                 <>
                   <Loader2 className="animate-spin" size={20} />
@@ -250,7 +235,6 @@ export default function VisualizadorAR({
                 </>
               )}
             </motion.button>
-
             <p className="text-[10px] uppercase tracking-widest text-cyan-500/50 font-bold">
               Tecnología Treddy AR
             </p>

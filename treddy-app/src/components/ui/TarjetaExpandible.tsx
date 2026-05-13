@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare } from "lucide-react";
@@ -54,19 +54,14 @@ export default function TarjetaExpandible({
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
-
-    // Default behavior: Show the normal image first
     setMostrarAR(false);
     setMostrarRealAR(false);
     setMostrarQR(false);
-
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-
-
-
-  const fetchReviews = async () => {
+  // useCallback para estabilizar la referencia y poder incluirla en el useEffect de abajo
+  const fetchReviews = useCallback(async () => {
     if (!figura) return;
     try {
       setLoadingReviews(true);
@@ -81,13 +76,13 @@ export default function TarjetaExpandible({
     } finally {
       setLoadingReviews(false);
     }
-  };
+  }, [figura]);
 
   useEffect(() => {
     if (figura?.producto_id) {
       fetchReviews();
     }
-  }, [figura?.producto_id]);
+  }, [figura?.producto_id, fetchReviews]);
 
   if (!figura) return null;
 
@@ -117,7 +112,6 @@ export default function TarjetaExpandible({
         color: "white",
         customClass: { popup: "rounded-2xl border border-cyan-500/30" },
       });
-
 
       onClose();
     } catch (e) {
@@ -160,6 +154,7 @@ export default function TarjetaExpandible({
         background: "#0F173A",
         color: "white",
       });
+      setIsSubmittingReview(false);
       return;
     }
 
@@ -196,12 +191,12 @@ export default function TarjetaExpandible({
         color: "white",
         customClass: { popup: "rounded-2xl border border-cyan-500/30" },
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Error posting review:", e);
       Swal.fire({
         icon: "error",
         title: "No se pudo guardar",
-        text: e.message || "Ocurrió un error inesperado.",
+        text: e instanceof Error ? e.message : "Ocurrió un error inesperado.",
         confirmButtonColor: "#EF4444",
         background: "#0F173A",
         color: "white",
@@ -221,7 +216,7 @@ export default function TarjetaExpandible({
           onClick={(e) => {
             if (e.target === e.currentTarget && !arActivo) onClose();
           }}
-          className={`absolute inset-0 bg-black/80 backdrop-blur-sm`}
+          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         />
 
         <motion.div
@@ -236,9 +231,7 @@ export default function TarjetaExpandible({
         >
           {!arActivo && (
             <button
-              onClick={() => {
-                onClose();
-              }}
+              onClick={onClose}
               className="absolute top-2 right-4 z-20 p-2 bg-black/20 hover:bg-red-500/80 rounded-full text-white transition-all duration-300"
             >
               <X size={20} />
@@ -331,7 +324,6 @@ export default function TarjetaExpandible({
 
           {!arActivo && (
             <div className="p-6 flex flex-col gap-4">
-              {/* TABS */}
               <div className="flex gap-2 bg-[#1a214f] p-1 rounded-xl">
                 <button onClick={() => setTab("detalles")} className={`flex-1 py-2 rounded-lg font-medium text-sm transition-all ${tab === "detalles" ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-gray-400 hover:text-white"}`}>Detalles</button>
                 <button onClick={() => setTab("resenas")} className={`flex-1 py-2 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-1 ${tab === "resenas" ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-gray-400 hover:text-white"}`}>
@@ -342,24 +334,16 @@ export default function TarjetaExpandible({
               {tab === "detalles" ? (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold text-white mb-1">
-                      {figura.nombre}
-                    </h2>
+                    <h2 className="text-2xl font-bold text-white mb-1">{figura.nombre}</h2>
                     <div className="flex items-center justify-center gap-2 mb-2">
-                      <span className="text-cyan-400 font-bold text-xl">
-                        ${figura.precio_base.toLocaleString()}
-                      </span>
+                      <span className="text-cyan-400 font-bold text-xl">${figura.precio_base.toLocaleString()}</span>
                       <span className="text-gray-500 text-sm">|</span>
-                      <span
-                        className={`text-sm ${figura.stock > 0 ? "text-green-400" : "text-red-400"
-                          }`}
-                      >
+                      <span className={`text-sm ${figura.stock > 0 ? "text-green-400" : "text-red-400"}`}>
                         {figura.stock > 0 ? `Stock: ${figura.stock}` : "Agotado"}
                       </span>
                     </div>
                     <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
-                      {figura.descripcion ||
-                        "Una increíble figura 3D lista para tu colección."}
+                      {figura.descripcion || "Una increíble figura 3D lista para tu colección."}
                     </p>
                   </div>
 
