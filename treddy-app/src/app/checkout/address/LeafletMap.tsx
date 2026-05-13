@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -16,29 +16,55 @@ const defaultIcon = L.icon({
 interface LeafletMapProps {
   position: [number, number];
   onPositionChange: (pos: [number, number]) => void;
+  onZoomChange?: (zoom: number) => void;
   zoom?: number;
 }
 
-// Component to handle map centering
+// Component to handle map centering and zoom independently
 function ChangeView({ center, zoom }: { center: [number, number]; zoom: number }) {
   const map = useMap();
+  const lastProps = useRef({ center, zoom });
+  
   useEffect(() => {
-    map.setView(center, zoom);
+    const centerChanged = center[0] !== lastProps.current.center[0] || center[1] !== lastProps.current.center[1];
+    const zoomChanged = zoom !== lastProps.current.zoom;
+
+    if (centerChanged && zoomChanged) {
+      map.setView(center, zoom, { animate: true });
+    } else if (centerChanged) {
+      map.setView(center, map.getZoom(), { animate: true });
+    } else if (zoomChanged) {
+      map.setZoom(zoom);
+    }
+
+    lastProps.current = { center, zoom };
   }, [center, zoom, map]);
+
   return null;
 }
 
-// Component to handle map click events
-function MapEvents({ onMapClick }: { onMapClick: (latlng: L.LatLng) => void }) {
-  useMapEvents({
+// Component to handle map events
+function MapEvents({ 
+  onMapClick, 
+  onZoomChange 
+}: { 
+  onMapClick: (latlng: L.LatLng) => void;
+  onZoomChange?: (zoom: number) => void;
+}) {
+  const map = useMapEvents({
     click(e) {
       onMapClick(e.latlng);
     },
+    zoomend() {
+      if (onZoomChange) {
+        onZoomChange(map.getZoom());
+      }
+    }
   });
   return null;
 }
 
-export default function LeafletMap({ position, onPositionChange, zoom = 13 }: LeafletMapProps) {
+export default function LeafletMap({ position, onPositionChange, onZoomChange, zoom = 13 }: LeafletMapProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -63,7 +89,10 @@ export default function LeafletMap({ position, onPositionChange, zoom = 13 }: Le
         
         <ChangeView center={position} zoom={zoom} />
         
-        <MapEvents onMapClick={(latlng) => onPositionChange([latlng.lat, latlng.lng])} />
+        <MapEvents 
+          onMapClick={(latlng) => onPositionChange([latlng.lat, latlng.lng])} 
+          onZoomChange={onZoomChange}
+        />
         
         <Marker
           position={position}
