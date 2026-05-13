@@ -168,7 +168,7 @@ export default function TarjetaExpandible({
         sceneRef.current.remove(modelRef.current);
       }
     };
-  }, [mostrarAR]);
+  }, [mostrarAR, figura.modelo3dUrl, figura.modelo_3d_path]);
 
   const fetchReviews = useCallback(async () => {
     if (!figura) return;

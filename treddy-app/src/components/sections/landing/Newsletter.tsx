@@ -33,7 +33,7 @@ export default function Newsletter() {
       } else {
         setError(data.message || "Algo salió mal. Inténtalo de nuevo.");
       }
-    } catch (err) {
+    } catch {
       setError("Error de conexión. Revisa tu internet.");
     } finally {
       setIsLoading(false);
