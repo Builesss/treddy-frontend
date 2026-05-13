@@ -389,28 +389,28 @@ export default function TarjetaExpandible({
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="w-full h-full flex flex-col items-center justify-center text-center p-8"
+                    className="w-full h-full flex flex-col items-center justify-center text-center p-4"
                   >
-                    <div className="relative mb-6">
-                      <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full" />
-                      <div className="relative w-20 h-20 bg-[#0F173A] border border-cyan-500/30 rounded-2xl flex items-center justify-center shadow-xl">
-                        <BoxSelect className="text-cyan-400/50" size={40} strokeWidth={1.5} />
-                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500/20 border border-red-500/40 rounded-full flex items-center justify-center">
-                          <span className="text-red-400 text-[10px] font-bold">!</span>
+                    <div className="relative mb-3">
+                      <div className="absolute inset-0 bg-cyan-500/10 blur-lg rounded-full" />
+                      <div className="relative w-14 h-14 bg-[#0F173A] border border-cyan-500/30 rounded-xl flex items-center justify-center shadow-xl">
+                        <BoxSelect className="text-cyan-400/40" size={28} strokeWidth={1.5} />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-red-500/20 border border-red-500/40 rounded-full flex items-center justify-center">
+                          <span className="text-red-400 text-[9px] font-bold">!</span>
                         </div>
                       </div>
                     </div>
                     
-                    <h3 className="text-white font-bold text-xl mb-2 tracking-tight">
+                    <h3 className="text-white font-bold text-lg mb-1 tracking-tight">
                       Modelo no disponible
                     </h3>
-                    <p className="text-gray-400 text-sm max-w-[240px] leading-relaxed">
+                    <p className="text-gray-400 text-xs max-w-[200px] leading-relaxed">
                       Esta figura aún no cuenta con una visualización 3D interactiva.
                     </p>
                     
-                    <div className="mt-8 flex items-center gap-2 px-4 py-1 bg-cyan-500/5 border border-cyan-500/10 rounded-full">
-                      <div className="w-1.5 h-1.5 bg-cyan-500/40 rounded-full animate-pulse" />
-                      <span className="text-cyan-500/60 text-[10px] font-bold uppercase tracking-[0.2em]">Treddy Studio</span>
+                    <div className="mt-4 flex items-center gap-2 px-3 py-1 bg-cyan-500/5 border border-cyan-500/10 rounded-full">
+                      <div className="w-1 h-1 bg-cyan-500/40 rounded-full animate-pulse" />
+                      <span className="text-cyan-500/50 text-[9px] font-bold uppercase tracking-[0.2em]">Treddy Studio</span>
                     </div>
                   </motion.div>
                 )}
