@@ -12,13 +12,13 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
   const containerRef = useRef<HTMLDivElement>(null)
   const modelRef = useRef<THREE.Group | null>(null)
   
-  // Variables de estado para el seguimiento (fuera del ciclo de renderizado de React)
-  let initialDist = 0
-  let initialScale = 0.9
-  let lastTouchX = 0
-  let lastTouchY = 0
-
   useEffect(() => {
+    // Variables de estado para el seguimiento (fuera del ciclo de renderizado de React)
+    let initialDist = 0
+    let initialScale = 0.9
+    let lastTouchX = 0
+    let lastTouchY = 0
+
     if (!containerRef.current) return
     containerRef.current.innerHTML = ""
 

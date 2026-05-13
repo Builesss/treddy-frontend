@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare } from "lucide-react";
@@ -65,7 +65,7 @@ export default function TarjetaExpandible({
 
 
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     if (!figura) return;
     try {
       setLoadingReviews(true);
@@ -80,13 +80,13 @@ export default function TarjetaExpandible({
     } finally {
       setLoadingReviews(false);
     }
-  };
+  }, [figura]);
 
   useEffect(() => {
     if (figura?.producto_id) {
       fetchReviews();
     }
-  }, [figura?.producto_id]);
+  }, [figura?.producto_id, fetchReviews]);
 
   if (!figura) return null;
 
@@ -195,7 +195,8 @@ export default function TarjetaExpandible({
         color: "white",
         customClass: { popup: "rounded-2xl border border-cyan-500/30" },
       });
-    } catch (e: any) {
+    } catch (error) {
+      const e = error as Error;
       console.error("Error posting review:", e);
       Swal.fire({
         icon: "error",
