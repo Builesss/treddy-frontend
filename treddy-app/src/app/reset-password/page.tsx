@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 import AnimatedBackground from "@/components/ui/AnimatedBackground";
 
 export default function ResetPasswordPage() {
@@ -12,10 +13,34 @@ export default function ResetPasswordPage() {
 
   const token = searchParams?.get("token");
 
+  const showAlert = (
+    type: "success" | "error",
+    title: string,
+    text?: string
+  ) => {
+    Swal.fire({
+      icon: type,
+      title,
+      text,
+      background: "#0F173A",
+      color: "#E0EAFD",
+      confirmButtonColor: type === "success" ? "#00E6F6" : "#3B82F6",
+      confirmButtonText: "Aceptar",
+      showConfirmButton: type === "error",
+      timer: type === "success" ? 2500 : undefined,
+      timerProgressBar: type === "success",
+      customClass: {
+        popup: "rounded-2xl shadow-lg border border-cyan-700",
+        title: "text-cyan-400 font-semibold",
+        confirmButton: "rounded-full px-6 py-2 font-semibold shadow-md",
+      },
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      alert("Token inválido o expirado");
+      showAlert("error", "Token inválido", "El token ha expirado o no es válido");
       return;
     }
 
@@ -32,14 +57,16 @@ export default function ResetPasswordPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Error al restablecer la contraseña");
+        showAlert("error", "Error", data.message || "Error al restablecer la contraseña");
       } else {
-        alert("Contraseña actualizada con éxito, ahora puedes iniciar sesión");
-        router.push("auth/login");
+        showAlert("success", "Contraseña actualizada", "Tu contraseña ha sido actualizada con éxito. Ahora puedes iniciar sesión.");
+        setTimeout(() => {
+          router.push("auth/login");
+        }, 2500);
       }
     } catch (error) {
       console.error("Error en reset-password:", error);
-      alert("Error al conectar con el servidor");
+      showAlert("error", "Error de conexión", "No se pudo conectar con el servidor");
     } finally {
       setLoading(false);
     }

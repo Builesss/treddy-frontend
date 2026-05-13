@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 import AnimatedBackground from "@/components/ui/AnimatedBackground";
 import Button from "@/components/ui/Button";
 
@@ -9,6 +10,30 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter()
+
+  const showAlert = (
+    type: "success" | "error",
+    title: string,
+    text?: string
+  ) => {
+    Swal.fire({
+      icon: type,
+      title,
+      text,
+      background: "#0F173A",
+      color: "#E0EAFD",
+      confirmButtonColor: type === "success" ? "#00E6F6" : "#3B82F6",
+      confirmButtonText: "Aceptar",
+      showConfirmButton: type === "error",
+      timer: type === "success" ? 2500 : undefined,
+      timerProgressBar: type === "success",
+      customClass: {
+        popup: "rounded-2xl shadow-lg border border-cyan-700",
+        title: "text-cyan-400 font-semibold",
+        confirmButton: "rounded-full px-6 py-2 font-semibold shadow-md",
+      },
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,14 +50,16 @@ export default function ForgotPasswordPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Error al solicitar recuperación");
+        showAlert("error", "Error", data.message || "Error al solicitar recuperación");
       } else {
-        alert("Te enviamos un correo con instrucciones para restablecer tu contraseña");
-        router.push("auth/login");
+        showAlert("success", "Correo enviado", "Te enviamos un correo con instrucciones para restablecer tu contraseña");
+        setTimeout(() => {
+          router.push("auth/login");
+        }, 2500);
       }
     } catch (error) {
       console.error("Error en forgot-password:", error);
-      alert("Error al conectar con el servidor");
+      showAlert("error", "Error de conexión", "No se pudo conectar con el servidor");
     } finally {
       setLoading(false);
     }
