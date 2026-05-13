@@ -108,7 +108,7 @@ export default function TarjetaExpandible({
 
 
     const loader = new GLTFLoader();
-    const modelToLoad = figura.modelo_3d_path || figura.modelo3dUrl || MODEL_URL;
+    const modelToLoad = figura.modelo3dUrl || figura.modelo_3d_path || MODEL_URL;
 
     loader.load(
       modelToLoad,
