@@ -19,6 +19,8 @@ export default function ProductManagementPreview() {
   });
   const [imagenFile, setImagenFile] = useState<File | null>(null);
   const [imagenPreview, setImagenPreview] = useState<string>("");
+  const [modelo3dFile, setModelo3dFile] = useState<File | null>(null);
+  const [vistaArFile, setVistaArFile] = useState<File | null>(null);
 
   const showTreddyAlert = (
     type: "success" | "error" | "warning" | "info",
@@ -73,6 +75,20 @@ export default function ProductManagementPreview() {
     return data.url;
   };
 
+  const subirModelo = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gcs/model`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Error al subir modelo");
+    const data = await res.json();
+    return data.url;
+  };
+
   const guardarFigura = async () => {
     if (!nuevoProducto.nombre || !nuevoProducto.precio) {
       showTreddyAlert("warning", "Faltan campos", "Nombre y precio son obligatorios");
@@ -80,16 +96,26 @@ export default function ProductManagementPreview() {
     }
 
     let imagenUrl = "";
+    let modelo3dUrl = "";
+    let vistaArUrl = "";
 
     try {
       if (imagenFile) {
         imagenUrl = await subirImagen(imagenFile);
       }
+      if (modelo3dFile) {
+        modelo3dUrl = await subirModelo(modelo3dFile);
+      }
+      if (vistaArFile) {
+        vistaArUrl = await subirModelo(vistaArFile);
+      }
 
       const figuraData = {
         nombre: nuevoProducto.nombre,
         precio: parseFloat(nuevoProducto.precio),
-        imagenUrl,
+        imagenUrl: imagenUrl || undefined,
+        modelo3dUrl: modelo3dUrl || undefined,
+        vistaArUrl: vistaArUrl || undefined,
         categorias: nuevoProducto.categorias
           ? nuevoProducto.categorias.split(",").map((c) => c.trim())
           : [],
@@ -106,6 +132,8 @@ export default function ProductManagementPreview() {
       setNuevoProducto({ nombre: "", precio: "", categorias: "" });
       setImagenFile(null);
       setImagenPreview("");
+      setModelo3dFile(null);
+      setVistaArFile(null);
       setEditandoId(null);
       cargarFiguras();
     } catch (error) {
@@ -201,6 +229,34 @@ export default function ProductManagementPreview() {
                 className="mt-4 mx-auto rounded-lg border border-cyan-600"
               />
             )}
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-2 text-cyan-400 font-semibold">Modelo 3D (.glb, .gltf, etc.)</label>
+            <input
+              type="file"
+              accept=".glb,.gltf,.fbx,.obj,.stl"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) setModelo3dFile(file);
+              }}
+              className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30"
+            />
+            {modelo3dFile && <p className="text-sm mt-2 text-gray-300">Seleccionado: {modelo3dFile.name}</p>}
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-2 text-cyan-400 font-semibold">Vista AR (.usdz)</label>
+            <input
+              type="file"
+              accept=".usdz"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) setVistaArFile(file);
+              }}
+              className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30"
+            />
+            {vistaArFile && <p className="text-sm mt-2 text-gray-300">Seleccionado: {vistaArFile.name}</p>}
           </div>
 
           <input

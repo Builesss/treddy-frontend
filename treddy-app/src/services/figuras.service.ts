@@ -18,6 +18,8 @@ export async function createFigura(data: {
   nombre: string;
   precio: number;
   imagenUrl?: string;
+  modelo3dUrl?: string;
+  vistaArUrl?: string;
   categorias?: string[];
 }) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/figuras`, {
@@ -38,6 +40,8 @@ export async function updateFigura(
     nombre?: string;
     precio?: number;
     imagenUrl?: string;
+    modelo3dUrl?: string;
+    vistaArUrl?: string;
     categorias?: string[];
   },
 ) {
