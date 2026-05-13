@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useRouter } from "next/navigation";
@@ -45,12 +45,9 @@ export default function CheckoutAddress() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const autocompleteRef = useRef<any>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mapRef = useRef<any>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const markerRef = useRef<any>(null);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -100,6 +97,48 @@ export default function CheckoutAddress() {
       document.body.style.paddingRight = "0px";
     };
   }, [showModal]);
+
+  const actualizarCamposDesdePlace = useCallback((place: google.maps.places.PlaceResult) => {
+    let calle = "";
+    let numero = "";
+    let ciudad = "";
+    let departamento = "";
+    let codigo_postal = "";
+
+    if (place.address_components) {
+      place.address_components.forEach((component) => {
+        const types = component.types;
+        if (types.includes("route")) calle = component.long_name;
+        if (types.includes("street_number")) numero = component.long_name;
+        if (types.includes("locality")) ciudad = component.long_name;
+        if (types.includes("administrative_area_level_1")) departamento = component.long_name;
+        if (types.includes("postal_code")) codigo_postal = component.long_name;
+      });
+    }
+
+    setNuevaDir(prev => ({
+      ...prev,
+      calle: calle || place.name || prev.calle,
+      numero: numero || prev.numero,
+      ciudad: ciudad || prev.ciudad,
+      departamento: departamento || prev.departamento,
+      codigo_postal: codigo_postal || prev.codigo_postal,
+      latitud: place.geometry?.location?.lat() || prev.latitud,
+      longitud: place.geometry?.location?.lng() || prev.longitud
+    }));
+  }, [setNuevaDir]);
+
+  const reverseGeocode = useCallback((latlng: google.maps.LatLng | google.maps.LatLngLiteral) => {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ location: latlng }, (results: google.maps.GeocoderResult[] | null, status: "ERROR" | "INVALID_REQUEST" | "OK" | "OVER_QUERY_LIMIT" | "REQUEST_DENIED" | "UNKNOWN_ERROR" | "ZERO_RESULTS") => {
+      if (status === "OK" && results && results[0]) {
+        actualizarCamposDesdePlace(results[0]);
+        if (inputRef.current) {
+          inputRef.current.value = results[0].formatted_address || "";
+        }
+      }
+    });
+  }, [actualizarCamposDesdePlace]);
 
   // Inicializar Autocomplete y Mapa cuando el modal se abre
   useEffect(() => {
@@ -192,87 +231,108 @@ export default function CheckoutAddress() {
 
       // Inicializar Mapa
       const defaultPos = { lat: 4.5709, lng: -74.2973 }; // Colombia
-      mapRef.current = new window.google.maps.Map(mapContainerRef.current, {
+      if (!mapContainerRef.current) return;
+      mapRef.current = new google.maps.Map(mapContainerRef.current, {
         center: defaultPos,
         zoom: 5,
         styles: darkMapStyle,
         disableDefaultUI: true,
         zoomControl: true,
-        gestureHandling: "greedy",
+        gestureHandling: "cooperative",
         clickableIcons: true,
+        draggableCursor: "pointer",
       });
 
       // Inicializar Marcador
-      markerRef.current = new window.google.maps.Marker({
+      markerRef.current = new google.maps.Marker({
         map: mapRef.current,
         draggable: true,
-        animation: window.google.maps.Animation.DROP,
+        animation: google.maps.Animation.DROP,
         icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
+          path: google.maps.SymbolPath.CIRCLE,
           scale: 10,
           fillColor: "#06B6D4",
           fillOpacity: 1,
           strokeWeight: 2,
           strokeColor: "#FFFFFF",
-        }
+        } as google.maps.Symbol
       });
 
       // Inicializar Autocomplete
-      autocompleteRef.current = new window.google.maps.places.Autocomplete(inputRef.current, {
+      autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current as HTMLInputElement, {
         types: ["address"],
         componentRestrictions: { country: "co" }
       });
 
       // Listener para Autocomplete
-      autocompleteRef.current.addListener("place_changed", () => {
-        const place = autocompleteRef.current.getPlace();
-        if (!place.geometry || !place.geometry.location) return;
+      if (autocompleteRef.current) {
+        autocompleteRef.current.addListener("place_changed", () => {
+          if (!autocompleteRef.current) return;
+          const place = autocompleteRef.current.getPlace();
+          if (!place.geometry || !place.geometry.location) return;
 
-        // Actualizar Mapa y Marcador
-        mapRef.current.setCenter(place.geometry.location);
-        mapRef.current.setZoom(17);
-        markerRef.current.setPosition(place.geometry.location);
-        markerRef.current.setVisible(true);
+          // Actualizar Mapa y Marcador
+          if (mapRef.current) {
+            mapRef.current.setCenter(place.geometry.location);
+            mapRef.current.setZoom(17);
+          }
+          if (markerRef.current) {
+            markerRef.current.setPosition(place.geometry.location);
+            markerRef.current.setVisible(true);
+          }
 
-        actualizarCamposDesdePlace(place);
-      });
+          actualizarCamposDesdePlace(place);
+        });
+      }
 
       // Listener para arrastre de marcador (Geocodificación Inversa)
-      markerRef.current.addListener("dragend", () => {
-        const pos = markerRef.current.getPosition();
-        if (pos) {
-          reverseGeocode(pos);
-        }
-      });
+      if (markerRef.current) {
+        markerRef.current.addListener("dragend", () => {
+          if (!markerRef.current) return;
+          const pos = markerRef.current.getPosition();
+          if (pos) {
+            reverseGeocode(pos);
+          }
+        });
+      }
 
       // Listener para clic en el mapa (Nuevo: Permite seleccionar cualquier punto o POI)
-      mapRef.current.addListener("click", (e: any) => {
-        // Si se hace clic en un POI (punto de interés), e.stop() previene el popup de Google
-        if (e.placeId) {
-          e.stop();
-          const service = new window.google.maps.places.PlacesService(mapRef.current);
-          service.getDetails({ placeId: e.placeId }, (place: any, status: any) => {
-            if (status === "OK" && place.geometry && place.geometry.location) {
-              markerRef.current.setPosition(place.geometry.location);
-              markerRef.current.setVisible(true);
-              actualizarCamposDesdePlace(place);
-              if (inputRef.current) {
-                inputRef.current.value = place.formatted_address || "";
+      if (mapRef.current) {
+        mapRef.current.addListener("click", (e: google.maps.MapMouseEvent | google.maps.IconMouseEvent) => {
+          if (!mapRef.current || !markerRef.current) return;
+
+          // Si se hace clic en un POI (punto de interés), e.stop() previene el popup de Google
+          if ("placeId" in e && e.placeId) {
+            e.stop();
+            const service = new google.maps.places.PlacesService(mapRef.current);
+            service.getDetails({ placeId: e.placeId }, (place: google.maps.places.PlaceResult | null, status: "INVALID_REQUEST" | "OK" | "OVER_QUERY_LIMIT" | "REQUEST_DENIED" | "UNKNOWN_ERROR" | "ZERO_RESULTS" | "NOT_FOUND") => {
+              if (status === "OK" && place && place.geometry && place.geometry.location) {
+                if (markerRef.current) {
+                  markerRef.current.setPosition(place.geometry.location);
+                  markerRef.current.setVisible(true);
+                }
+                actualizarCamposDesdePlace(place);
+                if (inputRef.current) {
+                  inputRef.current.value = place.formatted_address || "";
+                }
               }
-            }
-          });
-        } else if (e.latLng) {
-          markerRef.current.setPosition(e.latLng);
-          markerRef.current.setVisible(true);
-          reverseGeocode(e.latLng);
-        }
-      });
+            });
+          } else if (e.latLng) {
+            markerRef.current.setPosition(e.latLng);
+            markerRef.current.setVisible(true);
+            reverseGeocode(e.latLng);
+          }
+        });
+      }
+
+      // Asegurar que el mapa se renderice correctamente
+      google.maps.event.trigger(mapRef.current, "resize");
     };
 
     // Pequeño delay para asegurar que el DOM esté listo
     const timeout = setTimeout(initMapAndAutocomplete, 200);
     return () => clearTimeout(timeout);
-  }, [showModal, mapLoaded]);
+  }, [showModal, mapLoaded, reverseGeocode, actualizarCamposDesdePlace]);
 
   const detectarUbicacion = () => {
     if (!navigator.geolocation) {
@@ -318,51 +378,6 @@ export default function CheckoutAddress() {
     );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const reverseGeocode = (latlng: any) => {
-    const geocoder = new window.google.maps.Geocoder();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    geocoder.geocode({ location: latlng }, (results: any, status: any) => {
-      if (status === "OK" && results[0]) {
-        actualizarCamposDesdePlace(results[0]);
-        if (inputRef.current) {
-          inputRef.current.value = results[0].formatted_address;
-        }
-      }
-    });
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const actualizarCamposDesdePlace = (place: any) => {
-    let calle = "";
-    let numero = "";
-    let ciudad = "";
-    let departamento = "";
-    let codigo_postal = "";
-
-    if (place.address_components) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      place.address_components.forEach((component: any) => {
-        const types = component.types;
-        if (types.includes("route")) calle = component.long_name;
-        if (types.includes("street_number")) numero = component.long_name;
-        if (types.includes("locality")) ciudad = component.long_name;
-        if (types.includes("administrative_area_level_1")) departamento = component.long_name;
-        if (types.includes("postal_code")) codigo_postal = component.long_name;
-      });
-    }
-
-    setNuevaDir(prev => ({
-      ...prev,
-      calle: calle || place.name || prev.calle,
-      numero: numero || prev.numero,
-      ciudad: ciudad || prev.ciudad,
-      departamento: departamento || prev.departamento,
-      codigo_postal: codigo_postal || prev.codigo_postal,
-      latitud: place.geometry?.location?.lat() || prev.latitud,
-      longitud: place.geometry?.location?.lng() || prev.longitud
-    }));
-  };
 
   const guardarDireccion = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -476,28 +491,28 @@ export default function CheckoutAddress() {
       {/* Modal Nueva Dirección */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto px-4 py-8 sm:px-0">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowModal(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
             />
             
-            <div className="flex min-h-full items-start justify-center p-4">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95, y: 20 }} 
-                animate={{ opacity: 1, scale: 1, y: 0 }} 
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="relative bg-[#0F173A] w-full max-w-lg rounded-2xl border border-[#2a3055] overflow-hidden my-8 shadow-2xl"
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-[#0F173A] w-full max-w-lg rounded-2xl border border-[#2a3055] shadow-2xl z-10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setShowModal(false)}
+                className="absolute top-4 right-4 z-20 p-2 bg-black/20 hover:bg-red-500/80 rounded-full text-white transition-all"
               >
-                <button 
-                  onClick={() => setShowModal(false)}
-                  className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-red-500/80 rounded-full text-white transition-all"
-                >
-                  <Plus size={20} className="rotate-45" />
-                </button>
+                <Plus size={20} className="rotate-45" />
+              </button>
               <div className="p-6">
                 <h3 className="text-2xl font-bold mb-6 text-white">Agregar Dirección</h3>
                 <form onSubmit={guardarDireccion} className="space-y-4">
@@ -576,9 +591,8 @@ export default function CheckoutAddress() {
               </div>
             </motion.div>
           </div>
-        </div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
 
       <Footer />
       
