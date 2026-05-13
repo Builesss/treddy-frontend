@@ -27,8 +27,9 @@ export default function VisualizadorAR({ modelUrl = "/HORNET.glb" }: Visualizado
 
   useEffect(() => {
     // Verificar soporte de AR
-    if (typeof navigator !== 'undefined' && (navigator as any).xr) {
-      (navigator as any).xr.isSessionSupported('immersive-ar').then((supported: boolean) => {
+    if (typeof navigator !== 'undefined' && 'xr' in navigator) {
+      const nav = navigator as unknown as { xr: { isSessionSupported: (mode: string) => Promise<boolean> } };
+      nav.xr.isSessionSupported('immersive-ar').then((supported: boolean) => {
         setArSupported(supported)
       })
     } else {
