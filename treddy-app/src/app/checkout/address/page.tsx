@@ -16,6 +16,8 @@ interface Direccion {
   ciudad: string;
   departamento: string;
   codigo_postal: string;
+  latitud?: number;
+  longitud?: number;
   principal: boolean;
 }
 
@@ -27,6 +29,8 @@ export default function CheckoutAddress() {
   
   // Estado para nueva dirección
   const [showModal, setShowModal] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [nuevaDir, setNuevaDir] = useState({
     alias: "",
     calle: "",
@@ -34,6 +38,8 @@ export default function CheckoutAddress() {
     ciudad: "",
     departamento: "",
     codigo_postal: "",
+    latitud: undefined as number | undefined,
+    longitud: undefined as number | undefined,
     principal: true
   });
 
@@ -78,6 +84,22 @@ export default function CheckoutAddress() {
       setLoading(false);
     }
   };
+
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (showModal) {
+      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollBarWidth}px`;
+    } else {
+      document.body.style.overflow = "auto";
+      document.body.style.paddingRight = "0px";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+      document.body.style.paddingRight = "0px";
+    };
+  }, [showModal]);
 
   // Inicializar Autocomplete y Mapa cuando el modal se abre
   useEffect(() => {
@@ -176,6 +198,8 @@ export default function CheckoutAddress() {
         styles: darkMapStyle,
         disableDefaultUI: true,
         zoomControl: true,
+        gestureHandling: "greedy",
+        clickableIcons: true,
       });
 
       // Inicializar Marcador
@@ -183,6 +207,14 @@ export default function CheckoutAddress() {
         map: mapRef.current,
         draggable: true,
         animation: window.google.maps.Animation.DROP,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: "#06B6D4",
+          fillOpacity: 1,
+          strokeWeight: 2,
+          strokeColor: "#FFFFFF",
+        }
       });
 
       // Inicializar Autocomplete
@@ -212,12 +244,79 @@ export default function CheckoutAddress() {
           reverseGeocode(pos);
         }
       });
+
+      // Listener para clic en el mapa (Nuevo: Permite seleccionar cualquier punto o POI)
+      mapRef.current.addListener("click", (e: any) => {
+        // Si se hace clic en un POI (punto de interés), e.stop() previene el popup de Google
+        if (e.placeId) {
+          e.stop();
+          const service = new window.google.maps.places.PlacesService(mapRef.current);
+          service.getDetails({ placeId: e.placeId }, (place: any, status: any) => {
+            if (status === "OK" && place.geometry && place.geometry.location) {
+              markerRef.current.setPosition(place.geometry.location);
+              markerRef.current.setVisible(true);
+              actualizarCamposDesdePlace(place);
+              if (inputRef.current) {
+                inputRef.current.value = place.formatted_address || "";
+              }
+            }
+          });
+        } else if (e.latLng) {
+          markerRef.current.setPosition(e.latLng);
+          markerRef.current.setVisible(true);
+          reverseGeocode(e.latLng);
+        }
+      });
     };
 
     // Pequeño delay para asegurar que el DOM esté listo
-    const timeout = setTimeout(initMapAndAutocomplete, 100);
+    const timeout = setTimeout(initMapAndAutocomplete, 200);
     return () => clearTimeout(timeout);
-  }, [showModal]);
+  }, [showModal, mapLoaded]);
+
+  const detectarUbicacion = () => {
+    if (!navigator.geolocation) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Tu navegador no soporta geolocalización.",
+        background: "#0F173A", color: "white"
+      });
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const pos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        
+        if (mapRef.current) {
+          mapRef.current.setCenter(pos);
+          mapRef.current.setZoom(17);
+        }
+        if (markerRef.current) {
+          markerRef.current.setPosition(pos);
+          markerRef.current.setVisible(true);
+        }
+        
+        reverseGeocode(pos);
+        setIsLocating(false);
+      },
+      () => {
+        setIsLocating(false);
+        Swal.fire({
+          icon: "error",
+          title: "Error de ubicación",
+          text: "No pudimos obtener tu ubicación actual. Por favor, selecciónala manualmente en el mapa.",
+          background: "#0F173A", color: "white"
+        });
+      },
+      { enableHighAccuracy: true }
+    );
+  };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const reverseGeocode = (latlng: any) => {
@@ -259,7 +358,9 @@ export default function CheckoutAddress() {
       numero: numero || prev.numero,
       ciudad: ciudad || prev.ciudad,
       departamento: departamento || prev.departamento,
-      codigo_postal: codigo_postal || prev.codigo_postal
+      codigo_postal: codigo_postal || prev.codigo_postal,
+      latitud: place.geometry?.location?.lat() || prev.latitud,
+      longitud: place.geometry?.location?.lng() || prev.longitud
     }));
   };
 
@@ -375,11 +476,28 @@ export default function CheckoutAddress() {
       {/* Modal Nueva Dirección */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 overflow-y-auto">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0F173A] w-full max-w-lg rounded-2xl border border-[#2a3055] overflow-hidden"
-            >
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowModal(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            
+            <div className="flex min-h-full items-start justify-center p-4">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+                animate={{ opacity: 1, scale: 1, y: 0 }} 
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative bg-[#0F173A] w-full max-w-lg rounded-2xl border border-[#2a3055] overflow-hidden my-8 shadow-2xl"
+              >
+                <button 
+                  onClick={() => setShowModal(false)}
+                  className="absolute top-4 right-4 z-10 p-2 bg-black/20 hover:bg-red-500/80 rounded-full text-white transition-all"
+                >
+                  <Plus size={20} className="rotate-45" />
+                </button>
               <div className="p-6">
                 <h3 className="text-2xl font-bold mb-6 text-white">Agregar Dirección</h3>
                 <form onSubmit={guardarDireccion} className="space-y-4">
@@ -392,12 +510,23 @@ export default function CheckoutAddress() {
                       placeholder="Empieza a escribir..."
                       className="w-full bg-[#131b40] border border-[#2a3055] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 mb-4"
                     />
-                    <div 
-                      ref={mapContainerRef} 
-                      className="w-full h-48 md:h-64 rounded-xl border border-[#2a3055] overflow-hidden bg-[#0A0F2C]"
-                    />
+                    <div className="relative">
+                      <div 
+                        ref={mapContainerRef} 
+                        className="w-full h-48 md:h-64 rounded-xl border border-[#2a3055] overflow-hidden bg-[#0A0F2C]"
+                      />
+                      <button
+                        type="button"
+                        onClick={detectarUbicacion}
+                        disabled={isLocating}
+                        className="absolute bottom-4 right-4 bg-cyan-500 text-black p-2 rounded-full shadow-lg hover:bg-cyan-400 transition-all flex items-center justify-center"
+                        title="Usar mi ubicación actual"
+                      >
+                        {isLocating ? <Loader2 size={20} className="animate-spin" /> : <MapPin size={20} />}
+                      </button>
+                    </div>
                     <p className="text-[10px] text-gray-500 mt-2 text-center italic">
-                      Puedes arrastrar el marcador en el mapa para ajustar tu ubicación exacta.
+                      Puedes hacer clic en cualquier lugar del mapa o arrastrar el marcador para seleccionar tu ubicación.
                     </p>
                   </div>
 
@@ -447,8 +576,9 @@ export default function CheckoutAddress() {
               </div>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+    </AnimatePresence>
 
       <Footer />
       
@@ -456,6 +586,7 @@ export default function CheckoutAddress() {
       <Script 
         src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
         strategy="afterInteractive"
+        onLoad={() => setMapLoaded(true)}
       />
     </main>
   );

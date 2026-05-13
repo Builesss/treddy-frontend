@@ -104,6 +104,22 @@ export default function Perfil() {
     fetchData();
   }, [router]);
 
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (cancelModal.open) {
+      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollBarWidth}px`;
+    } else {
+      document.body.style.overflow = "auto";
+      document.body.style.paddingRight = "0px";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+      document.body.style.paddingRight = "0px";
+    };
+  }, [cancelModal.open]);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     router.push('/auth/login');
@@ -197,7 +213,7 @@ export default function Perfil() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0A0F2C] text-white overflow-hidden relative">
+    <main className="min-h-screen bg-[#0A0F2C] text-white relative">
 
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
@@ -412,13 +428,25 @@ export default function Perfil() {
       {/* Modal de Cancelación */}
       <AnimatePresence>
         {cancelModal.open && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 overflow-y-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#10193F] w-full max-w-md rounded-2xl border border-[#2a3055] overflow-hidden shadow-2xl"
-            >
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setCancelModal({ open: false, pedidoId: null });
+                setMotivoSeleccionado('');
+              }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            
+            <div className="flex min-h-full items-start justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative bg-[#10193F] w-full max-w-md rounded-2xl border border-[#2a3055] overflow-hidden shadow-2xl my-8"
+              >
               <div className="p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
@@ -490,8 +518,9 @@ export default function Perfil() {
               </div>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+    </AnimatePresence>
 
       <Footer />
     </main>

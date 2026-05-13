@@ -170,6 +170,16 @@ export default function TarjetaExpandible({
     };
   }, [mostrarAR, figura.modelo3dUrl, figura.modelo_3d_path]);
 
+  useEffect(() => {
+    const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = "hidden";
+    document.body.style.paddingRight = `${scrollBarWidth}px`;
+    return () => {
+      document.body.style.overflow = "auto";
+      document.body.style.paddingRight = "0px";
+    };
+  }, []);
+
   const fetchReviews = useCallback(async () => {
     if (!figura) return;
     try {
@@ -324,7 +334,7 @@ export default function TarjetaExpandible({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 overflow-y-auto">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -332,16 +342,17 @@ export default function TarjetaExpandible({
           onClick={() => {
             onClose();
           }}
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm"
         />
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="relative bg-[#0F173A]/90 border border-cyan-500/30 rounded-3xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col no-scrollbar"
-        >
+        <div className="flex min-h-full items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative bg-[#0F173A]/90 border border-cyan-500/30 rounded-3xl w-full max-w-md flex flex-col shadow-2xl"
+          >
           <button
             onClick={() => {
               onClose();
@@ -555,6 +566,7 @@ export default function TarjetaExpandible({
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
-  );
+    </div>
+  </AnimatePresence>
+);
 }
