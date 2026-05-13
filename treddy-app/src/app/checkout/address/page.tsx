@@ -7,6 +7,13 @@ import Script from "next/script";
 import Swal from "sweetalert2";
 import { Loader2, MapPin, Plus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import dynamic from "next/dynamic";
+
+// Importar el mapa de forma dinámica para evitar errores de SSR
+const LeafletMap = dynamic(() => import("./LeafletMap"), { 
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-[#0A0F2C] animate-pulse rounded-xl" />
+});
 
 interface Direccion {
   id: string;
@@ -19,6 +26,24 @@ interface Direccion {
   latitud?: number;
   longitud?: number;
   principal: boolean;
+}
+
+interface NominatimResult {
+  lat: string;
+  lon: string;
+  display_name: string;
+  address?: {
+    road?: string;
+    pedestrian?: string;
+    suburb?: string;
+    house_number?: string;
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    state?: string;
+    postcode?: string;
+  };
 }
 
 export default function CheckoutAddress() {
@@ -43,11 +68,15 @@ export default function CheckoutAddress() {
     principal: true
   });
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<NominatimResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const [mapPosition, setMapPosition] = useState<[number, number]>([4.5709, -74.2973]); // Colombia
+  const [zoom, setZoom] = useState(5);
+
   const inputRef = useRef<HTMLInputElement>(null);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const markerRef = useRef<google.maps.Marker | null>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -98,241 +127,102 @@ export default function CheckoutAddress() {
     };
   }, [showModal]);
 
-  const actualizarCamposDesdePlace = useCallback((place: google.maps.places.PlaceResult) => {
-    let calle = "";
-    let numero = "";
-    let ciudad = "";
-    let departamento = "";
-    let codigo_postal = "";
-
-    if (place.address_components) {
-      place.address_components.forEach((component) => {
-        const types = component.types;
-        if (types.includes("route")) calle = component.long_name;
-        if (types.includes("street_number")) numero = component.long_name;
-        if (types.includes("locality")) ciudad = component.long_name;
-        if (types.includes("administrative_area_level_1")) departamento = component.long_name;
-        if (types.includes("postal_code")) codigo_postal = component.long_name;
-      });
-    }
+  const actualizarCamposDesdeNominatim = (data: NominatimResult) => {
+    const addr = data.address || {};
+    
+    // Nominatim devuelve los campos de forma diferente a Google
+    const calle = addr.road || addr.pedestrian || addr.suburb || "";
+    const numero = addr.house_number || "";
+    const ciudad = addr.city || addr.town || addr.village || addr.municipality || "";
+    const departamento = addr.state || "";
+    const codigo_postal = addr.postcode || "";
 
     setNuevaDir(prev => ({
       ...prev,
-      calle: calle || place.name || prev.calle,
+      calle: calle || data.display_name.split(',')[0] || prev.calle,
       numero: numero || prev.numero,
       ciudad: ciudad || prev.ciudad,
       departamento: departamento || prev.departamento,
       codigo_postal: codigo_postal || prev.codigo_postal,
-      latitud: place.geometry?.location?.lat() || prev.latitud,
-      longitud: place.geometry?.location?.lng() || prev.longitud
+      latitud: parseFloat(data.lat),
+      longitud: parseFloat(data.lon)
     }));
-  }, [setNuevaDir]);
+  };
 
-  const reverseGeocode = useCallback((latlng: google.maps.LatLng | google.maps.LatLngLiteral) => {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: latlng }, (results: google.maps.GeocoderResult[] | null, status: "ERROR" | "INVALID_REQUEST" | "OK" | "OVER_QUERY_LIMIT" | "REQUEST_DENIED" | "UNKNOWN_ERROR" | "ZERO_RESULTS") => {
-      if (status === "OK" && results && results[0]) {
-        actualizarCamposDesdePlace(results[0]);
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+        headers: { 'Accept-Language': 'es' }
+      });
+      const data = await res.json();
+      if (data && data.address) {
+        actualizarCamposDesdeNominatim(data);
         if (inputRef.current) {
-          inputRef.current.value = results[0].formatted_address || "";
+          inputRef.current.value = data.display_name || "";
         }
       }
-    });
-  }, [actualizarCamposDesdePlace]);
+    } catch (error) {
+      console.error("Error in reverse geocoding:", error);
+    }
+  }, []);
 
-  // Inicializar Autocomplete y Mapa cuando el modal se abre
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (query.length < 3) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=co&limit=5&addressdetails=1`, {
+          headers: { 'Accept-Language': 'es' }
+        });
+        const data = await res.json();
+        setSearchResults(data);
+        setShowResults(true);
+      } catch (error) {
+        console.error("Error searching address:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+  };
+
+  const selectSearchResult = (result: NominatimResult) => {
+    const lat = parseFloat(result.lat);
+    const lon = parseFloat(result.lon);
+    setMapPosition([lat, lon]);
+    setZoom(17);
+    actualizarCamposDesdeNominatim(result);
+    if (inputRef.current) {
+      inputRef.current.value = result.display_name;
+    }
+    setShowResults(false);
+  };
+
+  // Cerrar resultados al hacer clic fuera
   useEffect(() => {
-    if (!showModal || !window.google) return;
-
-    const initMapAndAutocomplete = () => {
-      if (!inputRef.current || !mapContainerRef.current) return;
-
-      // Estilo oscuro para el mapa
-      const darkMapStyle = [
-        { elementType: "geometry", stylers: [{ color: "#0F173A" }] },
-        { elementType: "labels.text.stroke", stylers: [{ color: "#0F173A" }] },
-        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-        {
-          featureType: "administrative.locality",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#d59563" }],
-        },
-        {
-          featureType: "poi",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#d59563" }],
-        },
-        {
-          featureType: "poi.park",
-          elementType: "geometry",
-          stylers: [{ color: "#263c3f" }],
-        },
-        {
-          featureType: "poi.park",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#6b9a76" }],
-        },
-        {
-          featureType: "road",
-          elementType: "geometry",
-          stylers: [{ color: "#38414e" }],
-        },
-        {
-          featureType: "road",
-          elementType: "geometry.stroke",
-          stylers: [{ color: "#212a37" }],
-        },
-        {
-          featureType: "road",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#9ca5b3" }],
-        },
-        {
-          featureType: "road.highway",
-          elementType: "geometry",
-          stylers: [{ color: "#746855" }],
-        },
-        {
-          featureType: "road.highway",
-          elementType: "geometry.stroke",
-          stylers: [{ color: "#1f2835" }],
-        },
-        {
-          featureType: "road.highway",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#f3d19c" }],
-        },
-        {
-          featureType: "transit",
-          elementType: "geometry",
-          stylers: [{ color: "#2f3948" }],
-        },
-        {
-          featureType: "transit.station",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#d59563" }],
-        },
-        {
-          featureType: "water",
-          elementType: "geometry",
-          stylers: [{ color: "#17263c" }],
-        },
-        {
-          featureType: "water",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#515c6d" }],
-        },
-        {
-          featureType: "water",
-          elementType: "labels.text.stroke",
-          stylers: [{ color: "#17263c" }],
-        },
-      ];
-
-      // Inicializar Mapa
-      const defaultPos = { lat: 4.5709, lng: -74.2973 }; // Colombia
-      if (!mapContainerRef.current) return;
-      mapRef.current = new google.maps.Map(mapContainerRef.current, {
-        center: defaultPos,
-        zoom: 5,
-        styles: darkMapStyle,
-        disableDefaultUI: true,
-        zoomControl: true,
-        gestureHandling: "cooperative",
-        clickableIcons: true,
-        draggableCursor: "pointer",
-      });
-
-      // Inicializar Marcador
-      markerRef.current = new google.maps.Marker({
-        map: mapRef.current,
-        draggable: true,
-        animation: google.maps.Animation.DROP,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 10,
-          fillColor: "#06B6D4",
-          fillOpacity: 1,
-          strokeWeight: 2,
-          strokeColor: "#FFFFFF",
-        } as google.maps.Symbol
-      });
-
-      // Inicializar Autocomplete
-      autocompleteRef.current = new google.maps.places.Autocomplete(inputRef.current as HTMLInputElement, {
-        types: ["address"],
-        componentRestrictions: { country: "co" }
-      });
-
-      // Listener para Autocomplete
-      if (autocompleteRef.current) {
-        autocompleteRef.current.addListener("place_changed", () => {
-          if (!autocompleteRef.current) return;
-          const place = autocompleteRef.current.getPlace();
-          if (!place.geometry || !place.geometry.location) return;
-
-          // Actualizar Mapa y Marcador
-          if (mapRef.current) {
-            mapRef.current.setCenter(place.geometry.location);
-            mapRef.current.setZoom(17);
-          }
-          if (markerRef.current) {
-            markerRef.current.setPosition(place.geometry.location);
-            markerRef.current.setVisible(true);
-          }
-
-          actualizarCamposDesdePlace(place);
-        });
+    const handleClickOutside = (event: MouseEvent) => {
+      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
+        setShowResults(false);
       }
-
-      // Listener para arrastre de marcador (Geocodificación Inversa)
-      if (markerRef.current) {
-        markerRef.current.addListener("dragend", () => {
-          if (!markerRef.current) return;
-          const pos = markerRef.current.getPosition();
-          if (pos) {
-            reverseGeocode(pos);
-          }
-        });
-      }
-
-      // Listener para clic en el mapa (Nuevo: Permite seleccionar cualquier punto o POI)
-      if (mapRef.current) {
-        mapRef.current.addListener("click", (e: google.maps.MapMouseEvent | google.maps.IconMouseEvent) => {
-          if (!mapRef.current || !markerRef.current) return;
-
-          // Si se hace clic en un POI (punto de interés), e.stop() previene el popup de Google
-          if ("placeId" in e && e.placeId) {
-            e.stop();
-            const service = new google.maps.places.PlacesService(mapRef.current);
-            service.getDetails({ placeId: e.placeId }, (place: google.maps.places.PlaceResult | null, status: "INVALID_REQUEST" | "OK" | "OVER_QUERY_LIMIT" | "REQUEST_DENIED" | "UNKNOWN_ERROR" | "ZERO_RESULTS" | "NOT_FOUND") => {
-              if (status === "OK" && place && place.geometry && place.geometry.location) {
-                if (markerRef.current) {
-                  markerRef.current.setPosition(place.geometry.location);
-                  markerRef.current.setVisible(true);
-                }
-                actualizarCamposDesdePlace(place);
-                if (inputRef.current) {
-                  inputRef.current.value = place.formatted_address || "";
-                }
-              }
-            });
-          } else if (e.latLng) {
-            markerRef.current.setPosition(e.latLng);
-            markerRef.current.setVisible(true);
-            reverseGeocode(e.latLng);
-          }
-        });
-      }
-
-      // Asegurar que el mapa se renderice correctamente
-      google.maps.event.trigger(mapRef.current, "resize");
     };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    // Pequeño delay para asegurar que el DOM esté listo
-    const timeout = setTimeout(initMapAndAutocomplete, 200);
-    return () => clearTimeout(timeout);
-  }, [showModal, mapLoaded, reverseGeocode, actualizarCamposDesdePlace]);
+  // Eliminar el efecto de inicialización de Google Maps
+  useEffect(() => {
+    if (showModal) {
+      setZoom(5);
+      setMapPosition([4.5709, -74.2973]);
+    }
+  }, [showModal]);
 
   const detectarUbicacion = () => {
     if (!navigator.geolocation) {
@@ -348,21 +238,11 @@ export default function CheckoutAddress() {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const pos = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-        
-        if (mapRef.current) {
-          mapRef.current.setCenter(pos);
-          mapRef.current.setZoom(17);
-        }
-        if (markerRef.current) {
-          markerRef.current.setPosition(pos);
-          markerRef.current.setVisible(true);
-        }
-        
-        reverseGeocode(pos);
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setMapPosition([lat, lng]);
+        setZoom(17);
+        reverseGeocode(lat, lng);
         setIsLocating(false);
       },
       () => {
@@ -518,18 +398,56 @@ export default function CheckoutAddress() {
                 <form onSubmit={guardarDireccion} className="space-y-4">
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-1">Buscar dirección (Google Maps)</label>
-                    <input 
-                      ref={inputRef}
-                      type="text" 
-                      placeholder="Empieza a escribir..."
-                      className="w-full bg-[#131b40] border border-[#2a3055] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 mb-4"
-                    />
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Buscar dirección</label>
                     <div className="relative">
-                      <div 
-                        ref={mapContainerRef} 
-                        className="w-full h-48 md:h-64 rounded-xl border border-[#2a3055] overflow-hidden bg-[#0A0F2C]"
+                      <input 
+                        ref={inputRef}
+                        type="text" 
+                        placeholder="Escribe una dirección..."
+                        value={searchQuery}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        onFocus={() => searchQuery.length >= 3 && setShowResults(true)}
+                        className="w-full bg-[#131b40] border border-[#2a3055] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 mb-2"
                       />
+                      {isSearching && (
+                        <div className="absolute right-3 top-3.5">
+                          <Loader2 size={20} className="animate-spin text-cyan-500" />
+                        </div>
+                      )}
+                      
+                      <AnimatePresence>
+                        {showResults && searchResults.length > 0 && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="absolute z-[60] w-full bg-[#131b40] border border-[#2a3055] rounded-lg shadow-2xl max-h-60 overflow-y-auto mt-1"
+                          >
+                            {searchResults.map((result, idx) => (
+                              <div 
+                                key={idx}
+                                onClick={() => selectSearchResult(result)}
+                                className="p-3 hover:bg-cyan-500/10 cursor-pointer border-b border-[#2a3055] last:border-0 text-sm transition-colors"
+                              >
+                                {result.display_name}
+                              </div>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    <div className="relative mt-2">
+                      <div className="w-full h-48 md:h-64 rounded-xl border border-[#2a3055] overflow-hidden bg-[#0A0F2C]">
+                        <LeafletMap 
+                          position={mapPosition} 
+                          zoom={zoom}
+                          onPositionChange={(pos) => {
+                            setMapPosition(pos);
+                            reverseGeocode(pos[0], pos[1]);
+                          }}
+                        />
+                      </div>
                       <button
                         type="button"
                         onClick={detectarUbicacion}
@@ -595,13 +513,6 @@ export default function CheckoutAddress() {
       </AnimatePresence>
 
       <Footer />
-      
-      {/* Script de Google Maps cargado de forma optimizada */}
-      <Script 
-        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
-        strategy="afterInteractive"
-        onLoad={() => setMapLoaded(true)}
-      />
     </main>
   );
 }
