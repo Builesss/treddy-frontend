@@ -8,14 +8,19 @@ import { Camera, Loader2, Maximize2 } from "lucide-react"
 
 interface VisualizadorARProps {
   modelUrl?: string
+  onSessionChange?: (active: boolean) => void
 }
 
-export default function VisualizadorAR({ modelUrl = "/HORNET.glb" }: VisualizadorARProps) {
+export default function VisualizadorAR({ 
+  modelUrl = "/HORNET.glb", 
+  onSessionChange 
+}: VisualizadorARProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const modelRef = useRef<THREE.Group | null>(null)
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
   const [loading, setLoading] = useState(false)
   const [arSupported, setArSupported] = useState<boolean | null>(null)
+  const [isAR, setIsAR] = useState(false)
   
   // Variables de estado para el seguimiento persistente
   const touchState = useRef({
@@ -128,7 +133,15 @@ export default function VisualizadorAR({ modelUrl = "/HORNET.glb" }: Visualizado
       canvas.removeEventListener('touchend', handleTouchEnd)
       
       if (rendererRef.current) {
+        // Detener animación
         rendererRef.current.setAnimationLoop(null)
+        
+        // Finalizar sesión XR si existe
+        const session = rendererRef.current.xr.getSession()
+        if (session) {
+          session.end().catch(() => {})
+        }
+        
         rendererRef.current.dispose()
       }
     }
@@ -147,11 +160,22 @@ export default function VisualizadorAR({ modelUrl = "/HORNET.glb" }: Visualizado
         domOverlay: { root: document.body }
       }
       
-      const session = await xr.requestSession('immersive-ar', sessionInit)
-      rendererRef.current.xr.setSession(session as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      const session = await (navigator as any).xr.requestSession('immersive-ar', sessionInit)
+      
+      // Notificar al padre que AR está activo
+      setIsAR(true)
+      if (onSessionChange) onSessionChange(true)
+
+      // Escuchar el final de la sesión
+      session.addEventListener('end', () => {
+        setIsAR(false)
+        if (onSessionChange) onSessionChange(false)
+      })
+
+      rendererRef.current.xr.setSession(session)
     } catch (error) {
       console.error("Error al iniciar la sesión AR:", error)
-      // Opcional: podrías mostrar un aviso al usuario aquí
+      if (onSessionChange) onSessionChange(false)
     }
   }
 
@@ -168,12 +192,14 @@ export default function VisualizadorAR({ modelUrl = "/HORNET.glb" }: Visualizado
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#0F173A] to-[#1a214f] overflow-hidden"
+      className={`relative w-full h-full flex flex-col items-center justify-center overflow-hidden transition-colors duration-500 ${isAR ? 'bg-transparent' : 'bg-gradient-to-br from-[#0F173A] to-[#1a214f]'}`}
     >
-      {/* Círculos decorativos de fondo */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
-      
-      <div className="z-10 flex flex-col items-center gap-6 p-8 text-center">
+      {!isAR && (
+        <>
+          {/* Círculos decorativos de fondo */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
+          
+          <div className="z-10 flex flex-col items-center gap-6 p-8 text-center">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -214,10 +240,12 @@ export default function VisualizadorAR({ modelUrl = "/HORNET.glb" }: Visualizado
           )}
         </motion.button>
 
-        <p className="text-[10px] uppercase tracking-widest text-cyan-500/50 font-bold">
-          Tecnología Treddy AR
-        </p>
-      </div>
+            <p className="text-[10px] uppercase tracking-widest text-cyan-500/50 font-bold">
+              Tecnología Treddy AR
+            </p>
+          </div>
+        </>
+      )}
     </div>
   )
 }
