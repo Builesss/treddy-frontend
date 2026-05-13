@@ -135,7 +135,8 @@ export default function VisualizadorAR({ modelUrl = "/HORNET.glb" }: Visualizado
   }, [modelUrl])
 
   const startAR = async () => {
-    const xr = (navigator as any).xr
+    const nav = navigator as unknown as { xr?: { requestSession: (mode: string, options?: unknown) => Promise<unknown> } };
+    const xr = nav.xr;
     if (!rendererRef.current || !xr) return
 
     try {
@@ -146,8 +147,8 @@ export default function VisualizadorAR({ modelUrl = "/HORNET.glb" }: Visualizado
         domOverlay: { root: document.body }
       }
       
-      const session = await (navigator as any).xr.requestSession('immersive-ar', sessionInit)
-      rendererRef.current.xr.setSession(session)
+      const session = await xr.requestSession('immersive-ar', sessionInit)
+      rendererRef.current.xr.setSession(session as any) // eslint-disable-line @typescript-eslint/no-explicit-any
     } catch (error) {
       console.error("Error al iniciar la sesión AR:", error)
       // Opcional: podrías mostrar un aviso al usuario aquí
