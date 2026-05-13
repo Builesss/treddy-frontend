@@ -4,7 +4,7 @@ import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
-import { Loader2, MapPin, Plus, ArrowRight } from "lucide-react";
+import { Loader2, MapPin, Plus, ArrowRight, Pencil, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 
@@ -54,6 +54,8 @@ export default function CheckoutAddress() {
   // Estado para nueva dirección
   const [showModal, setShowModal] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [nuevaDir, setNuevaDir] = useState({
     alias: "",
     calle: "",
@@ -63,7 +65,7 @@ export default function CheckoutAddress() {
     codigo_postal: "",
     latitud: undefined as number | undefined,
     longitud: undefined as number | undefined,
-    principal: true
+    principal: false
   });
 
   const [mapPosition, setMapPosition] = useState<[number, number]>([4.5709, -74.2973]); // Colombia
@@ -231,8 +233,14 @@ export default function CheckoutAddress() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
-      const res = await fetch(`${apiUrl}/api/address`, {
-        method: "POST",
+      const url = isEditing 
+        ? `${apiUrl}/api/address/${editId}`
+        : `${apiUrl}/api/address`;
+      
+      const method = isEditing ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...nuevaDir, usuario_id: userId })
       });
@@ -240,15 +248,19 @@ export default function CheckoutAddress() {
       if (!res.ok) throw new Error("Error al guardar");
       
       const data = await res.json();
-      setDirecciones([data, ...direcciones.filter(d => !data.principal || !d.principal)]);
-      if (data.principal) {
-        setDirecciones(prev => prev.map(d => d.id === data.id ? data : { ...d, principal: false }));
+      
+      if (isEditing) {
+        setDirecciones(prev => prev.map(d => d.id === editId ? data : (data.principal ? { ...d, principal: false } : d)));
+      } else {
+        setDirecciones(prev => [data, ...prev.map(d => data.principal ? { ...d, principal: false } : d)]);
       }
+
       setShowModal(false);
+      resetForm();
       
       Swal.fire({
         icon: "success",
-        title: "Dirección guardada",
+        title: isEditing ? "Dirección actualizada" : "Dirección guardada",
         background: "#0F173A", color: "white",
         timer: 1500, showConfirmButton: false
       });
@@ -257,10 +269,81 @@ export default function CheckoutAddress() {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "No se pudo guardar la dirección.",
+        text: "No se pudo procesar la dirección.",
         background: "#0F173A", color: "white"
       });
     }
+  };
+
+  const eliminarDireccion = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const result = await Swal.fire({
+      title: "¿Estás seguro?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#06b6d4",
+      cancelButtonColor: "#ef4444",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      background: "#0F173A", color: "white"
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
+        const res = await fetch(`${apiUrl}/api/address/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          setDirecciones(prev => prev.filter(d => d.id !== id));
+          Swal.fire({
+            icon: "success",
+            title: "Eliminado",
+            background: "#0F173A", color: "white",
+            timer: 1000, showConfirmButton: false
+          });
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  const editarDireccion = (e: React.MouseEvent, dir: Direccion) => {
+    e.stopPropagation();
+    setNuevaDir({
+      alias: dir.alias || "",
+      calle: dir.calle,
+      numero: dir.numero,
+      ciudad: dir.ciudad,
+      departamento: dir.departamento,
+      codigo_postal: dir.codigo_postal || "",
+      latitud: dir.latitud,
+      longitud: dir.longitud,
+      principal: dir.principal
+    });
+    setEditId(dir.id);
+    setIsEditing(true);
+    if (dir.latitud && dir.longitud) {
+      setMapPosition([dir.latitud, dir.longitud]);
+      setZoom(17);
+    }
+    setShowModal(true);
+  };
+
+  const resetForm = () => {
+    setNuevaDir({
+      alias: "",
+      calle: "",
+      numero: "",
+      ciudad: "",
+      departamento: "",
+      codigo_postal: "",
+      latitud: undefined,
+      longitud: undefined,
+      principal: false
+    });
+    setIsEditing(false);
+    setEditId(null);
   };
 
   const seleccionarDireccion = (id: string) => {
@@ -288,7 +371,7 @@ export default function CheckoutAddress() {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold">Mis Direcciones</h3>
               <button 
-                onClick={() => setShowModal(true)}
+                onClick={() => { resetForm(); setShowModal(true); }}
                 className="flex items-center gap-2 bg-cyan-500/10 text-cyan-400 px-4 py-2 rounded-lg hover:bg-cyan-500/20 transition-all"
               >
                 <Plus size={20} /> Nueva Dirección
@@ -309,10 +392,31 @@ export default function CheckoutAddress() {
                     onClick={() => seleccionarDireccion(dir.id)}
                     className="cursor-pointer border border-[#2a3055] rounded-xl p-5 hover:border-cyan-500 hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all bg-[#131b40] group relative"
                   >
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className="font-bold text-lg">{dir.alias || "Dirección"}</h4>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={(e) => editarDireccion(e, dir)}
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg transition-all border border-cyan-500/20"
+                          title="Editar dirección"
+                        >
+                          <Pencil size={14} />
+                          <span className="text-xs font-medium">Editar</span>
+                        </button>
+                        <button 
+                          onClick={(e) => eliminarDireccion(e, dir.id)}
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all border border-red-500/20"
+                          title="Eliminar dirección"
+                        >
+                          <Trash2 size={14} />
+                          <span className="text-xs font-medium">Eliminar</span>
+                        </button>
+
+                      </div>
+                    </div>
                     {dir.principal && (
-                      <span className="absolute top-3 right-3 bg-cyan-500 text-black text-xs font-bold px-2 py-1 rounded">Principal</span>
+                      <span className="absolute top-16 right-3 bg-cyan-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded shadow-lg">Principal</span>
                     )}
-                    <h4 className="font-bold text-lg mb-1">{dir.alias || "Dirección"}</h4>
                     <p className="text-gray-400 text-sm mb-1">{dir.calle} {dir.numero}</p>
                     <p className="text-gray-400 text-sm mb-3">{dir.ciudad}, {dir.departamento}</p>
                     <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
@@ -352,7 +456,9 @@ export default function CheckoutAddress() {
                 <Plus size={20} className="rotate-45" />
               </button>
               <div className="p-6">
-                <h3 className="text-2xl font-bold mb-6 text-white">Agregar Dirección</h3>
+                <h3 className="text-2xl font-bold mb-6 text-white">
+                  {isEditing ? "Editar Dirección" : "Agregar Dirección"}
+                </h3>
                 <form onSubmit={guardarDireccion} className="space-y-4">
                   
                   <div>
@@ -372,7 +478,7 @@ export default function CheckoutAddress() {
                         type="button"
                         onClick={detectarUbicacion}
                         disabled={isLocating}
-                        className="absolute bottom-4 right-4 bg-cyan-500 text-black p-2 rounded-full shadow-lg hover:bg-cyan-400 transition-all flex items-center justify-center z-[1000]"
+                        className="absolute bottom-12 right-4 bg-cyan-500 text-black p-2.5 rounded-full shadow-lg hover:bg-cyan-400 hover:scale-110 active:scale-95 transition-all flex items-center justify-center z-[1000] border-2 border-[#0F173A]"
                         title="Usar mi ubicación actual"
                       >
                         {isLocating ? <Loader2 size={20} className="animate-spin" /> : <MapPin size={20} />}
@@ -446,9 +552,11 @@ export default function CheckoutAddress() {
                     <label htmlFor="principal" className="text-sm text-gray-300">Establecer como dirección principal</label>
                   </div>
 
-                  <div className="flex gap-4 mt-8">
+                   <div className="flex gap-4 mt-8">
                     <button type="button" onClick={() => setShowModal(false)} className="flex-1 bg-transparent border border-gray-600 text-white py-3 rounded-xl hover:bg-gray-800 transition">Cancelar</button>
-                    <button type="submit" className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-black font-bold py-3 rounded-xl hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] transition">Guardar</button>
+                    <button type="submit" className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-black font-bold py-3 rounded-xl hover:shadow-[0_0_15px_rgba(6,182,212,0.4)] transition">
+                      {isEditing ? "Actualizar" : "Guardar"}
+                    </button>
                   </div>
                 </form>
               </div>
