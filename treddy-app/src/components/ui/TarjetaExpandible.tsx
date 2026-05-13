@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare } from "lucide-react";
+import Button from "./Button";
 import { QRCodeSVG } from "qrcode.react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
@@ -431,28 +432,24 @@ export default function TarjetaExpandible({
                 </div>
 
                 <div className="flex flex-col gap-3 mt-2">
-                  <button
+                  <Button
                     onClick={handleComprar}
-                    disabled={figura.stock <= 0 || loading}
-                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black font-bold py-3 rounded-xl hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    disabled={figura.stock <= 0}
+                    isLoading={loading}
+                    className="w-full"
                   >
-                    {loading ? (
-                      <Loader2 className="animate-spin" size={20} />
-                    ) : (
-                      <>
-                        <ShoppingCart size={20} />
-                        {figura.stock > 0 ? "Agregar al Carrito" : "Sin Stock"}
-                      </>
-                    )}
-                  </button>
+                    <ShoppingCart size={20} />
+                    {figura.stock > 0 ? "Agregar al Carrito" : "Sin Stock"}
+                  </Button>
 
-                  <button
+                  <Button
                     onClick={handlePersonalizar}
-                    className="w-full bg-[#1a214f] text-white font-semibold py-3 rounded-xl border border-[#2a3055] hover:bg-[#232d66] hover:border-cyan-500/30 transition-all flex items-center justify-center gap-2"
+                    variant="secondary"
+                    className="w-full"
+                    icon={<Edit3 size={20} />}
                   >
-                    <Edit3 size={20} />
                     Personalizar
-                  </button>
+                  </Button>
                 </div>
               </motion.div>
             ) : (
@@ -470,10 +467,16 @@ export default function TarjetaExpandible({
                     placeholder="Escribe tu reseña sobre el producto..." 
                     className="w-full bg-[#0A0F2C] border border-[#2a3055] rounded-lg p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 resize-none h-24 mb-3 transition-all"
                   />
-                  <button onClick={handleSubmitReview} disabled={!newComment.trim() || isSubmittingReview} className="w-full bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-2.5 rounded-lg transition-all text-sm flex items-center justify-center gap-2">
-                    {isSubmittingReview ? <Loader2 className="animate-spin" size={16} /> : <MessageSquare size={16} />}
+                  <Button 
+                    onClick={handleSubmitReview} 
+                    disabled={!newComment.trim()} 
+                    isLoading={isSubmittingReview}
+                    variant="outline"
+                    className="w-full"
+                    icon={<MessageSquare size={16} />}
+                  >
                     {isSubmittingReview ? "Publicando..." : "Publicar reseña"}
-                  </button>
+                  </Button>
                 </div>
                 
                 <div className="flex flex-col gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">

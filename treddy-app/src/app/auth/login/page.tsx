@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import AnimatedBackground from "@/components/ui/AnimatedBackground";
+import Button from "@/components/ui/Button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function LoginPage() {
     contrasena: "",
     recordar: false,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -44,6 +46,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
       const response = await fetch(`${apiUrl}/api/auth/login`, {
@@ -91,6 +94,8 @@ export default function LoginPage() {
         "Error en la conexión",
         "No se pudo conectar con el servidor. Intenta nuevamente."
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -157,38 +162,39 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <button
+          <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg transition-transform hover:scale-[1.02]"
+            isLoading={isLoading}
+            className="w-full"
           >
             Ingresar
-          </button>
+          </Button>
         </form>
 
         <hr className="my-6 border-cyan-700" />
 
         <div className="space-y-3">
-          <button
+          <Button
             onClick={() => {
               const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
               window.location.href = `${apiUrl}/api/auth/google`;
             }}
-            className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
+            className="w-full"
+            icon={<span>📧</span>}
           >
-            <span>📧</span>
-            <span>Inicia Sesión con Gmail</span>
-          </button>
+            Inicia Sesión con Gmail
+          </Button>
 
-          <button
+          <Button
             onClick={() => {
               const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
               window.location.href = `${apiUrl}/api/auth/microsoft`;
             }}
-            className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg"
+            className="w-full"
+            icon={<span>🪟</span>}
           >
-            <span>🪟</span>
-            <span>Inicia Sesión con Microsoft</span>
-          </button>
+            Inicia Sesión con Microsoft
+          </Button>
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import AnimatedBackground from "@/components/ui/AnimatedBackground";
+import Button from "@/components/ui/Button";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function RegisterPage() {
     confirmarContrasena: "",
     aceptar: false,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -45,6 +47,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
 
     if (!form.aceptar) {
@@ -97,6 +100,8 @@ export default function RegisterPage() {
     } catch (error) {
       console.error("Error en fetch:", error);
       showAlert("error", "Error de conexión", "No se pudo conectar con el servidor. Intenta más tarde.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -198,26 +203,31 @@ export default function RegisterPage() {
           </div>
 
 
-          <button
+          <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg transition-transform hover:scale-[1.02]"
+            isLoading={isLoading}
+            className="w-full"
           >
             Registrarse
-          </button>
+          </Button>
         </form>
 
         <hr className="my-6 border-cyan-700" />
 
 
         <div className="space-y-3">
-          <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
-            <span>📧</span>
-            <span>Regístrate con Gmail</span>
-          </button>
-          <button className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg">
-            <span>🪟</span>
-            <span>Regístrate con Microsoft</span>
-          </button>
+          <Button
+            className="w-full"
+            icon={<span>📧</span>}
+          >
+            Regístrate con Gmail
+          </Button>
+          <Button
+            className="w-full"
+            icon={<span>🪟</span>}
+          >
+            Regístrate con Microsoft
+          </Button>
         </div>
       </div>
     </div>

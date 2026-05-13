@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AnimatedBackground from "@/components/ui/AnimatedBackground";
+import Button from "@/components/ui/Button";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -61,13 +62,13 @@ export default function ForgotPasswordPage() {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full p-3 rounded-lg bg-[#162435] border border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400"
           />
-          <button
+          <Button
             type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 py-3 rounded-full hover:opacity-90 font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            isLoading={loading}
+            className="w-full"
           >
-            {loading ? "Enviando..." : "Enviar correo"}
-          </button>
+            Enviar correo
+          </Button>
         </form>
       </div>
     </div>
