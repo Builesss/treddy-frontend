@@ -129,22 +129,23 @@ export default function Newsletter() {
                 <div className="w-24 h-24 rounded-full bg-cyan-500 flex items-center justify-center mb-8 shadow-[0_0_50px_rgba(6,182,212,0.5)]">
                   <CheckCircle2 className="w-12 h-12 text-black" />
                 </div>
-                <h3 className="text-4xl md:text-6xl font-black text-white mb-4">
+                <h3 className="text-4xl md:text-6xl font-black text-white mb-6 text-center">
                   ¡BIENVENIDO AL CLUB!
                 </h3>
-                <p className="text-cyan-400 text-xl font-bold">
+                <p className="text-cyan-400 text-xl md:text-2xl font-bold text-center mb-4">
                   Revisa tu correo para el primer secreto.
                 </p>
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="mt-12 w-1 h-12 bg-gradient-to-b from-cyan-400 to-transparent"
-                />
+                <div className="mt-8 flex items-center gap-2 bg-cyan-400/10 border border-cyan-400/20 px-6 py-2 rounded-full">
+                  <Sparkles className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-black text-cyan-400 uppercase tracking-widest">
+                    Acceso VIP Confirmado
+                  </span>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="mt-20 pt-10 border-t border-white/5 flex flex-wrap justify-center items-center gap-12 opacity-40 hover:opacity-100 transition-opacity">
+          <div className="mt-12 pt-10 border-t border-white/5 flex flex-wrap justify-center items-center gap-12 opacity-40 hover:opacity-100 transition-opacity">
             <div className="flex items-center gap-3 text-white font-black uppercase text-sm cursor-pointer hover:text-cyan-400 transition-colors">
               <MessageSquare className="w-5 h-5" /> Discord
             </div>
