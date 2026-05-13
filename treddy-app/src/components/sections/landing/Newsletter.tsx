@@ -1,15 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, MessageSquare, CheckCircle2 } from "lucide-react";
+import { Sparkles, MessageSquare, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Newsletter() {
+  const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubscribe = () => {
-    setIsSubscribed(true);
-    // Here we would normally call the API
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://treddy-backend.onrender.com'}/api/newsletter/subscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsSubscribed(true);
+      } else {
+        setError(data.message || "Algo salió mal. Inténtalo de nuevo.");
+      }
+    } catch (err) {
+      setError("Error de conexión. Revisa tu internet.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -33,7 +61,7 @@ export default function Newsletter() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
-                className="flex flex-col items-center"
+                className="flex flex-col items-center w-full"
               >
                 <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-2 rounded-full mb-8 backdrop-blur-md">
                   <Sparkles className="w-5 h-5 text-cyan-400" />
@@ -54,19 +82,42 @@ export default function Newsletter() {
                   contenido VIP sobre personalización 3D.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg p-3 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-2xl">
-                  <input
-                    type="email"
-                    placeholder="Escribe tu mejor email"
-                    className="flex-grow px-8 py-4 rounded-2xl bg-transparent text-white placeholder:text-white/20 focus:outline-none font-bold"
-                  />
-                  <button
-                    onClick={handleSubscribe}
-                    className="px-8 py-4 bg-white text-black font-black rounded-2xl hover:bg-cyan-400 hover:shadow-[0_10px_40px_rgba(6,182,212,0.4)] transition-all transform active:scale-95"
-                  >
-                    SUSCRIBIRME
-                  </button>
-                </div>
+                <form onSubmit={handleSubscribe} className="w-full max-w-lg">
+                  <div className="flex flex-col sm:flex-row gap-4 w-full p-3 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-2xl">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Escribe tu mejor email"
+                      required
+                      className="flex-grow px-8 py-4 rounded-2xl bg-transparent text-white placeholder:text-white/20 focus:outline-none font-bold"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="px-8 py-4 bg-white text-black font-black rounded-2xl hover:bg-cyan-400 hover:shadow-[0_10px_40px_rgba(6,182,212,0.4)] transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          ESPERA...
+                        </>
+                      ) : (
+                        "SUSCRIBIRME"
+                      )}
+                    </button>
+                  </div>
+                  {error && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 flex items-center gap-2 text-red-400 font-bold justify-center"
+                    >
+                      <AlertCircle size={16} />
+                      {error}
+                    </motion.div>
+                  )}
+                </form>
               </motion.div>
             ) : (
               <motion.div
