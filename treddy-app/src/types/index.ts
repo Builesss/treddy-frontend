@@ -8,6 +8,8 @@ export interface Figura {
   categorias?: string[];
   categoria?: string;
   stock?: number;
+  modelo_3d_path?: string;
+  modelo3dUrl?: string;
 }
 
 // ─── Carrito ─────────────────────────────────────────────────────────────────

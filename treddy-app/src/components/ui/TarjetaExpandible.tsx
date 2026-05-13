@@ -17,6 +17,8 @@ type Figura = {
   precio_base: number;
   descripcion: string;
   stock: number;
+  modelo_3d_path?: string;
+  modelo3dUrl?: string;
 };
 
 function ensureSessionId() {
@@ -106,8 +108,10 @@ export default function TarjetaExpandible({
 
 
     const loader = new GLTFLoader();
+    const modelToLoad = figura.modelo_3d_path || figura.modelo3dUrl || MODEL_URL;
+
     loader.load(
-      MODEL_URL,
+      modelToLoad,
       (gltf) => {
         if (modelRef.current) scene.remove(modelRef.current);
         modelRef.current = gltf.scene;
