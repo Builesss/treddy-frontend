@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, ReactNode } from "react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare } from "lucide-react";
@@ -113,7 +113,7 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
         color: "white",
       });
       onClose();
-    } catch (e) {
+    } catch {
       Swal.fire({ icon: "error", title: "Error", text: "No se pudo agregar el producto.", background: "#0F173A", color: "white" });
     } finally {
       setLoading(false);
@@ -140,7 +140,7 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
       setNewComment("");
       fetchReviews();
       Swal.fire({ icon: "success", title: "¡Gracias!", timer: 1500, showConfirmButton: false, background: "#0F173A", color: "white" });
-    } catch (e) {
+    } catch {
       Swal.fire({ icon: "error", title: "Error", text: "No se pudo publicar la reseña.", background: "#0F173A", color: "white" });
     } finally {
       setIsSubmittingReview(false);
@@ -259,7 +259,14 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
 
 // --- Subcomponentes de Apoyo ---
 
-function HeaderButton({ active, onClick, icon, label }: any) {
+interface HeaderButtonProps {
+  active: boolean;
+  onClick: () => void;
+  icon: ReactNode;
+  label: string;
+}
+
+function HeaderButton({ active, onClick, icon, label }: HeaderButtonProps) {
   return (
     <button
       onClick={onClick}
@@ -272,7 +279,14 @@ function HeaderButton({ active, onClick, icon, label }: any) {
   );
 }
 
-function TabButton({ active, onClick, label, icon }: any) {
+interface TabButtonProps {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  icon?: ReactNode;
+}
+
+function TabButton({ active, onClick, label, icon }: TabButtonProps) {
   return (
     <button 
       onClick={onClick} 
@@ -285,7 +299,18 @@ function TabButton({ active, onClick, label, icon }: any) {
   );
 }
 
-function ResenasSection({ reviews, loading, newRating, setNewRating, newComment, setNewComment, onSubmit, submitting }: any) {
+interface ResenasSectionProps {
+  reviews: Review[];
+  loading: boolean;
+  newRating: number;
+  setNewRating: (rating: number) => void;
+  newComment: string;
+  setNewComment: (comment: string) => void;
+  onSubmit: () => void;
+  submitting: boolean;
+}
+
+function ResenasSection({ reviews, loading, newRating, setNewRating, newComment, setNewComment, onSubmit, submitting }: ResenasSectionProps) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
       <div className="bg-[#1a214f] p-4 rounded-xl space-y-3">
