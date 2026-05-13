@@ -3,7 +3,6 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useRouter } from "next/navigation";
-import Script from "next/script";
 import Swal from "sweetalert2";
 import { Loader2, MapPin, Plus, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -54,7 +53,6 @@ export default function CheckoutAddress() {
   
   // Estado para nueva dirección
   const [showModal, setShowModal] = useState(false);
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [nuevaDir, setNuevaDir] = useState({
     alias: "",
