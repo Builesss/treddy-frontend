@@ -197,7 +197,16 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
           {/* Visualizador Principal */}
           <div className="relative w-full h-80 bg-gradient-to-b from-[#1a214f] to-[#0F173A] mt-14 flex items-center justify-center overflow-hidden">
             {viewMode === "3d" && <Visualizador3D modelUrl={figura.modeloUrl || "/HORNET.glb"} />}
-            {viewMode === "ar" && <VisualizadorAR modelUrl={figura.modeloUrl || "/HORNET.glb"} />}
+            {viewMode === "ar" && (
+           <div
+              onTouchStart={e => e.stopPropagation()}
+              onTouchMove={e => e.stopPropagation()}
+              className="w-full h-full"
+              >
+              <VisualizadorAR modelUrl={figura.modeloUrl || "/HORNET.glb"} />
+              </div>
+                )}
+
             {viewMode === "qr" && (
               <div className="bg-white p-4 rounded-xl">
                 <QRCodeSVG value={figura.imagenUrl} size={180} fgColor="#0F173A" />
