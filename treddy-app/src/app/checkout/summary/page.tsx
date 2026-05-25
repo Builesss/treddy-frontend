@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { Loader2, CreditCard, MapPin, Package, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
+import { savePendingPrintItems } from "@/services/print.service";
 
 function ensureSessionId() {
   let sid = localStorage.getItem("sessionId");
@@ -33,6 +34,8 @@ interface CartItem {
   imagenUrl: string;
   unit_price: number;
   quantity: number;
+  modelo3dUrl?: string;
+  modelo_3d_path?: string;
 }
 
 interface Direccion {
@@ -106,7 +109,7 @@ export default function CheckoutSummary() {
       
       const mapped = (data?.carrito_item || []).map((it: { 
         producto_id: number | string; 
-        productos: { nombre?: string; imagenUrl?: string; imagen?: string }; 
+        productos: { nombre?: string; imagenUrl?: string; imagen?: string; modelo3dUrl?: string; modelo_3d_path?: string }; 
         precio_unitario: number | string; 
         cantidad: number | string 
       }) => ({
@@ -115,6 +118,8 @@ export default function CheckoutSummary() {
         imagenUrl: resolveImageUrl(it.productos),
         unit_price: Number(it.precio_unitario),
         quantity: Number(it.cantidad ?? 1),
+        modelo3dUrl: it.productos?.modelo3dUrl ?? undefined,
+        modelo_3d_path: it.productos?.modelo_3d_path ?? undefined,
       }));
 
       setFiguras(mapped);
@@ -185,6 +190,16 @@ export default function CheckoutSummary() {
 
       if (!res.ok) throw new Error("Error creando orden temporal");
       const data = await res.json();
+
+      // ── Guardar items con modelos 3D en localStorage ANTES de redirigir ──
+      // La página /success los recuperará para disparar la impresión automáticamente
+      const orderId = data.preferenceId ?? data.orderId ?? ensureSessionId();
+      savePendingPrintItems(orderId, figuras.map(f => ({
+        id: f.id,
+        title: f.title,
+        modelo3dUrl: f.modelo3dUrl,
+        modelo_3d_path: f.modelo_3d_path,
+      })));
 
       Swal.close();
 
