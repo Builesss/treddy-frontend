@@ -35,6 +35,7 @@ function resolveImageUrl(prod: any): string {
 }
 
 type FiguraCarrito = {
+  id: number;
   producto_id: number;
   nombre: string;
   imagenUrl: string;
@@ -71,6 +72,7 @@ export default function Carrito() {
 
       const mapped: FiguraCarrito[] = (data?.carrito_item || []).map(
         (it: any) => ({
+          id: Number(it.id),
           producto_id: Number(it.producto_id),
           nombre: it.productos?.nombre ?? "Producto",
           imagenUrl: resolveImageUrl(it.productos),
@@ -101,20 +103,20 @@ export default function Carrito() {
     };
   }, []);
 
-  const eliminarFigura = async (producto_id: number) => {
+  const eliminarFigura = async (id: number) => {
     try {
-      setProcessingId(producto_id);
+      setProcessingId(id);
       const sessionId = ensureSessionId();
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
       const res = await fetch(
-        `${apiUrl}/api/cart/items/${producto_id}?sessionId=${sessionId}`,
+        `${apiUrl}/api/cart/items/${id}?sessionId=${sessionId}`,
         {
           method: "DELETE",
         }
       );
 
       if (!res.ok) throw new Error("No se pudo eliminar el producto");
-      setFiguras((prev) => prev.filter((f) => f.producto_id !== producto_id));
+      setFiguras((prev) => prev.filter((f) => f.id !== id));
     } catch (e) {
       console.error("Error eliminando producto:", e);
     } finally {
@@ -123,16 +125,16 @@ export default function Carrito() {
   };
 
   const actualizarCantidad = async (
-    producto_id: number,
+    id: number,
     nuevaCantidad: number
   ) => {
     if (nuevaCantidad < 1) return;
     try {
-      setProcessingId(producto_id);
+      setProcessingId(id);
       const sessionId = ensureSessionId();
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
       const res = await fetch(
-        `${apiUrl}/api/cart/items/${producto_id}`,
+        `${apiUrl}/api/cart/items/${id}`,
         {
           method: "PATCH",
           headers: {
@@ -147,7 +149,7 @@ export default function Carrito() {
       if (!res.ok) throw new Error("No se pudo actualizar la cantidad");
       setFiguras((prev) =>
         prev.map((f) =>
-          f.producto_id === producto_id
+          f.id === id
             ? { ...f, cantidad: Number(nuevaCantidad) }
             : f
         )
@@ -271,7 +273,7 @@ export default function Carrito() {
                   <AnimatePresence mode="popLayout">
                     {figuras.map((figura) => (
                       <motion.div
-                        key={figura.producto_id}
+                        key={figura.id}
                         layout
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -280,11 +282,11 @@ export default function Carrito() {
                       >
 
                         <button
-                          onClick={() => eliminarFigura(figura.producto_id)}
-                          disabled={processingId === figura.producto_id}
+                          onClick={() => eliminarFigura(figura.id)}
+                          disabled={processingId === figura.id}
                           className="md:hidden absolute top-4 right-4 text-gray-500 hover:text-red-400 transition-colors"
                         >
-                          {processingId === figura.producto_id ? (
+                          {processingId === figura.id ? (
                             <Loader2 className="animate-spin" size={20} />
                           ) : (
                             <Trash2 size={20} />
@@ -322,17 +324,17 @@ export default function Carrito() {
                             <button
                               onClick={() =>
                                 actualizarCantidad(
-                                  figura.producto_id,
+                                  figura.id,
                                   Number(figura.cantidad) - 1
                                 )
                               }
-                              disabled={processingId === figura.producto_id}
+                              disabled={processingId === figura.id}
                               className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#1a214f] text-cyan-400 transition-colors disabled:opacity-50"
                             >
                               <Minus size={16} />
                             </button>
                             <span className="w-8 text-center font-bold text-white">
-                              {processingId === figura.producto_id ? (
+                              {processingId === figura.id ? (
                                 <Loader2 className="animate-spin mx-auto" size={14} />
                               ) : (
                                 figura.cantidad
@@ -341,11 +343,11 @@ export default function Carrito() {
                             <button
                               onClick={() =>
                                 actualizarCantidad(
-                                  figura.producto_id,
+                                  figura.id,
                                   Number(figura.cantidad) + 1
                                 )
                               }
-                              disabled={processingId === figura.producto_id}
+                              disabled={processingId === figura.id}
                               className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#1a214f] text-cyan-400 transition-colors disabled:opacity-50"
                             >
                               <Plus size={16} />
@@ -364,12 +366,12 @@ export default function Carrito() {
 
 
                           <button
-                            onClick={() => eliminarFigura(figura.producto_id)}
-                            disabled={processingId === figura.producto_id}
+                            onClick={() => eliminarFigura(figura.id)}
+                            disabled={processingId === figura.id}
                             className="hidden md:flex p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
                             title="Eliminar producto"
                           >
-                            {processingId === figura.producto_id ? (
+                            {processingId === figura.id ? (
                               <Loader2 className="animate-spin" size={20} />
                             ) : (
                               <Trash2 size={20} />

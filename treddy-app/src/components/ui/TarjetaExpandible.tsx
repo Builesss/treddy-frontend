@@ -253,7 +253,13 @@ export default function TarjetaExpandible({
   const handlePersonalizar = () => {
     if (hasModel) {
       const url = figura.modelo3dUrl || figura.modelo_3d_path;
-      router.push(`/personalizacion?modelUrl=${encodeURIComponent(url as string)}`);
+      const params = new URLSearchParams({
+        modelUrl: encodeURIComponent(url as string),
+        productoId: String(figura.producto_id),
+        precioBase: String(figura.precio_base),
+        nombreProducto: figura.nombre,
+      });
+      router.push(`/personalizacion?${params.toString()}`);
     } else {
       Swal.fire({
         title: "No disponible",
