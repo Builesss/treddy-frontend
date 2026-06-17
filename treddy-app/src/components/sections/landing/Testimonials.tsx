@@ -119,6 +119,11 @@ export default function Testimonials({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeMobileIndex, setActiveMobileIndex] = useState(0);
 
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeftState, setScrollLeftState] = useState(0);
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -142,8 +147,59 @@ export default function Testimonials({
     return () => container.removeEventListener("scroll", handleScroll);
   }, [isMobile]);
 
+  // Auto scroll effect
+  useEffect(() => {
+    if (isHovered || isDragging) return;
+
+    const timer = setInterval(() => {
+      if (isMobile) {
+        const container = scrollRef.current;
+        if (container) {
+          const cardWidth = container.offsetWidth * 0.82;
+          const nextIndex = (activeMobileIndex + 1) % testimonials.length;
+          container.scrollTo({
+            left: nextIndex * (cardWidth + 16),
+            behavior: "smooth",
+          });
+        }
+      } else {
+        setTestimonialIndex((prev: number) => (prev === totalPages - 1 ? 0 : prev + 1));
+      }
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [isMobile, activeMobileIndex, setTestimonialIndex, totalPages, isHovered, isDragging]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeftState(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    setIsHovered(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeftState - walk;
+  };
+
   return (
-    <section className="py-16 sm:py-24 px-4 sm:px-8 overflow-hidden bg-[#030712]">
+    <section 
+      className="py-16 sm:py-24 px-4 sm:px-8 overflow-hidden bg-[#030712]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="max-w-[1500px] mx-auto">
         <div className="text-center mb-10 sm:mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4 sm:mb-6">
@@ -159,7 +215,10 @@ export default function Testimonials({
           <div className="relative">
             <div
               ref={scrollRef}
-              className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4"
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
+              className={`flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-4 px-4 ${isDragging ? 'cursor-grabbing snap-none' : 'cursor-grab'}`}
               style={{
                 scrollbarWidth: "none",
                 msOverflowStyle: "none",
@@ -212,7 +271,20 @@ export default function Testimonials({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -50 }}
                   transition={{ duration: 0.6, ease: "easeInOut" }}
-                  className="grid grid-cols-3 gap-8 py-4"
+                  className="grid grid-cols-3 gap-8 py-4 cursor-grab active:cursor-grabbing"
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.2}
+                  onDragStart={() => setIsDragging(true)}
+                  onDragEnd={(e, { offset }) => {
+                    setIsDragging(false);
+                    const swipe = offset.x;
+                    if (swipe < -50) {
+                      setTestimonialIndex((prev: number) => (prev === totalPages - 1 ? 0 : prev + 1));
+                    } else if (swipe > 50) {
+                      setTestimonialIndex((prev: number) => (prev === 0 ? totalPages - 1 : prev - 1));
+                    }
+                  }}
                 >
                   {testimonials
                     .slice(testimonialIndex * 3, testimonialIndex * 3 + 3)
