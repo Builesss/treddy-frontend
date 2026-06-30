@@ -100,7 +100,12 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
       initialDist = 0
     }
 
-    // Importante: Usar el contenedor y passive: false
+    // Registrar en el canvas (renderer.domElement) y en el contenedor
+    // El canvas queda por encima en modo AR y captura todos los eventos primero
+    const canvas = renderer.domElement
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false })
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false })
+    canvas.addEventListener('touchend', handleTouchEnd)
     container.addEventListener('touchstart', handleTouchStart, { passive: false })
     container.addEventListener('touchmove', handleTouchMove, { passive: false })
     container.addEventListener('touchend', handleTouchEnd)
@@ -118,6 +123,9 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
 
     return () => {
       window.removeEventListener('resize', handleResize)
+      canvas.removeEventListener('touchstart', handleTouchStart)
+      canvas.removeEventListener('touchmove', handleTouchMove)
+      canvas.removeEventListener('touchend', handleTouchEnd)
       container.removeEventListener('touchstart', handleTouchStart)
       container.removeEventListener('touchmove', handleTouchMove)
       container.removeEventListener('touchend', handleTouchEnd)
