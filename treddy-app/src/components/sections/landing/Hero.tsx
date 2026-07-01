@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Zap, ShieldCheck, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Figura } from "@/types";
+import { useState, useEffect, useRef } from "react";
 
 interface HeroProps {
   figuras: Figura[];
@@ -12,6 +13,67 @@ interface HeroProps {
   prevSlide: () => void;
   nextSlide: () => void;
   goToSlide: (index: number) => void;
+}
+
+const ROTATING_WORDS = ["unicas", "precisas", "tuyas", "epicas", "premium"];
+
+function RotatingWord() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % ROTATING_WORDS.length), 2200);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <span className="relative inline-block overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={idx}
+          initial={{ y: 36, opacity: 0, filter: "blur(6px)" }}
+          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          exit={{ y: -36, opacity: 0, filter: "blur(6px)" }}
+          transition={{ duration: 0.45, ease: "easeInOut" }}
+          className="inline-block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"
+        >
+          {ROTATING_WORDS[idx]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+function FloatingBadge({
+  icon,
+  text,
+  delay,
+  className,
+}: {
+  icon: React.ReactNode;
+  text: string;
+  delay: number;
+  className?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay, type: "spring", stiffness: 120 }}
+      className={`absolute flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0F173A]/80 border border-cyan-500/20 backdrop-blur-md text-xs font-semibold text-cyan-300 shadow-lg shadow-cyan-500/10 pointer-events-none select-none ${className}`}
+    >
+      {icon}
+      {text}
+    </motion.div>
+  );
+}
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div>
+        <p className="text-xl font-black text-white leading-none">{value}</p>
+        <p className="text-[11px] text-gray-500 mt-0.5 leading-none">{label}</p>
+      </div>
+    </div>
+  );
 }
 
 export default function Hero({
@@ -22,139 +84,255 @@ export default function Hero({
   goToSlide,
 }: HeroProps) {
   const router = useRouter();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [spotlight, setSpotlight] = useState({ x: 50, y: 50 });
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = cardRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setSpotlight({ x, y });
   };
 
   const itemVariants: Variants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
+    hidden: { y: 28, opacity: 0 },
+    visible: (i: number) => ({
       y: 0,
       opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-      },
-    },
+      transition: { delay: i * 0.12, type: "spring", stiffness: 90, damping: 18 },
+    }),
   };
 
   return (
-    <section className="pt-20 sm:pt-32 pb-12 sm:pb-24 px-4 sm:px-8 relative overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-1/4 left-10 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl animate-pulse pointer-events-none" />
-      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-1000 pointer-events-none" />
+    <section className="relative min-h-[92vh] flex items-center overflow-hidden px-4 sm:px-8 lg:px-14">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(0,230,246,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,246,0.04) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+      <div className="absolute top-[-5%] left-[-5%] w-[55%] h-[55%] bg-cyan-500/8 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-5%] right-[-5%] w-[45%] h-[45%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[30%] right-[30%] w-[20%] h-[20%] bg-purple-600/6 rounded-full blur-[80px] pointer-events-none" />
 
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="max-w-[1600px] mx-auto border border-white/10 p-6 sm:p-14 bg-[#0F173A]/20 rounded-3xl sm:rounded-[40px] shadow-2xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-8 sm:gap-12 relative z-10"
-      >
-        <div className="max-w-xl text-center md:text-left">
-          <motion.h2
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-0 py-16 lg:py-0">
+
+        <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left pr-0 lg:pr-12 xl:pr-20">
+
+          <motion.div
+            custom={0}
             variants={itemVariants}
-            className="text-3xl sm:text-5xl md:text-7xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-4 sm:mb-6 md:ml-10"
+            initial="hidden"
+            animate="visible"
+            className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/25 text-cyan-400 text-xs font-bold tracking-widest uppercase"
           >
-            Treddy Figuras 3D
-          </motion.h2>
+            <Sparkles size={13} className="text-cyan-300" />
+            Impresion 3D de alta precision
+          </motion.div>
+
+          <motion.h1
+            custom={1}
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-5xl sm:text-6xl xl:text-7xl 2xl:text-8xl font-black leading-[1.05] tracking-tight text-white mb-6"
+          >
+            Figuras 3D<br />
+            <RotatingWord />
+          </motion.h1>
+
           <motion.p
+            custom={2}
             variants={itemVariants}
-            className="text-base sm:text-xl text-[#B5B8C5] mb-6 sm:mb-8 leading-relaxed md:ml-10"
+            initial="hidden"
+            animate="visible"
+            className="text-base sm:text-lg text-[#8B8FA8] max-w-md leading-relaxed mb-8"
           >
-            Personaliza o crea tu propia figura impresa en 3D con tecnología de
-            vanguardia y acabados profesionales.
+            Disena, personaliza y recibe tu figura impresa en 3D directamente en tu puerta. Tecnologia de vanguardia, acabados que sorprenden.
           </motion.p>
-          <motion.button
+
+          <motion.div
+            custom={3}
             variants={itemVariants}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push("/catalogo")}
-            className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 sm:px-10 py-3 sm:py-4 rounded-full hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] font-bold shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all md:ml-10 text-sm sm:text-base"
+            initial="hidden"
+            animate="visible"
+            className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-10"
           >
-            Inicia ahora
-          </motion.button>
+            <button
+              onClick={() => router.push("/catalogo")}
+              className="group flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-7 py-3.5 rounded-full font-bold text-sm hover:shadow-[0_0_35px_rgba(6,182,212,0.55)] shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
+            >
+              Ver catalogo
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
+              onClick={() => router.push("/personalizacion")}
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm text-white border border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/30 backdrop-blur-sm transition-all duration-300"
+            >
+              <Zap size={15} className="text-cyan-400" />
+              Personalizar
+            </button>
+          </motion.div>
+
+          <motion.div
+            custom={4}
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex items-center gap-6 flex-wrap justify-center lg:justify-start"
+          >
+            <Stat value="10k+" label="Pedidos entregados" />
+            <div className="w-px h-8 bg-white/10" />
+            <Stat value="98%" label="Satisfaccion" />
+            <div className="w-px h-8 bg-white/10" />
+            <Stat value="48h" label="Tiempo de entrega" />
+          </motion.div>
+
+          <motion.div
+            custom={5}
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            className="mt-8 flex items-center gap-2 text-[11px] text-gray-600"
+          >
+            <ShieldCheck size={14} className="text-cyan-600" />
+            Pago seguro - Envio protegido - Garantia 15 dias
+          </motion.div>
         </div>
 
         {figuras.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="relative w-full md:w-[700px] h-[350px] sm:h-[450px] md:h-[550px] bg-[#0F173A]/40 backdrop-blur-xl border border-white/10 rounded-3xl sm:rounded-[2.5rem] overflow-hidden group shadow-2xl flex flex-col"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.2, type: "spring", stiffness: 70 }}
+            className="flex-shrink-0 w-full lg:w-[520px] xl:w-[580px] 2xl:w-[640px]"
           >
-            <div className="flex-grow flex items-center justify-center p-8">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentIndex}
-                  initial={{ opacity: 0, scale: 0.8, rotateY: 45 }}
-                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                  exit={{ opacity: 0, scale: 1.1, rotateY: -45 }}
-                  transition={{ duration: 0.6, type: "spring", damping: 20 }}
-                  className="flex flex-col items-center justify-center text-center w-full h-full"
-                >
-                  <div className="relative w-full h-full max-h-[330px] aspect-square mb-10 -mt-8">
-                    <Image
-                      src={figuras[currentIndex].imagenUrl}
-                      alt={figuras[currentIndex].nombre}
-                      fill
-                      priority
-                      sizes="(max-width: 768px) 100vw, 500px"
-                      className="object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.15)] filter brightness-110"
-                    />
-                  </div>
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <p className="text-cyan-400 text-sm font-bold tracking-[0.2em] uppercase mb-2">
-                      Destacado
-                    </p>
-                    <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight uppercase">
-                      {figuras[currentIndex].nombre}
-                    </h3>
-                  </motion.div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+            <div className="relative">
+              <div className="absolute -inset-4 bg-gradient-to-br from-cyan-500/15 to-blue-600/15 rounded-[3rem] blur-2xl pointer-events-none" />
 
-            <button
-              onClick={prevSlide}
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 p-2 sm:p-4 rounded-full bg-black/40 text-white border border-white/5 hover:bg-cyan-500 hover:text-black hover:border-transparent transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 z-10 backdrop-blur-md"
-            >
-              <ChevronLeft size={24} />
-            </button>
+              <div
+                ref={cardRef}
+                onMouseMove={handleMouseMove}
+                className="relative w-full h-[440px] sm:h-[500px] bg-[#0A0F2C]/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl group"
+                style={{
+                  background: `radial-gradient(circle at ${spotlight.x}% ${spotlight.y}%, rgba(0,230,246,0.08) 0%, transparent 60%), rgba(10,15,44,0.7)`,
+                }}
+              >
+                <div className="absolute top-5 left-5 flex gap-1.5 z-20">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+                </div>
 
-            <button
-              onClick={nextSlide}
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 p-2 sm:p-4 rounded-full bg-black/40 text-white border border-white/5 hover:bg-cyan-500 hover:text-black hover:border-transparent transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 z-10 backdrop-blur-md"
-            >
-              <ChevronRight size={24} />
-            </button>
+                <div className="absolute top-5 right-5 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 text-[10px] font-bold tracking-widest uppercase">
+                  <Sparkles size={10} />
+                  Destacado
+                </div>
 
-            <div className="absolute bottom-10 left-0 right-0 flex justify-center space-x-4 z-10">
-              {figuras.map((_, index) => (
+                <div className="flex-1 h-full flex flex-col items-center justify-center px-8 pt-12 pb-24">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentIndex}
+                      initial={{ opacity: 0, scale: 0.82, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 1.08, y: -16 }}
+                      transition={{ duration: 0.5, type: "spring", damping: 22 }}
+                      className="w-full h-full flex flex-col items-center justify-center text-center"
+                    >
+                      <div className="relative w-full h-[260px] sm:h-[290px]">
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="w-48 h-48 rounded-full bg-cyan-400/10 blur-3xl" />
+                        </div>
+                        <Image
+                          src={figuras[currentIndex].imagenUrl}
+                          alt={figuras[currentIndex].nombre}
+                          fill
+                          priority
+                          sizes="(max-width: 768px) 100vw, 580px"
+                          className="object-contain drop-shadow-[0_0_40px_rgba(0,230,246,0.2)] filter brightness-110 hover:scale-105 transition-transform duration-700"
+                        />
+                      </div>
+
+                      <motion.div
+                        initial={{ y: 16, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.25 }}
+                        className="mt-4"
+                      >
+                        <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
+                          {figuras[currentIndex].nombre}
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1 tracking-widest uppercase">Figura impresa en 3D</p>
+                      </motion.div>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
                 <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`h-1.5 rounded-full transition-all duration-500 ${
-                    index === currentIndex
-                      ? "w-12 bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]"
-                      : "w-3 bg-white/20 hover:bg-white/40"
-                  }`}
-                />
-              ))}
+                  onClick={prevSlide}
+                  aria-label="Anterior"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/40 text-white border border-white/8 hover:bg-cyan-500 hover:text-black hover:border-transparent transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 z-10 backdrop-blur-md"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  aria-label="Siguiente"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/40 text-white border border-white/8 hover:bg-cyan-500 hover:text-black hover:border-transparent transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 z-10 backdrop-blur-md"
+                >
+                  <ChevronRight size={20} />
+                </button>
+
+                <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-10">
+                  {figuras.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => goToSlide(index)}
+                      aria-label={`Slide ${index + 1}`}
+                      className={`h-1.5 rounded-full transition-all duration-500 ${
+                        index === currentIndex
+                          ? "w-10 bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.8)]"
+                          : "w-2.5 bg-white/20 hover:bg-white/40"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="absolute bottom-5 right-5 z-20"
+                >
+                  <button
+                    onClick={() => router.push("/catalogo")}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-bold hover:bg-cyan-500 hover:text-black transition-all duration-200"
+                  >
+                    Ver en catalogo
+                    <ArrowRight size={12} />
+                  </button>
+                </motion.div>
+              </div>
+
+              <FloatingBadge
+                icon={<ShieldCheck size={13} className="text-green-400" />}
+                text="Garantia incluida"
+                delay={0.9}
+                className="-bottom-4 left-6"
+              />
+              <FloatingBadge
+                icon={<Zap size={13} className="text-yellow-400" />}
+                text="Entrega express"
+                delay={1.1}
+                className="-top-4 right-16"
+              />
             </div>
           </motion.div>
         )}
-      </motion.div>
+      </div>
     </section>
   );
 }
