@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Nav from "@/components/layout/Navbar";
@@ -359,15 +359,12 @@ export default function ContactanosPage() {
       <Nav />
 
       {/* Hero */}
-      <section className="relative z-10 pt-20 pb-16 text-center px-4">
+      <section className="relative z-10 pt-20 pb-16 text-center px-6 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <span className="inline-block px-4 py-1.5 mb-6 text-xs font-semibold tracking-widest uppercase rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
-            Soporte & Contacto
-          </span>
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent leading-tight pb-2">
             ¿En qué podemos
             <br />
@@ -400,7 +397,7 @@ export default function ContactanosPage() {
       </section>
 
       {/* Main Grid */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 pb-20 grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 pb-20 grid grid-cols-1 lg:grid-cols-5 gap-8">
 
         {/* Form */}
         <motion.div
@@ -581,7 +578,7 @@ export default function ContactanosPage() {
       </div>
 
       {/* FAQ */}
-      <section className="relative z-10 max-w-3xl mx-auto px-4 pb-24">
+      <section className="relative z-10 max-w-5xl mx-auto px-6 lg:px-10 pb-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
