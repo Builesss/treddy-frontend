@@ -70,7 +70,7 @@ function ProductCard({
         toast: true,
         position: "top-end",
       });
-    } catch (err) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error",
