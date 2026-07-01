@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import { Eye, EyeOff } from "lucide-react";
 import AnimatedBackground from "@/components/ui/AnimatedBackground";
 import Button from "@/components/ui/Button";
 
@@ -17,6 +18,7 @@ export default function RegisterPage() {
     confirmarContrasena: "",
     aceptar: false,
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,22 +170,40 @@ export default function RegisterPage() {
 
 
           <div className="grid grid-cols-2 gap-3">
-            <input
-              type="password"
-              name="contrasena"
-              placeholder="Contraseña"
-              value={form.contrasena}
-              onChange={handleChange}
-              className="p-2 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
-            />
-            <input
-              type="password"
-              name="confirmarContrasena"
-              placeholder="Confirmar Contraseña"
-              value={form.confirmarContrasena}
-              onChange={handleChange}
-              className="p-2 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="contrasena"
+                placeholder="Contraseña"
+                value={form.contrasena}
+                onChange={handleChange}
+                className="w-full p-2 pr-10 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-cyan-400 hover:text-cyan-300"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="confirmarContrasena"
+                placeholder="Confirmar Contraseña"
+                value={form.confirmarContrasena}
+                onChange={handleChange}
+                className="w-full p-2 pr-10 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-cyan-400 hover:text-cyan-300"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
 

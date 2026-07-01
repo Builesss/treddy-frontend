@@ -12,8 +12,8 @@ import Footer from '@/components/layout/Footer'
 import Swal from 'sweetalert2'
 
 // ─── Constantes de precio ───────────────────────────────────────────────────
-const PRECIO_POR_COLOR = 5_000   // +$5.000 por cada parte con color modificado
-const PRECIO_POR_TAMAÑO = 25_000  // +$25.000 si se elige un tamaño diferente al base
+const PRECIO_POR_COLOR = 2_000   // +$2.000 por cada parte con color modificado
+const PRECIO_POR_TAMAÑO = 10_000  // +$10.000 si se elige un tamaño diferente al base
 
 type ParteConfig = {
   color: string
