@@ -214,7 +214,7 @@ export default function Personalizador3DIndependiente() {
           <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2 tracking-tight text-center">
             Personalizador 3D
           </h1>
-          <p className="text-[#B5B8C5] mb-10 text-center max-w-2xl text-lg">
+          <p className="text-[#B5B8C5] mb-20 text-center max-w-2xl text-lg">
             Diseña y visualiza tu estilo único con nuestra herramienta de personalización en tiempo real.
           </p>
 

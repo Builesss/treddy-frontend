@@ -55,26 +55,30 @@ export default function Nav() {
     <motion.header
       className="bg-[#0A0F2C] border-b border-[#1a1f40] shadow-md sticky top-0 z-50"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+      {/* Usamos position relative en el contenedor para poder centrar el nav absolutamente */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center relative">
 
-        {/* Logo */}
-        <div className="flex-shrink-0">
+        {/* Logo — lado izquierdo, ocupa flex-1 para empujar el centro */}
+        <div className="flex-1 flex justify-start">
           <Link href="/" className="relative group text-xl sm:text-2xl font-extrabold text-[#00E6F6]">
             TREDDY
             <span className="absolute left-0 right-0 -bottom-1 h-0.5 bg-[#00E6F6] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
           </Link>
         </div>
 
-        {/* Desktop Nav Links */}
-        <nav className="hidden md:flex space-x-8" aria-label="Main Navigation">
+        {/* Desktop Nav Links — centrado ABSOLUTAMENTE para que no dependa de los laterales */}
+        <nav
+          className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2"
+          aria-label="Main Navigation"
+        >
           {links.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
-              className="relative group py-2"
+              className="relative group py-2 whitespace-nowrap"
             >
               <span
-                className={`transition-colors ${pathname === href
+                className={`text-sm transition-colors ${pathname === href
                   ? "text-[#00E6F6] font-semibold"
                   : "text-white hover:text-[#00E6F6]"
                   }`}
@@ -92,58 +96,57 @@ export default function Nav() {
           ))}
         </nav>
 
-        {/* Desktop Right Actions */}
-        <div className="hidden md:flex space-x-6 items-center">
+        {/* Desktop Right Actions — lado derecho, ocupa flex-1 para empujar el centro */}
+        <div className="flex-1 hidden md:flex items-center justify-end gap-3">
 
           {isAdmin ? (
             <Link
               href="/gestion-productos"
-              className={`flex items-center space-x-2 transition-colors ${pathname === "/gestion-productos"
+              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/gestion-productos"
                 ? "text-[#00E6F6] font-semibold"
                 : "text-white hover:text-[#00E6F6]"
                 }`}
             >
-              <LayoutDashboard size={20} />
+              <LayoutDashboard size={18} />
               <span>Dashboard</span>
             </Link>
           ) : (
             <Link
               href="/carrito-compras"
-              className={`flex items-center space-x-2 transition-colors ${pathname === "/carrito-compras"
+              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/carrito-compras"
                 ? "text-[#00E6F6] font-semibold"
                 : "text-white hover:text-[#00E6F6]"
                 }`}
             >
-              <ShoppingBag size={20} />
+              <ShoppingBag size={18} />
               <span>Carrito</span>
             </Link>
           )}
-
 
           {isLoggedIn ? (
             <>
               <Link
                 href="/perfil"
-                className={`flex items-center space-x-2 transition-colors ${pathname === "/perfil"
+                className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/perfil"
                   ? "text-[#00E6F6] font-semibold"
                   : "text-white hover:text-[#00E6F6]"
                   }`}
               >
-                <User size={20} />
+                <User size={18} />
                 <span>Perfil</span>
               </Link>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-4 py-2 rounded-full font-semibold hover:opacity-90 shadow-md"
+                className="flex items-center gap-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-4 py-1.5 rounded-full text-sm font-semibold hover:opacity-90 shadow-md transition-opacity whitespace-nowrap"
               >
-                <LogOut size={18} />
+                <LogOut size={16} />
                 <span>Cerrar sesión</span>
               </button>
             </>
           ) : (
             <Link
               href="/auth/login"
-              className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-6 py-2 rounded-full font-semibold hover:opacity-90 shadow-md"
+              className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-5 py-1.5 rounded-full text-sm font-semibold hover:opacity-90 shadow-md transition-opacity whitespace-nowrap"
             >
               Iniciar sesión
             </Link>
