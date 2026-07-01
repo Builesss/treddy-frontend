@@ -8,7 +8,7 @@ export default function ARSection() {
   const router = useRouter();
 
   return (
-    <section className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden bg-[#0A0F2C]">
+    <section className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden bg-[#030712]">
       {/* Background Glow */}
       <div className="absolute top-1/2 right-0 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px] translate-x-1/2 pointer-events-none" />
 

@@ -196,7 +196,7 @@ export default function Testimonials({
 
   return (
     <section 
-      className="py-16 sm:py-24 px-4 sm:px-8 overflow-hidden bg-[#030712]"
+      className="py-16 sm:py-24 px-4 sm:px-8 overflow-hidden bg-[#0A0F2C]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
     >

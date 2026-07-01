@@ -61,7 +61,7 @@ export default function WhyChooseUs() {
   ];
 
   return (
-    <section className="py-16 sm:py-32 px-4 sm:px-8 relative overflow-hidden bg-[#0A0F2C]">
+    <section className="py-16 sm:py-32 px-4 sm:px-8 relative overflow-hidden bg-[#030712]">
       {/* Background Decorative Gradient */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-blue-900/10 rounded-full blur-[150px] pointer-events-none" />
 
