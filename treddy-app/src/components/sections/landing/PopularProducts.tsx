@@ -15,7 +15,7 @@ export default function PopularProducts({
   handleVerMas,
 }: PopularProductsProps) {
   return (
-    <section className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden bg-transparent">
+    <section className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden bg-[#030712]">
       {/* Background decoration (sutil) */}
       <div className="absolute top-1/3 left-0 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none" />
 
@@ -41,14 +41,21 @@ export default function PopularProducts({
           </motion.p>
         </div>
 
+        {/* Mobile Carousel Hint */}
+        <div className="md:hidden flex items-center justify-center gap-2 mb-6 text-cyan-400/60 animate-pulse">
+          <ArrowRight className="w-4 h-4 rotate-180" />
+          <span className="text-[10px] font-black uppercase tracking-widest">Desliza para explorar</span>
+          <ArrowRight className="w-4 h-4" />
+        </div>
+
         {/* Products Grid / Mobile Carousel */}
         <div className="flex md:grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory scrollbar-hide pb-8 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
           {figuras.slice(0, 7).map((figura: Figura, index: number) => (
             <motion.div
               key={figura.producto_id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-50px" }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "200px" }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               whileHover={{
                 y: -10,
