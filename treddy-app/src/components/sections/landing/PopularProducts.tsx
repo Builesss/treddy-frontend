@@ -4,7 +4,7 @@ import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import Image from "next/image";
 import { ArrowRight, ShoppingCart } from "lucide-react";
 import { Figura } from "@/types";
-import { useRouter } from "next/navigation";
+// No useRouter needed
 import Swal from "sweetalert2";
 
 interface PopularProductsProps {
@@ -21,7 +21,7 @@ function ProductCard({
   index: number;
   handleVerMas: (nombre: string) => void;
 }) {
-  const router = useRouter();
+  // router removed
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -70,7 +70,7 @@ function ProductCard({
         toast: true,
         position: "top-end",
       });
-    } catch (error) {
+    } catch (err) {
       Swal.fire({
         icon: "error",
         title: "Error",
