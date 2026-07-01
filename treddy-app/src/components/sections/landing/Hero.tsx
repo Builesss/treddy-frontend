@@ -2,26 +2,66 @@
 
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Sparkles, Zap, ShieldCheck, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Figura } from "@/types";
+import { useState, useEffect } from "react";
 
 interface HeroProps {
   figuras: Figura[];
-  currentIndex: number;
-  prevSlide: () => void;
-  nextSlide: () => void;
-  goToSlide: (index: number) => void;
+}
+
+const ROTATING_WORDS = ["unicas", "precisas", "tuyas", "epicas", "premium"];
+
+function RotatingWord() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % ROTATING_WORDS.length), 2200);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <span className="relative inline-block overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={idx}
+          initial={{ y: 36, opacity: 0, filter: "blur(6px)" }}
+          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          exit={{ y: -36, opacity: 0, filter: "blur(6px)" }}
+          transition={{ duration: 0.45, ease: "easeInOut" }}
+          className="inline-block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"
+        >
+          {ROTATING_WORDS[idx]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div>
+        <p className="text-xl font-black text-white leading-none">{value}</p>
+        <p className="text-[11px] text-gray-500 mt-0.5 leading-none">{label}</p>
+      </div>
+    </div>
+  );
 }
 
 export default function Hero({
   figuras,
-  currentIndex,
-  prevSlide,
-  nextSlide,
-  goToSlide,
 }: HeroProps) {
   const router = useRouter();
+
+  const itemVariants: Variants = {
+    hidden: { y: 28, opacity: 0 },
+    visible: (i: number) => ({
+      y: 0,
+      opacity: 1,
+      transition: { delay: i * 0.12, type: "spring", stiffness: 90, damping: 18 },
+    }),
+  };
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -33,21 +73,9 @@ export default function Hero({
     },
   };
 
-  const itemVariants: Variants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-      },
-    },
-  };
-
   return (
-    <section className="pt-20 sm:pt-32 pb-12 sm:pb-24 px-4 sm:px-8 relative overflow-hidden">
-      {/* Decorative Background Elements */}
+    <section className="pt-8 sm:pt-12 pb-12 sm:pb-24 px-4 sm:px-8 relative overflow-hidden">
+      {/* Decorative background elements sutiles igual que antes */}
       <div className="absolute top-1/4 left-10 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl animate-pulse pointer-events-none" />
       <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-1000 pointer-events-none" />
 
@@ -57,101 +85,174 @@ export default function Hero({
         animate="visible"
         className="max-w-[1600px] mx-auto border border-white/10 p-6 sm:p-14 bg-[#0F173A]/20 rounded-3xl sm:rounded-[40px] shadow-2xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-8 sm:gap-12 relative z-10"
       >
-        <div className="max-w-xl text-center md:text-left">
-          <motion.h2
+
+        <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left md:ml-10">
+
+          <motion.div
+            custom={0}
             variants={itemVariants}
-            className="text-3xl sm:text-5xl md:text-7xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-4 sm:mb-6 md:ml-10"
+            initial="hidden"
+            animate="visible"
+            className="inline-flex items-center gap-2 px-4 py-1.5 mb-5 rounded-full bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/25 text-cyan-400 text-xs font-bold tracking-widest uppercase"
           >
-            Treddy Figuras 3D
-          </motion.h2>
+            <Sparkles size={13} className="text-cyan-300" />
+            Impresión 3D de alta precisión
+          </motion.div>
+
+          <motion.h1
+            custom={1}
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-5"
+          >
+            Treddy — Figuras 3D<br />
+            <RotatingWord />
+          </motion.h1>
+
           <motion.p
+            custom={2}
             variants={itemVariants}
-            className="text-base sm:text-xl text-[#B5B8C5] mb-6 sm:mb-8 leading-relaxed md:ml-10"
+            initial="hidden"
+            animate="visible"
+            className="text-base sm:text-xl text-[#B5B8C5] mb-6 sm:mb-8 leading-relaxed max-w-lg"
           >
-            Personaliza o crea tu propia figura impresa en 3D con tecnología de
-            vanguardia y acabados profesionales.
+            Personaliza o crea tu propia figura impresa en 3D con tecnología de vanguardia y acabados profesionales.
           </motion.p>
-          <motion.button
+
+          <motion.div
+            custom={3}
             variants={itemVariants}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push("/catalogo")}
-            className="bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-8 sm:px-10 py-3 sm:py-4 rounded-full hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] font-bold shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all md:ml-10 text-sm sm:text-base"
+            initial="hidden"
+            animate="visible"
+            className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-8 sm:mb-10"
           >
-            Inicia ahora
-          </motion.button>
+            <button
+              onClick={() => router.push("/catalogo")}
+              className="group flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-7 py-3.5 rounded-full font-bold text-sm hover:shadow-[0_0_35px_rgba(6,182,212,0.55)] shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
+            >
+              Ver catalogo
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
+              onClick={() => router.push("/personalizacion")}
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm text-white border border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/30 backdrop-blur-sm transition-all duration-300"
+            >
+              <Zap size={15} className="text-cyan-400" />
+              Personalizar
+            </button>
+          </motion.div>
+
+          <motion.div
+            custom={4}
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex items-center gap-6 flex-wrap justify-center md:justify-start"
+          >
+            <Stat value="10k+" label="Pedidos entregados" />
+            <div className="w-px h-8 bg-white/10" />
+            <Stat value="98%" label="Satisfaccion" />
+            <div className="w-px h-8 bg-white/10" />
+            <Stat value="48h" label="Tiempo de entrega" />
+          </motion.div>
+
+          <motion.div
+            custom={5}
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            className="mt-6 flex items-center gap-2 text-[11px] text-gray-500"
+          >
+            <ShieldCheck size={14} className="text-cyan-600" />
+            Pago seguro · Envío protegido · Garantía 15 días
+          </motion.div>
         </div>
 
         {figuras.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="relative w-full md:w-[700px] h-[350px] sm:h-[450px] md:h-[550px] bg-[#0F173A]/40 backdrop-blur-xl border border-white/10 rounded-3xl sm:rounded-[2.5rem] overflow-hidden group shadow-2xl flex flex-col"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.2, type: "spring", stiffness: 70 }}
+            className="flex-shrink-0 w-full lg:w-[500px] xl:w-[600px] flex items-center justify-center relative mt-16 lg:mt-0"
           >
-            <div className="flex-grow flex items-center justify-center p-8">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentIndex}
-                  initial={{ opacity: 0, scale: 0.8, rotateY: 45 }}
-                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                  exit={{ opacity: 0, scale: 1.1, rotateY: -45 }}
-                  transition={{ duration: 0.6, type: "spring", damping: 20 }}
-                  className="flex flex-col items-center justify-center text-center w-full h-full"
-                >
-                  <div className="relative w-full h-full max-h-[330px] aspect-square mb-10 -mt-8">
-                    <Image
-                      src={figuras[currentIndex].imagenUrl}
-                      alt={figuras[currentIndex].nombre}
-                      fill
-                      priority
-                      sizes="(max-width: 768px) 100vw, 500px"
-                      className="object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.15)] filter brightness-110"
-                    />
-                  </div>
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <p className="text-cyan-400 text-sm font-bold tracking-[0.2em] uppercase mb-2">
-                      Destacado
-                    </p>
-                    <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight uppercase">
-                      {figuras[currentIndex].nombre}
-                    </h3>
-                  </motion.div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+            {/* Glow central */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] bg-cyan-500/20 rounded-full blur-[100px] pointer-events-none" />
 
-            <button
-              onClick={prevSlide}
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 p-2 sm:p-4 rounded-full bg-black/40 text-white border border-white/5 hover:bg-cyan-500 hover:text-black hover:border-transparent transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 z-10 backdrop-blur-md"
+            {/* Figura Flotante Principal */}
+            <motion.div
+              animate={{ y: [-15, 15, -15] }}
+              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              className="relative w-[300px] h-[350px] sm:w-[400px] sm:h-[450px] xl:w-[450px] xl:h-[500px] z-20"
             >
-              <ChevronLeft size={24} />
-            </button>
+              <Image
+                src={figuras[0].imagenUrl}
+                alt="Figura Premium Destacada"
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 500px"
+                className="object-contain drop-shadow-[0_20px_50px_rgba(0,230,246,0.25)] filter brightness-110"
+              />
+            </motion.div>
 
-            <button
-              onClick={nextSlide}
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 p-2 sm:p-4 rounded-full bg-black/40 text-white border border-white/5 hover:bg-cyan-500 hover:text-black hover:border-transparent transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 z-10 backdrop-blur-md"
+            {/* Badges Flotantes Premium */}
+            {/* Arriba izquierda */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, x: -20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ delay: 0.8, duration: 0.5, type: "spring" }}
+              className="absolute top-[15%] left-0 sm:-left-10 z-30 flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#0F173A]/60 backdrop-blur-xl border border-white/10 shadow-xl"
             >
-              <ChevronRight size={24} />
-            </button>
+              <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                <Sparkles size={18} />
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Material</p>
+                <p className="text-sm text-white font-semibold">Resina 8K</p>
+              </div>
+            </motion.div>
 
-            <div className="absolute bottom-10 left-0 right-0 flex justify-center space-x-4 z-10">
-              {figuras.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`h-1.5 rounded-full transition-all duration-500 ${
-                    index === currentIndex
-                      ? "w-12 bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]"
-                      : "w-3 bg-white/20 hover:bg-white/40"
-                  }`}
-                />
-              ))}
-            </div>
+            {/* Abajo derecha */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ delay: 1, duration: 0.5, type: "spring" }}
+              className="absolute bottom-[20%] right-0 sm:-right-8 z-30 flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#0F173A]/60 backdrop-blur-xl border border-white/10 shadow-xl"
+            >
+              <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
+                <ShieldCheck size={18} />
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Acabado</p>
+                <p className="text-sm text-white font-semibold">Pintado a mano</p>
+              </div>
+            </motion.div>
+
+            {/* Arriba derecha (Pequeño) */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: 1.2, duration: 0.5, type: "spring" }}
+              className="absolute top-[5%] right-10 z-10 px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 backdrop-blur-md text-[10px] font-bold text-blue-300 tracking-widest uppercase"
+            >
+              Exclusivo
+            </motion.div>
+
+            {/* Nombre de la figura debajo */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.4 }}
+              className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-center w-full"
+            >
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase shadow-black drop-shadow-md">
+                {figuras[0].nombre}
+              </h3>
+              <p className="text-xs text-cyan-400 mt-1 tracking-widest uppercase font-semibold drop-shadow-md">
+                Modelo Destacado
+              </p>
+            </motion.div>
+
           </motion.div>
         )}
       </motion.div>

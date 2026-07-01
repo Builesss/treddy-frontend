@@ -333,13 +333,13 @@ function CustomizerContent() {
   return (
     <>
       <Nav />
-      <main className="min-h-screen flex flex-col items-center justify-center bg-[#0A0F2C] relative overflow-hidden py-20 -mb-20">
+      <main className="min-h-screen flex flex-col items-center justify-center bg-[#0A0F2C] relative overflow-hidden py-20 -mb-15">
 
         <div className="z-10 w-full max-w-7xl px-4 flex flex-col items-center">
-          <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-2 tracking-tight text-center">
+          <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-5 tracking-tight text-center">
             Personalizador 3D
           </h1>
-          <p className="text-[#B5B8C5] mb-4 text-center max-w-2xl text-lg">
+          <p className="text-[#B5B8C5] mb-15 text-center max-w-2xl text-lg">
             Diseña y visualiza tu estilo único. El precio se actualiza en tiempo real según tus personalizaciones.
           </p>
 
