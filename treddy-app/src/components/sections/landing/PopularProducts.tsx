@@ -15,9 +15,9 @@ export default function PopularProducts({
   handleVerMas,
 }: PopularProductsProps) {
   return (
-    <section className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden bg-[#030712]">
-      {/* Background decoration */}
-      <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -translate-x-1/2 pointer-events-none" />
+    <section className="py-16 sm:py-24 px-4 sm:px-8 relative overflow-hidden bg-transparent">
+      {/* Background decoration (sutil) */}
+      <div className="absolute top-1/3 left-0 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-[1600px] mx-auto">
         <div className="text-center mb-16">
@@ -25,9 +25,9 @@ export default function PopularProducts({
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="text-3xl sm:text-4xl md:text-6xl font-black bg-gradient-to-r py-3 from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2 tracking-tighter"
+            className="text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r py-3 from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4 tracking-tight"
           >
-            PRODUCTOS POPULARES
+            Colección Premium
           </motion.h3>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -55,7 +55,7 @@ export default function PopularProducts({
                 transition: { duration: 0.3 },
               }}
               style={{ perspective: 1000 }}
-              className={`group relative bg-[#10193F]/40 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] text-center border border-white/5 hover:border-cyan-500/30 transition-all duration-300 flex flex-col ${
+              className={`group relative bg-[#0F173A]/40 backdrop-blur-xl p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] text-center border border-white/10 shadow-2xl hover:border-cyan-500/30 transition-all duration-500 flex flex-col ${
                 index === 0 ? "md:col-span-2 lg:col-span-2 lg:row-span-2" : ""
               }`}
             >
@@ -103,10 +103,10 @@ export default function PopularProducts({
               </div>
 
               {/* Holographic Reflection Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/0 via-white/[0.03] to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2rem]" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/0 via-white/[0.04] to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2.5rem]" />
 
               {/* Card Glow Background */}
-              <div className="absolute -inset-[1px] bg-gradient-to-br from-cyan-500/20 to-blue-600/20 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300 pointer-events-none rounded-[2rem]" />
+              <div className="absolute -inset-[1px] bg-gradient-to-br from-cyan-500/20 to-blue-600/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500 pointer-events-none rounded-[2.5rem]" />
             </motion.div>
           ))}
         </div>

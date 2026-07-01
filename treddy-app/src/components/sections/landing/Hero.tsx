@@ -74,7 +74,7 @@ export default function Hero({
   };
 
   return (
-    <section className="pt-20 sm:pt-32 pb-12 sm:pb-24 px-4 sm:px-8 relative overflow-hidden">
+    <section className="pt-8 sm:pt-12 pb-12 sm:pb-24 px-4 sm:px-8 relative overflow-hidden">
       {/* Decorative background elements sutiles igual que antes */}
       <div className="absolute top-1/4 left-10 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl animate-pulse pointer-events-none" />
       <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-1000 pointer-events-none" />

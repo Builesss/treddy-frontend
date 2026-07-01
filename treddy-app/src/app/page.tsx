@@ -17,10 +17,6 @@ const HowItWorks = dynamic(() => import("@/components/sections/landing/HowItWork
   loading: () => <div className="h-96 animate-pulse bg-gray-800/20" />,
 });
 
-const Categories = dynamic(() => import("@/components/sections/landing/Categories"), {
-  loading: () => <div className="h-96 animate-pulse bg-gray-800/20" />,
-});
-
 const WhyChooseUs = dynamic(() => import("@/components/sections/landing/WhyChooseUs"), {
   loading: () => <div className="h-96 animate-pulse bg-gray-800/20" />,
 });
@@ -66,8 +62,6 @@ export default function HomePage() {
       <PopularProducts figuras={figuras} handleVerMas={handleVerMas} />
 
       <HowItWorks />
-
-      <Categories />
 
       <WhyChooseUs />
 
