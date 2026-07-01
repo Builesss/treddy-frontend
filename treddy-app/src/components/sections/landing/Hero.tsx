@@ -183,7 +183,7 @@ export default function Hero({
             <motion.div
               animate={{ y: [-15, 15, -15] }}
               transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-              className="relative w-[300px] h-[350px] sm:w-[400px] sm:h-[450px] xl:w-[450px] xl:h-[500px] z-20"
+              className="relative w-full max-w-[260px] aspect-[6/7] sm:max-w-none sm:w-[400px] sm:h-[450px] xl:w-[450px] xl:h-[500px] z-20 mx-auto"
             >
               <Image
                 src={figuras[0].imagenUrl}
@@ -201,14 +201,14 @@ export default function Hero({
               initial={{ opacity: 0, scale: 0.8, x: -20 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               transition={{ delay: 0.8, duration: 0.5, type: "spring" }}
-              className="absolute top-[15%] left-0 sm:-left-10 z-30 flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#0F173A]/60 backdrop-blur-xl border border-white/10 shadow-xl"
+              className="absolute top-[10%] left-2 sm:-left-10 z-30 flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-[#0F173A]/80 backdrop-blur-xl border border-white/10 shadow-xl"
             >
-              <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400">
-                <Sparkles size={18} />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                <Sparkles size={16} />
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Material</p>
-                <p className="text-sm text-white font-semibold">Resina 8K</p>
+                <p className="text-[9px] sm:text-[10px] text-gray-400 uppercase tracking-wider font-bold">Material</p>
+                <p className="text-xs sm:text-sm text-white font-semibold">Resina 8K</p>
               </div>
             </motion.div>
 
@@ -217,14 +217,14 @@ export default function Hero({
               initial={{ opacity: 0, scale: 0.8, x: 20 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               transition={{ delay: 1, duration: 0.5, type: "spring" }}
-              className="absolute bottom-[20%] right-0 sm:-right-8 z-30 flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#0F173A]/60 backdrop-blur-xl border border-white/10 shadow-xl"
+              className="absolute bottom-[15%] right-2 sm:-right-8 z-30 flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl bg-[#0F173A]/80 backdrop-blur-xl border border-white/10 shadow-xl"
             >
-              <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
-                <ShieldCheck size={18} />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
+                <ShieldCheck size={16} />
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Acabado</p>
-                <p className="text-sm text-white font-semibold">Pintado a mano</p>
+                <p className="text-[9px] sm:text-[10px] text-gray-400 uppercase tracking-wider font-bold">Acabado</p>
+                <p className="text-xs sm:text-sm text-white font-semibold">Pintado a mano</p>
               </div>
             </motion.div>
 
@@ -233,7 +233,7 @@ export default function Hero({
               initial={{ opacity: 0, scale: 0.8, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 1.2, duration: 0.5, type: "spring" }}
-              className="absolute top-[5%] right-10 z-10 px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 backdrop-blur-md text-[10px] font-bold text-blue-300 tracking-widest uppercase"
+              className="absolute top-[2%] right-4 sm:right-10 z-10 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl bg-blue-500/10 border border-blue-500/20 backdrop-blur-md text-[8px] sm:text-[10px] font-bold text-blue-300 tracking-widest uppercase"
             >
               Exclusivo
             </motion.div>
@@ -243,12 +243,12 @@ export default function Hero({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.4 }}
-              className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-center w-full"
+              className="absolute -bottom-6 sm:-bottom-10 left-1/2 -translate-x-1/2 text-center w-full z-10"
             >
-              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase shadow-black drop-shadow-md">
+              <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight uppercase shadow-black drop-shadow-md">
                 {figuras[0].nombre}
               </h3>
-              <p className="text-xs text-cyan-400 mt-1 tracking-widest uppercase font-semibold drop-shadow-md">
+              <p className="text-[10px] sm:text-xs text-cyan-400 mt-0.5 sm:mt-1 tracking-widest uppercase font-semibold drop-shadow-md">
                 Modelo Destacado
               </p>
             </motion.div>
