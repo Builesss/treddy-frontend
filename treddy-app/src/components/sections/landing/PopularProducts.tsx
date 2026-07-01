@@ -129,7 +129,7 @@ function ProductCard({
         </div>
 
         {/* Image Container */}
-        <div className="relative flex-grow mt-8 mb-6 w-full flex items-center justify-center">
+        <div className="relative flex-grow mt-10 mb-8 w-full flex items-center justify-center">
           <motion.div
             whileHover={{ scale: 1.1, rotate: index % 2 === 0 ? 3 : -3 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -154,7 +154,7 @@ function ProductCard({
             {figura.nombre}
           </h4>
           
-          <div className="my-4 h-[1px] w-full bg-gradient-to-r from-cyan-500/50 via-white/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+          <div className="my-6 sm:my-8 h-[1px] w-full bg-gradient-to-r from-cyan-500/50 via-white/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
           
           <div className="flex items-center justify-between gap-2">
             <div className="flex flex-col">
@@ -200,7 +200,7 @@ export default function PopularProducts({
   handleVerMas,
 }: PopularProductsProps) {
   return (
-    <section className="py-16 sm:py-24 relative overflow-hidden bg-[#0A0F2C]">
+    <section className="py-16 sm:py-24 relative overflow-hidden bg-[#030712]">
       {/* Background decoration */}
       <div className="absolute top-1/3 left-0 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-[150px] pointer-events-none" />
       
