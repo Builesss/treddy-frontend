@@ -174,7 +174,7 @@ export default function Hero({
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.2, type: "spring", stiffness: 70 }}
-            className="flex-shrink-0 w-full lg:w-[500px] xl:w-[600px] flex items-center justify-center relative mt-16 lg:mt-0"
+            className="flex-shrink-0 w-full lg:w-[500px] xl:w-[600px] flex items-center justify-center relative mt-16 lg:mt-0 pb-20 sm:pb-16 lg:pb-0"
           >
             {/* Glow central */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] bg-cyan-500/20 rounded-full blur-[100px] pointer-events-none" />
@@ -243,7 +243,7 @@ export default function Hero({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.4 }}
-              className="absolute -bottom-6 sm:-bottom-10 left-1/2 -translate-x-1/2 text-center w-full z-10"
+              className="absolute -bottom-14 sm:-bottom-10 left-1/2 -translate-x-1/2 text-center w-full z-10"
             >
               <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight uppercase shadow-black drop-shadow-md">
                 {figuras[0].nombre}
