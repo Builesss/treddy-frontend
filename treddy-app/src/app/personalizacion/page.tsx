@@ -333,7 +333,7 @@ function CustomizerContent() {
   return (
     <>
       <Nav />
-      <main className="min-h-screen flex flex-col items-center justify-center bg-[#0A0F2C] relative overflow-hidden py-20 -mb-15">
+      <main className="min-h-screen flex flex-col items-center justify-center bg-[#0A0F2C] relative overflow-hidden py-20 -mb-20">
 
         <div className="z-10 w-full max-w-7xl px-4 flex flex-col items-center">
           <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-5 tracking-tight text-center">

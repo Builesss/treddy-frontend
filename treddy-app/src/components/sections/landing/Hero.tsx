@@ -104,7 +104,7 @@ export default function Hero({
             variants={itemVariants}
             initial="hidden"
             animate="visible"
-            className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-5"
+            className="text-3xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-5 break-words w-full"
           >
             Treddy — Figuras 3D<br />
             <RotatingWord />

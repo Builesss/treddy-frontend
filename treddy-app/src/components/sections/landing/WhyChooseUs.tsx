@@ -16,7 +16,7 @@ export default function WhyChooseUs() {
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.9, y: 20 },
+    hidden: { opacity: 0, scale: 0.9, y: 0 },
     visible: {
       opacity: 1,
       scale: 1,

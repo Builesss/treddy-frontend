@@ -138,7 +138,7 @@ export default function Testimonials({
 
     const handleScroll = () => {
       const scrollLeft = container.scrollLeft;
-      const cardWidth = container.offsetWidth * 0.82; // ~82% card width + gap
+      const cardWidth = container.offsetWidth; // 100% card width
       const index = Math.round(scrollLeft / cardWidth);
       setActiveMobileIndex(Math.min(index, testimonials.length - 1));
     };
@@ -155,7 +155,7 @@ export default function Testimonials({
       if (isMobile) {
         const container = scrollRef.current;
         if (container) {
-          const cardWidth = container.offsetWidth * 0.82;
+          const cardWidth = container.offsetWidth;
           const nextIndex = (activeMobileIndex + 1) % testimonials.length;
           container.scrollTo({
             left: nextIndex * (cardWidth + 16),
@@ -228,7 +228,7 @@ export default function Testimonials({
               {testimonials.map((testimonial, idx) => (
                 <div
                   key={idx}
-                  className="flex-shrink-0 w-[82%] snap-center"
+                  className="flex-shrink-0 w-full snap-center"
                 >
                   <TestimonialCard testimonial={testimonial} />
                 </div>
@@ -243,7 +243,7 @@ export default function Testimonials({
                   onClick={() => {
                     const container = scrollRef.current;
                     if (container) {
-                      const cardWidth = container.offsetWidth * 0.82;
+                      const cardWidth = container.offsetWidth;
                       container.scrollTo({
                         left: idx * (cardWidth + 16),
                         behavior: "smooth",

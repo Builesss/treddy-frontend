@@ -30,8 +30,8 @@ export default function PopularProducts({
             PRODUCTOS POPULARES
           </motion.h3>
           <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
             className="text-[#B5B8C5] text-lg max-w-2xl mx-auto"
@@ -44,8 +44,8 @@ export default function PopularProducts({
           {figuras.slice(0, 7).map((figura: Figura, index: number) => (
             <motion.div
               key={figura.producto_id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               whileHover={{
