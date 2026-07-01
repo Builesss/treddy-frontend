@@ -243,7 +243,7 @@ export default function Hero({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1.4 }}
-              className="absolute -bottom-14 sm:-bottom-10 left-1/2 -translate-x-1/2 text-center w-full z-10"
+              className="absolute bottom-2 sm:-bottom-10 left-1/2 -translate-x-1/2 text-center w-full z-10"
             >
               <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight uppercase shadow-black drop-shadow-md">
                 {figuras[0].nombre}

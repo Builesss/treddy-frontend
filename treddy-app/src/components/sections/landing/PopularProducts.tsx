@@ -84,14 +84,18 @@ export default function PopularProducts({
                     Premium Edition
                   </p>
                   <p
-                    className={`font-black text-white uppercase tracking-tight group-hover:text-cyan-300 transition-colors text-left ${index === 0 ? "text-4xl" : "text-xl"}`}
+                    className={`font-black text-white uppercase tracking-tight group-hover:text-cyan-300 transition-colors text-left ${
+                      index === 0 ? "text-4xl md:text-4xl" : "text-4xl md:text-xl"
+                    }`}
                   >
                     {figura.nombre}
                   </p>
                   <div className="my-4 h-[1px] w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
                   <div className="flex items-center justify-between gap-4">
                     <p
-                      className={`font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight ${index === 0 ? "text-4xl" : "text-2xl"}`}
+                      className={`font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight ${
+                        index === 0 ? "text-4xl md:text-4xl" : "text-4xl md:text-2xl"
+                      }`}
                     >
                       ${figura.precio_base.toLocaleString("es-CO")}
                     </p>
@@ -100,7 +104,9 @@ export default function PopularProducts({
                         e.stopPropagation();
                         handleVerMas(figura.nombre);
                       }}
-                      className={`group/btn relative overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 text-white hover:text-black hover:bg-white rounded-xl font-bold transition-all duration-500 flex items-center justify-center gap-2 ${index === 0 ? "px-8 py-4 text-xl" : "px-4 py-2 text-sm"}`}
+                      className={`group/btn relative overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10 text-white hover:text-black hover:bg-white rounded-xl font-bold transition-all duration-500 flex items-center justify-center gap-2 ${
+                        index === 0 ? "px-8 py-4 text-xl" : "px-8 py-4 text-xl md:px-4 md:py-2 md:text-sm"
+                      }`}
                     >
                       Detalles
                       <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
