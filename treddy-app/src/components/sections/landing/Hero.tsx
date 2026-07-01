@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
@@ -104,33 +104,40 @@ export default function Hero({
     }),
   };
 
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
   return (
-    <section className="relative min-h-[92vh] flex items-center overflow-hidden px-4 sm:px-8 lg:px-14">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(0,230,246,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,230,246,0.04) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-      <div className="absolute top-[-5%] left-[-5%] w-[55%] h-[55%] bg-cyan-500/8 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-5%] right-[-5%] w-[45%] h-[45%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-[30%] right-[30%] w-[20%] h-[20%] bg-purple-600/6 rounded-full blur-[80px] pointer-events-none" />
+    <section className="pt-20 sm:pt-32 pb-12 sm:pb-24 px-4 sm:px-8 relative overflow-hidden">
+      {/* Decorative background elements sutiles igual que antes */}
+      <div className="absolute top-1/4 left-10 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl animate-pulse pointer-events-none" />
+      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-1000 pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-0 py-16 lg:py-0">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-w-[1600px] mx-auto border border-white/10 p-6 sm:p-14 bg-[#0F173A]/20 rounded-3xl sm:rounded-[40px] shadow-2xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-8 sm:gap-12 relative z-10"
+      >
 
-        <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left pr-0 lg:pr-12 xl:pr-20">
+        <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left md:ml-10">
 
           <motion.div
             custom={0}
             variants={itemVariants}
             initial="hidden"
             animate="visible"
-            className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/25 text-cyan-400 text-xs font-bold tracking-widest uppercase"
+            className="inline-flex items-center gap-2 px-4 py-1.5 mb-5 rounded-full bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/25 text-cyan-400 text-xs font-bold tracking-widest uppercase"
           >
             <Sparkles size={13} className="text-cyan-300" />
-            Impresion 3D de alta precision
+            Impresión 3D de alta precisión
           </motion.div>
 
           <motion.h1
@@ -138,9 +145,9 @@ export default function Hero({
             variants={itemVariants}
             initial="hidden"
             animate="visible"
-            className="text-5xl sm:text-6xl xl:text-7xl 2xl:text-8xl font-black leading-[1.05] tracking-tight text-white mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent leading-tight mb-5"
           >
-            Figuras 3D<br />
+            Treddy — Figuras 3D<br />
             <RotatingWord />
           </motion.h1>
 
@@ -149,9 +156,9 @@ export default function Hero({
             variants={itemVariants}
             initial="hidden"
             animate="visible"
-            className="text-base sm:text-lg text-[#8B8FA8] max-w-md leading-relaxed mb-8"
+            className="text-base sm:text-xl text-[#B5B8C5] mb-6 sm:mb-8 leading-relaxed max-w-lg"
           >
-            Disena, personaliza y recibe tu figura impresa en 3D directamente en tu puerta. Tecnologia de vanguardia, acabados que sorprenden.
+            Personaliza o crea tu propia figura impresa en 3D con tecnología de vanguardia y acabados profesionales.
           </motion.p>
 
           <motion.div
@@ -159,7 +166,7 @@ export default function Hero({
             variants={itemVariants}
             initial="hidden"
             animate="visible"
-            className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-10"
+            className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-8 sm:mb-10"
           >
             <button
               onClick={() => router.push("/catalogo")}
@@ -182,7 +189,7 @@ export default function Hero({
             variants={itemVariants}
             initial="hidden"
             animate="visible"
-            className="flex items-center gap-6 flex-wrap justify-center lg:justify-start"
+            className="flex items-center gap-6 flex-wrap justify-center md:justify-start"
           >
             <Stat value="10k+" label="Pedidos entregados" />
             <div className="w-px h-8 bg-white/10" />
@@ -196,10 +203,10 @@ export default function Hero({
             variants={itemVariants}
             initial="hidden"
             animate="visible"
-            className="mt-8 flex items-center gap-2 text-[11px] text-gray-600"
+            className="mt-6 flex items-center gap-2 text-[11px] text-gray-500"
           >
             <ShieldCheck size={14} className="text-cyan-600" />
-            Pago seguro - Envio protegido - Garantia 15 dias
+            Pago seguro · Envío protegido · Garantía 15 días
           </motion.div>
         </div>
 
@@ -332,7 +339,7 @@ export default function Hero({
             </div>
           </motion.div>
         )}
-      </div>
+      </motion.div>
     </section>
   );
 }
