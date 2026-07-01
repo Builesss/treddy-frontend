@@ -2,17 +2,13 @@
 
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Sparkles, Zap, ShieldCheck, ArrowRight } from "lucide-react";
+import { Sparkles, Zap, ShieldCheck, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Figura } from "@/types";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 interface HeroProps {
   figuras: Figura[];
-  currentIndex: number;
-  prevSlide: () => void;
-  nextSlide: () => void;
-  goToSlide: (index: number) => void;
 }
 
 const ROTATING_WORDS = ["unicas", "precisas", "tuyas", "epicas", "premium"];
@@ -41,29 +37,6 @@ function RotatingWord() {
   );
 }
 
-function FloatingBadge({
-  icon,
-  text,
-  delay,
-  className,
-}: {
-  icon: React.ReactNode;
-  text: string;
-  delay: number;
-  className?: string;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay, type: "spring", stiffness: 120 }}
-      className={`absolute flex items-center gap-2 px-3 py-2 rounded-xl bg-[#0F173A]/80 border border-cyan-500/20 backdrop-blur-md text-xs font-semibold text-cyan-300 shadow-lg shadow-cyan-500/10 pointer-events-none select-none ${className}`}
-    >
-      {icon}
-      {text}
-    </motion.div>
-  );
-}
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (
@@ -78,10 +51,6 @@ function Stat({ value, label }: { value: string; label: string }) {
 
 export default function Hero({
   figuras,
-  currentIndex,
-  prevSlide,
-  nextSlide,
-  goToSlide,
 }: HeroProps) {
   const router = useRouter();
 

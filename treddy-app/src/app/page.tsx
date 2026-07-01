@@ -42,32 +42,12 @@ const Newsletter = dynamic(() => import("@/components/sections/landing/Newslette
 
 export default function HomePage() {
   const [figuras, setFiguras] = useState<Figura[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [testimonialIndex, setTestimonialIndex] = useState(0);
 
   useEffect(() => {
     getFiguras().then(setFiguras).catch(console.error);
   }, []);
 
-  useEffect(() => {
-    if (figuras.length === 0) return;
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [currentIndex, figuras.length]);
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev === 0 ? figuras.length - 1 : prev - 1));
-  };
-
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev === figuras.length - 1 ? 0 : prev + 1));
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
 
   const handleVerMas = (nombre: string) => {
     window.location.href = `/catalogo?search=${encodeURIComponent(nombre)}`;
@@ -81,13 +61,7 @@ export default function HomePage() {
       </div>
       <Nav />
 
-      <Hero
-        figuras={figuras}
-        currentIndex={currentIndex}
-        prevSlide={prevSlide}
-        nextSlide={nextSlide}
-        goToSlide={goToSlide}
-      />
+      <Hero figuras={figuras} />
 
       <PopularProducts figuras={figuras} handleVerMas={handleVerMas} />
 
