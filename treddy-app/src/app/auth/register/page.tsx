@@ -20,10 +20,17 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+    // Clear error for this field when user modifies it
+    if (errors[name]) {
+      const newErrors = { ...errors };
+      delete newErrors[name];
+      setErrors(newErrors);
+    }
   };
 
 
@@ -47,21 +54,59 @@ export default function RegisterPage() {
     });
   };
 
+  const validateForm = () => {
+    const fieldErrors: Record<string, string> = {};
+    if (!form.nombre) fieldErrors.nombre = 'Campo Incompleto';
+    if (!form.apellido) fieldErrors.apellido = 'Campo Incompleto';
+    if (!form.telefono) fieldErrors.telefono = 'Campo Incompleto';
+    if (!form.email) fieldErrors.email = 'Campo Incompleto';
+    if (!form.contrasena) {
+      fieldErrors.contrasena = 'Campo Incompleto';
+    } else {
+      const pwd = form.contrasena;
+      const hasUpper = /[A-Z]/.test(pwd);
+      const hasLower = /[a-z]/.test(pwd);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
+      if (pwd.length < 8) {
+        fieldErrors.contrasena = 'La contraseña debe tener al menos 8 caracteres';
+      } else if (!hasUpper || !hasLower || !hasSpecial) {
+        fieldErrors.contrasena = 'La contraseña debe incluir mayúscula, minúscula y carácter especial';
+      }
+    }
+    if (!form.confirmarContrasena) fieldErrors.confirmarContrasena = 'Campo Incompleto';
+    else if (form.contrasena && form.confirmarContrasena && form.contrasena !== form.confirmarContrasena) {
+      fieldErrors.confirmarContrasena = 'Las contraseñas no coinciden';
+    }
+    return fieldErrors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrors({});
+    // Validate required fields
+    const fieldErrors = validateForm();
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors(fieldErrors);
 
+      setIsLoading(false);
+      return;
+    }
 
-    if (!form.aceptar) {
+    setErrors({}); if (!form.aceptar) {
       showAlert("warning", "Atención", "Debes aceptar los términos y condiciones.");
+      setIsLoading(false);
       return;
     }
 
     if (form.contrasena !== form.confirmarContrasena) {
-      showAlert("error", "Error", "Las contraseñas no coinciden.");
+      // Set specific errors for password fields
+      setErrors({ contrasena: 'Las contraseñas no coinciden', confirmarContrasena: 'Las contraseñas no coinciden' });
+      setIsLoading(false);
       return;
     }
 
+    setErrors({});
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
       const response = await fetch(`${apiUrl}/api/auth/register`, {
@@ -130,79 +175,97 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
 
           <div className="grid grid-cols-2 gap-3">
-            <input
-              type="text"
-              name="nombre"
-              placeholder="Nombre"
-              value={form.nombre}
-              onChange={handleChange}
-              className="p-2 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
-            />
-            <input
-              type="text"
-              name="apellido"
-              placeholder="Apellido"
-              value={form.apellido}
-              onChange={handleChange}
-              className="p-2 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
-            />
-          </div>
-
-
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              type="text"
-              name="telefono"
-              placeholder="Teléfono"
-              value={form.telefono}
-              onChange={handleChange}
-              className="p-2 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Correo"
-              value={form.email}
-              onChange={handleChange}
-              className="p-2 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
-            />
-          </div>
-
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="relative">
+            <div>
               <input
-                type={showPassword ? "text" : "password"}
-                name="contrasena"
-                placeholder="Contraseña"
-                value={form.contrasena}
+                type="text"
+                name="nombre"
+                placeholder="Nombre"
+                value={form.nombre}
                 onChange={handleChange}
-                className="w-full p-2 pr-10 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
+                className={`w-full p-2 rounded bg-[#162435] border ${errors.nombre ? "border-red-500" : "border-cyan-500"} focus:outline-none`}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-cyan-400 hover:text-cyan-300"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+              {errors.nombre && <p className="text-sm text-red-500 mt-1">{errors.nombre}</p>}
             </div>
-            <div className="relative">
+            <div>
               <input
-                type={showPassword ? "text" : "password"}
-                name="confirmarContrasena"
-                placeholder="Confirmar Contraseña"
-                value={form.confirmarContrasena}
+                type="text"
+                name="apellido"
+                placeholder="Apellido"
+                value={form.apellido}
                 onChange={handleChange}
-                className="w-full p-2 pr-10 rounded bg-[#162435] border border-cyan-500 focus:outline-none"
+                className={`w-full p-2 rounded bg-[#162435] border ${errors.apellido ? "border-red-500" : "border-cyan-500"} focus:outline-none`}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-cyan-400 hover:text-cyan-300"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+              {errors.apellido && <p className="text-sm text-red-500 mt-1">{errors.apellido}</p>}
+            </div>
+          </div>
+
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <input
+                type="text"
+                name="telefono"
+                placeholder="Teléfono"
+                value={form.telefono}
+                onChange={handleChange}
+                className={`w-full p-2 rounded bg-[#162435] border ${errors.telefono ? "border-red-500" : "border-cyan-500"} focus:outline-none`}
+              />
+              {errors.telefono && <p className="text-sm text-red-500 mt-1">{errors.telefono}</p>}
+            </div>
+            <div>
+              <input
+                type="email"
+                name="email"
+                placeholder="Correo"
+                value={form.email}
+                onChange={handleChange}
+                className={`w-full p-2 rounded bg-[#162435] border ${errors.email ? "border-red-500" : "border-cyan-500"} focus:outline-none`}
+              />
+              {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+            </div>
+          </div>
+
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="contrasena"
+                  placeholder="Contraseña"
+                  value={form.contrasena}
+                  onChange={handleChange}
+                  className={`w-full p-2 pr-10 rounded bg-[#162435] border ${errors.contrasena ? "border-red-500" : "border-cyan-500"} focus:outline-none`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-cyan-400 hover:text-cyan-300"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.contrasena && <p className="text-sm text-red-500 mt-1">{errors.contrasena}</p>}
+            </div>
+            <div>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="confirmarContrasena"
+                  placeholder="Confirmar Contraseña"
+                  value={form.confirmarContrasena}
+                  onChange={handleChange}
+                  className={`w-full p-2 pr-10 rounded bg-[#162435] border ${errors.confirmarContrasena ? "border-red-500" : "border-cyan-500"} focus:outline-none`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-cyan-400 hover:text-cyan-300"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.confirmarContrasena && <p className="text-sm text-red-500 mt-1">{errors.confirmarContrasena}</p>}
             </div>
           </div>
 
