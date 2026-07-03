@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Image from "next/image";
@@ -113,7 +114,7 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
         color: "white",
       });
       onClose();
-    } catch (e) {
+    } catch {
       Swal.fire({ icon: "error", title: "Error", text: "No se pudo agregar el producto.", background: "#0F173A", color: "white" });
     } finally {
       setLoading(false);
@@ -140,7 +141,7 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
       setNewComment("");
       fetchReviews();
       Swal.fire({ icon: "success", title: "¡Gracias!", timer: 1500, showConfirmButton: false, background: "#0F173A", color: "white" });
-    } catch (e) {
+    } catch {
       Swal.fire({ icon: "error", title: "Error", text: "No se pudo publicar la reseña.", background: "#0F173A", color: "white" });
     } finally {
       setIsSubmittingReview(false);
