@@ -88,10 +88,7 @@ export default function RegisterPage() {
     const fieldErrors = validateForm();
     if (Object.keys(fieldErrors).length > 0) {
       setErrors(fieldErrors);
-      const messages = Object.entries(fieldErrors)
-        .map(([field, msg]) => `${field.charAt(0).toUpperCase() + field.slice(1)}: ${msg}`)
-        .join('\n');
-      showAlert('error', 'Campos incompletos', messages);
+
       setIsLoading(false);
       return;
     }
@@ -105,7 +102,6 @@ export default function RegisterPage() {
     if (form.contrasena !== form.confirmarContrasena) {
       // Set specific errors for password fields
       setErrors({ contrasena: 'Las contraseñas no coinciden', confirmarContrasena: 'Las contraseñas no coinciden' });
-      showAlert("error", "Error", "Las contraseñas no coinciden.");
       setIsLoading(false);
       return;
     }
@@ -231,40 +227,44 @@ export default function RegisterPage() {
 
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="contrasena"
-                placeholder="Contraseña"
-                value={form.contrasena}
-                onChange={handleChange}
-                className={`w-full p-2 pr-10 rounded bg-[#162435] border ${errors.contrasena ? "border-red-500" : "border-cyan-500"} focus:outline-none`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-cyan-400 hover:text-cyan-300"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+            <div>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="contrasena"
+                  placeholder="Contraseña"
+                  value={form.contrasena}
+                  onChange={handleChange}
+                  className={`w-full p-2 pr-10 rounded bg-[#162435] border ${errors.contrasena ? "border-red-500" : "border-cyan-500"} focus:outline-none`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-cyan-400 hover:text-cyan-300"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.contrasena && <p className="text-sm text-red-500 mt-1">{errors.contrasena}</p>}
             </div>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="confirmarContrasena"
-                placeholder="Confirmar Contraseña"
-                value={form.confirmarContrasena}
-                onChange={handleChange}
-                className={`w-full p-2 pr-10 rounded bg-[#162435] border ${errors.confirmarContrasena ? "border-red-500" : "border-cyan-500"} focus:outline-none`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-cyan-400 hover:text-cyan-300"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+            <div>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="confirmarContrasena"
+                  placeholder="Confirmar Contraseña"
+                  value={form.confirmarContrasena}
+                  onChange={handleChange}
+                  className={`w-full p-2 pr-10 rounded bg-[#162435] border ${errors.confirmarContrasena ? "border-red-500" : "border-cyan-500"} focus:outline-none`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-cyan-400 hover:text-cyan-300"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.confirmarContrasena && <p className="text-sm text-red-500 mt-1">{errors.confirmarContrasena}</p>}
             </div>
           </div>
