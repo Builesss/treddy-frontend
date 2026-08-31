@@ -145,9 +145,13 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
         const deltaX = touchX - lastTouchX
         const deltaY = touchY - lastTouchY
 
-        // Rotación en lugar de posición para mejor experiencia 3D
-        modelRef.current.rotation.y += deltaX * 0.01
-        modelRef.current.rotation.x += deltaY * 0.01
+        // Mover (pan) con 1 dedo
+        const moveSensitivity = 0.003
+        const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
+        const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1)
+
+        modelRef.current.position.addScaledVector(right, deltaX * moveSensitivity)
+        modelRef.current.position.addScaledVector(up, -deltaY * moveSensitivity)
 
         lastTouchX = touchX
         lastTouchY = touchY
@@ -175,19 +179,12 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
           modelRef.current.scale.set(newScale, newScale, newScale)
           updateSizeLabel()
 
-          // Mover (pan): desplazamos el modelo según cómo se movió el punto
-          // medio entre los 2 dedos, proyectado sobre los ejes derecha/arriba
-          // de la cámara (así "arrastrar" se siente natural sin importar
-          // hacia dónde esté mirando el usuario).
+          // Rotación con 2 dedos basada en el movimiento del punto medio
           const deltaMidX = midX - lastMidX
           const deltaMidY = midY - lastMidY
-          const moveSensitivity = 0.003
 
-          const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
-          const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1)
-
-          modelRef.current.position.addScaledVector(right, deltaMidX * moveSensitivity)
-          modelRef.current.position.addScaledVector(up, -deltaMidY * moveSensitivity)
+          modelRef.current.rotation.y += deltaMidX * 0.01
+          modelRef.current.rotation.x += deltaMidY * 0.01
 
           lastMidX = midX
           lastMidY = midY
