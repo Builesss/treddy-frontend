@@ -12,6 +12,11 @@ interface VisualizadorARProps {
 export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const modelRef = useRef<THREE.Group | null>(null)
+  // Dimensiones "base" del modelo (ancho, alto, profundo) en metros, medidas
+  // ANTES de aplicar cualquier escala. Sirven para calcular el tamaño real
+  // multiplicando por la escala actual, sin que la rotación distorsione la medición
+  // (el bounding box world-space cambia con la rotación, por eso NO lo usamos en vivo).
+  const baseSizeRef = useRef<THREE.Vector3>(new THREE.Vector3())
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -21,6 +26,9 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
     let initialScale = 0.9
     let lastTouchX = 0
     let lastTouchY = 0
+    // Punto medio entre los 2 dedos, usado para mover (pan) el modelo
+    let lastMidX = 0
+    let lastMidY = 0
 
     // Limpieza
     container.innerHTML = ""
@@ -61,6 +69,35 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
 
     document.body.appendChild(arButton)
 
+    // --- Etiqueta de tamaño (cm) ---
+    // Vive DENTRO de `container`, que es el root del dom-overlay, así que
+    // también se ve superpuesta a la cámara durante la sesión AR.
+    const sizeLabel = document.createElement('div')
+    sizeLabel.style.position = 'absolute'
+    sizeLabel.style.top = '12px'
+    sizeLabel.style.left = '50%'
+    sizeLabel.style.transform = 'translateX(-50%)'
+    sizeLabel.style.background = 'rgba(0,0,0,0.6)'
+    sizeLabel.style.color = '#fff'
+    sizeLabel.style.padding = '4px 10px'
+    sizeLabel.style.borderRadius = '8px'
+    sizeLabel.style.fontSize = '12px'
+    sizeLabel.style.fontFamily = 'sans-serif'
+    sizeLabel.style.pointerEvents = 'none' // no debe interferir con los gestos táctiles
+    sizeLabel.style.zIndex = '10'
+    sizeLabel.style.whiteSpace = 'nowrap'
+    container.appendChild(sizeLabel)
+
+    // Recalcula el texto de tamaño en base a baseSizeRef * escala actual del modelo
+    const updateSizeLabel = () => {
+      if (!modelRef.current) return
+      const scale = modelRef.current.scale.x
+      const w = baseSizeRef.current.x * scale * 100
+      const h = baseSizeRef.current.y * scale * 100
+      const d = baseSizeRef.current.z * scale * 100
+      sizeLabel.textContent = `${w.toFixed(1)} × ${h.toFixed(1)} × ${d.toFixed(1)} cm`
+    }
+
     scene.add(new THREE.AmbientLight(0xffffff, 1.5))
     const dirLight = new THREE.DirectionalLight(0xffffff, 1)
     dirLight.position.set(2, 4, 5)
@@ -69,9 +106,17 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
     const loader = new GLTFLoader()
     loader.load(modelUrl, (gltf) => {
       modelRef.current = gltf.scene
+
+      // Medimos el modelo ANTES de aplicar nuestra escala inicial (0.9),
+      // así baseSizeRef queda en "unidades reales" del .glb (metros).
+      const box = new THREE.Box3().setFromObject(modelRef.current)
+      box.getSize(baseSizeRef.current)
+
       modelRef.current.scale.set(0.9, 0.9, 0.9)
       modelRef.current.position.set(0, -0.5, -2)
       scene.add(modelRef.current)
+
+      updateSizeLabel()
     })
 
     // --- Handlers con detención de propagación ---
@@ -80,6 +125,11 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
       if (e.touches.length === 1) {
         lastTouchX = e.touches[0].pageX
         lastTouchY = e.touches[0].pageY
+      }
+      if (e.touches.length === 2) {
+        // Fuerza que el próximo touchmove recalcule la distancia y el punto
+        // medio de referencia, evitando saltos al pasar de 1 a 2 dedos.
+        initialDist = 0
       }
     }
 
@@ -104,17 +154,43 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
       }
 
       if (e.touches.length === 2) {
-        const dX = e.touches[0].pageX - e.touches[1].pageX
-        const dY = e.touches[0].pageY - e.touches[1].pageY
+        const t0 = e.touches[0]
+        const t1 = e.touches[1]
+        const dX = t0.pageX - t1.pageX
+        const dY = t0.pageY - t1.pageY
         const currentDist = Math.sqrt(dX * dX + dY * dY)
+        const midX = (t0.pageX + t1.pageX) / 2
+        const midY = (t0.pageY + t1.pageY) / 2
 
         if (initialDist === 0) {
+          // Primer frame del gesto: solo fijamos referencias, sin mover nada aún
           initialDist = currentDist
           initialScale = modelRef.current.scale.x
+          lastMidX = midX
+          lastMidY = midY
         } else {
+          // Escala (pinch)
           const factor = currentDist / initialDist
           const newScale = Math.max(0.1, initialScale * factor)
           modelRef.current.scale.set(newScale, newScale, newScale)
+          updateSizeLabel()
+
+          // Mover (pan): desplazamos el modelo según cómo se movió el punto
+          // medio entre los 2 dedos, proyectado sobre los ejes derecha/arriba
+          // de la cámara (así "arrastrar" se siente natural sin importar
+          // hacia dónde esté mirando el usuario).
+          const deltaMidX = midX - lastMidX
+          const deltaMidY = midY - lastMidY
+          const moveSensitivity = 0.003
+
+          const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
+          const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1)
+
+          modelRef.current.position.addScaledVector(right, deltaMidX * moveSensitivity)
+          modelRef.current.position.addScaledVector(up, -deltaMidY * moveSensitivity)
+
+          lastMidX = midX
+          lastMidY = midY
         }
       }
     }
@@ -154,6 +230,7 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
       container.removeEventListener('touchend', handleTouchEnd)
       renderer.dispose()
       if (arButton.parentNode) document.body.removeChild(arButton)
+      if (sizeLabel.parentNode) sizeLabel.parentNode.removeChild(sizeLabel)
     }
   }, [modelUrl])
 
