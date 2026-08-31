@@ -46,6 +46,19 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
       optionalFeatures: ["dom-overlay"],
       domOverlay: { root: container },
     })
+
+    // Fija el botón AR a una posición constante del VIEWPORT (no de la
+    // página). Por defecto Three.js lo crea con `position: absolute`,
+    // que se ancla al documento y se desplaza si el fondo detrás del
+    // modal hace scroll. Con `position: fixed` queda siempre en el
+    // mismo lugar en pantalla, sin importar el scroll, y totalmente
+    // funcional (no se toca pointer-events ni opacidad).
+    arButton.style.position = 'fixed'
+    arButton.style.bottom = '24px'
+    arButton.style.left = '50%'
+    arButton.style.transform = 'translateX(-50%)'
+    arButton.style.zIndex = '99999'
+
     document.body.appendChild(arButton)
 
     scene.add(new THREE.AmbientLight(0xffffff, 1.5))
