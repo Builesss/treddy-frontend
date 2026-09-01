@@ -48,7 +48,7 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
   // Estados de Visualización
   const [viewMode, setViewMode] = useState<"image" | "3d" | "ar" | "qr">("image");
   const [tab, setTab] = useState<"detalles" | "resenas">("detalles");
-  
+
   // Estados de Carga y Datos
   const [loading, setLoading] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -68,6 +68,17 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Bloquea el scroll del body mientras el modal está abierto. Esto evita
+  // que el fondo detrás del modal se desplace en mobile, lo cual además
+  // mantiene fijo el botón de AR (que se ancla al viewport con position: fixed).
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
   }, []);
 
   const fetchReviews = useCallback(async () => {
@@ -151,7 +162,7 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Overlay */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           onClick={onClose}
           className="absolute inset-0 bg-black/80 backdrop-blur-sm"
@@ -167,22 +178,22 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
           {/* Botones de Cabecera */}
           <div className="absolute top-3 left-4 z-20 flex gap-2">
             {!isMobile && (
-              <HeaderButton 
-                active={viewMode === "qr"} 
+              <HeaderButton
+                active={viewMode === "qr"}
                 onClick={() => setViewMode(viewMode === "qr" ? "image" : "qr")}
                 icon={<QrCode size={16} />}
                 label={viewMode === "qr" ? "Imagen" : "QR"}
               />
             )}
-            <HeaderButton 
-              active={viewMode === "3d"} 
+            <HeaderButton
+              active={viewMode === "3d"}
               onClick={() => setViewMode(viewMode === "3d" ? "image" : "3d")}
               icon={<Camera size={16} />}
               label={viewMode === "3d" ? "Imagen" : "Ver 3D"}
             />
             {isMobile && (
-              <HeaderButton 
-                active={viewMode === "ar"} 
+              <HeaderButton
+                active={viewMode === "ar"}
                 onClick={() => setViewMode(viewMode === "ar" ? "image" : "ar")}
                 icon={<Camera size={16} />}
                 label="RA"
@@ -198,14 +209,14 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
           <div className="relative w-full h-80 bg-gradient-to-b from-[#1a214f] to-[#0F173A] mt-14 flex items-center justify-center overflow-hidden">
             {viewMode === "3d" && <Visualizador3D modelUrl={figura.modeloUrl || "/HORNET.glb"} />}
             {viewMode === "ar" && (
-           <div
-              onTouchStart={e => e.stopPropagation()}
-              onTouchMove={e => e.stopPropagation()}
-              className="w-full h-full"
+              <div
+                onTouchStart={e => e.stopPropagation()}
+                onTouchMove={e => e.stopPropagation()}
+                className="w-full h-full"
               >
-              <VisualizadorAR modelUrl={figura.modeloUrl || "/HORNET.glb"} />
+                <VisualizadorAR modelUrl={figura.modeloUrl || "/HORNET.glb"} />
               </div>
-                )}
+            )}
 
             {viewMode === "qr" && (
               <div className="bg-white p-4 rounded-xl">
@@ -248,10 +259,10 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
                 </div>
               </motion.div>
             ) : (
-              <ResenasSection 
-                reviews={reviews} 
-                loading={loadingReviews} 
-                newRating={newRating} 
+              <ResenasSection
+                reviews={reviews}
+                loading={loadingReviews}
+                newRating={newRating}
                 setNewRating={setNewRating}
                 newComment={newComment}
                 setNewComment={setNewComment}
@@ -271,7 +282,7 @@ export default function TarjetaExpandible({ figura, onClose }: { figura: Figura;
 interface HeaderButtonProps {
   active: boolean;
   onClick: () => void;
-  icon: ReactNode;
+  icon: React.ReactNode;
   label: string;
 }
 
@@ -279,9 +290,8 @@ function HeaderButton({ active, onClick, icon, label }: HeaderButtonProps) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all ${
-        active ? "bg-cyan-500 text-black shadow-[0_0_10px_#06b6d4]" : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50"
-      }`}
+      className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all ${active ? "bg-cyan-500 text-black shadow-[0_0_10px_#06b6d4]" : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50"
+        }`}
     >
       {icon} {label}
     </button>
@@ -292,16 +302,15 @@ interface TabButtonProps {
   active: boolean;
   onClick: () => void;
   label: string;
-  icon?: ReactNode;
+  icon?: React.ReactNode;
 }
 
 function TabButton({ active, onClick, label, icon }: TabButtonProps) {
   return (
-    <button 
-      onClick={onClick} 
-      className={`flex-1 py-2 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-        active ? "bg-cyan-500/20 text-cyan-400" : "text-gray-400"
-      }`}
+    <button
+      onClick={onClick}
+      className={`flex-1 py-2 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${active ? "bg-cyan-500/20 text-cyan-400" : "text-gray-400"
+        }`}
     >
       {icon} {label}
     </button>
@@ -312,9 +321,9 @@ interface ResenasSectionProps {
   reviews: Review[];
   loading: boolean;
   newRating: number;
-  setNewRating: (rating: number) => void;
+  setNewRating: (r: number) => void;
   newComment: string;
-  setNewComment: (comment: string) => void;
+  setNewComment: (c: string) => void;
   onSubmit: () => void;
   submitting: boolean;
 }
@@ -328,8 +337,8 @@ function ResenasSection({ reviews, loading, newRating, setNewRating, newComment,
             <Star key={s} size={20} onClick={() => setNewRating(s)} className={`cursor-pointer ${s <= newRating ? "fill-cyan-400 text-cyan-400" : "text-gray-600"}`} />
           ))}
         </div>
-        <textarea 
-          value={newComment} 
+        <textarea
+          value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Tu opinión importa..."
           className="w-full bg-[#0A0F2C] border border-[#2a3055] rounded-lg p-3 text-sm text-white resize-none h-20"
