@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useCallback, ReactNode } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare } from "lucide-react";
