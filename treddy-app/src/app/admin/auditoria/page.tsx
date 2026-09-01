@@ -47,7 +47,7 @@ export default function AuditoriaPage() {
         }
         const data = await res.json();
         setAuditorias(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
       } finally {
         setLoading(false);
@@ -60,7 +60,7 @@ export default function AuditoriaPage() {
     doc.text("Reporte de Auditoría de Sistemas", 14, 15);
     
     const tableColumn = ["ID", "Usuario", "Email", "Tabla", "Acción", "Fecha"];
-    const tableRows: any[] = [];
+    const tableRows: (string | number)[][] = [];
     auditorias.forEach(audit => {
       const auditData = [
         audit.auditoria_id,
