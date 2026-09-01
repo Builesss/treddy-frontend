@@ -5,9 +5,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Nav from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Edit3, LogOut, Settings, User, Lock, ShoppingBag, Mail, Phone, Calendar, Shield, XCircle, AlertTriangle } from 'lucide-react';
+import { Edit3, LogOut, Settings, User, Lock, ShoppingBag, Mail, Phone, Calendar, Shield, XCircle, AlertTriangle, Bell, Sun, Moon, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
-import { getUserProfile, updateUserProfile, getUserOrders, cancelOrder } from '@/services/user.service';
+import { getUserProfile, updateUserProfile, getUserOrders, cancelOrder, changePassword, getPreferences, updatePreferences } from '@/services/user.service';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const MOTIVOS_CANCELACION = [
@@ -55,6 +55,18 @@ export default function Perfil() {
   const [cancelModal, setCancelModal] = useState<{ open: boolean; pedidoId: number | null }>({ open: false, pedidoId: null });
   const [motivoSeleccionado, setMotivoSeleccionado] = useState('');
   const [cancelando, setCancelando] = useState(false);
+
+  // Estado para modal Cambiar Contraseña
+  const [passwordModal, setPasswordModal] = useState(false);
+  const [pwForm, setPwForm] = useState({ contrasenaActual: '', nuevaContrasena: '', confirmar: '' });
+  const [pwErrors, setPwErrors] = useState<{ contrasenaActual?: string; nuevaContrasena?: string; confirmar?: string }>({});
+  const [pwLoading, setPwLoading] = useState(false);
+  const [showPw, setShowPw] = useState({ actual: false, nueva: false, confirmar: false });
+
+  // Estado para modal Preferencias
+  const [prefsModal, setPrefsModal] = useState(false);
+  const [prefs, setPrefs] = useState({ notificaciones_email: true, notificaciones_sms: false, tema: 'oscuro' as 'oscuro' | 'claro' });
+  const [prefsLoading, setPrefsLoading] = useState(false);
 
 
   useEffect(() => {
@@ -104,9 +116,10 @@ export default function Perfil() {
     fetchData();
   }, [router]);
 
-  // Bloquear scroll del body cuando el modal está abierto
+  // Bloquear scroll del body cuando cualquier modal está abierto
   useEffect(() => {
-    if (cancelModal.open) {
+    const anyOpen = cancelModal.open || passwordModal || prefsModal;
+    if (anyOpen) {
       const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = "hidden";
       document.body.style.paddingRight = `${scrollBarWidth}px`;
@@ -118,7 +131,88 @@ export default function Perfil() {
       document.body.style.overflow = "auto";
       document.body.style.paddingRight = "0px";
     };
-  }, [cancelModal.open]);
+  }, [cancelModal.open, passwordModal, prefsModal]);
+
+  // Cargar preferencias al abrir modal
+  useEffect(() => {
+    if (!prefsModal) return;
+    getPreferences()
+      .then((data) => {
+        setPrefs({
+          notificaciones_email: data.notificaciones_email ?? true,
+          notificaciones_sms: data.notificaciones_sms ?? false,
+          tema: data.tema ?? 'oscuro',
+        });
+      })
+      .catch(() => {
+        // Si el endpoint aún no existe, mantener defaults locales
+      });
+  }, [prefsModal]);
+
+  const handleChangePassword = async () => {
+    const errors: typeof pwErrors = {};
+    if (!pwForm.contrasenaActual) errors.contrasenaActual = 'Ingresa tu contraseña actual';
+    if (pwForm.nuevaContrasena.length < 8) errors.nuevaContrasena = 'Mínimo 8 caracteres';
+    if (pwForm.nuevaContrasena !== pwForm.confirmar) errors.confirmar = 'Las contraseñas no coinciden';
+    if (Object.keys(errors).length) { setPwErrors(errors); return; }
+
+    setPwLoading(true);
+    try {
+      await changePassword({ contrasenaActual: pwForm.contrasenaActual, nuevaContrasena: pwForm.nuevaContrasena });
+      setPasswordModal(false);
+      setPwForm({ contrasenaActual: '', nuevaContrasena: '', confirmar: '' });
+      setPwErrors({});
+      Swal.fire({
+        icon: 'success',
+        title: 'Contraseña actualizada',
+        text: 'Tu contraseña ha sido cambiada exitosamente.',
+        background: '#0F173A',
+        color: '#E0EAFD',
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: { popup: 'rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20' },
+      });
+    } catch (error: any) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al cambiar contraseña',
+        text: error.message || 'Ocurrió un error inesperado.',
+        background: '#0F173A',
+        color: '#E0EAFD',
+        customClass: { popup: 'rounded-2xl border border-red-500/30 shadow-2xl shadow-red-500/20' },
+      });
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
+  const handleSavePreferences = async () => {
+    setPrefsLoading(true);
+    try {
+      await updatePreferences(prefs);
+      setPrefsModal(false);
+      Swal.fire({
+        icon: 'success',
+        title: 'Preferencias guardadas',
+        background: '#0F173A',
+        color: '#E0EAFD',
+        timer: 1500,
+        showConfirmButton: false,
+        customClass: { popup: 'rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20' },
+      });
+    } catch (error: any) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar preferencias',
+        text: error.message || 'Ocurrió un error inesperado.',
+        background: '#0F173A',
+        color: '#E0EAFD',
+        customClass: { popup: 'rounded-2xl border border-red-500/30 shadow-2xl shadow-red-500/20' },
+      });
+    } finally {
+      setPrefsLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -341,7 +435,7 @@ export default function Perfil() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
-                  onClick={() => alert('Funcionalidad pendiente: cambiar contraseña')}
+                  onClick={() => { setPwForm({ contrasenaActual: '', nuevaContrasena: '', confirmar: '' }); setPwErrors({}); setPasswordModal(true); }}
                   className="group flex items-center gap-3 bg-[#0A0F2C] hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-500 transition-all px-5 py-4 rounded-xl border border-cyan-500/20 hover:border-transparent"
                 >
                   <Lock size={20} className="text-cyan-400 group-hover:text-black" />
@@ -351,7 +445,7 @@ export default function Perfil() {
                   </div>
                 </button>
                 <button
-                  onClick={() => alert('Funcionalidad pendiente: preferencias')}
+                  onClick={() => setPrefsModal(true)}
                   className="group flex items-center gap-3 bg-[#0A0F2C] hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-500 transition-all px-5 py-4 rounded-xl border border-cyan-500/20 hover:border-transparent"
                 >
                   <Settings size={20} className="text-cyan-400 group-hover:text-black" />
@@ -521,6 +615,258 @@ export default function Perfil() {
         </div>
       )}
     </AnimatePresence>
+
+      {/* ─── Modal Cambiar Contraseña ─── */}
+      <AnimatePresence>
+        {passwordModal && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPasswordModal(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <div className="flex min-h-full items-start justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative bg-[#10193F] w-full max-w-md rounded-2xl border border-[#2a3055] overflow-hidden shadow-2xl my-8"
+              >
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                      <Lock className="text-cyan-400" size={22} />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Cambiar Contraseña</h3>
+                      <p className="text-sm text-gray-400">Actualiza tu contraseña de acceso</p>
+                    </div>
+                  </div>
+
+                  {/* Campo contraseña actual */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-400 mb-2">Contraseña actual *</label>
+                    <div className="relative">
+                      <input
+                        type={showPw.actual ? 'text' : 'password'}
+                        value={pwForm.contrasenaActual}
+                        onChange={(e) => { setPwForm({ ...pwForm, contrasenaActual: e.target.value }); setPwErrors({ ...pwErrors, contrasenaActual: undefined }); }}
+                        className={`w-full bg-[#0A0F2C] border rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all ${
+                          pwErrors.contrasenaActual ? 'border-red-500' : 'border-[#2a3055]'
+                        }`}
+                        placeholder="Tu contraseña actual"
+                      />
+                      <button type="button" onClick={() => setShowPw({ ...showPw, actual: !showPw.actual })} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyan-400 transition">
+                        {showPw.actual ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    {pwErrors.contrasenaActual && <p className="text-red-400 text-xs mt-1">{pwErrors.contrasenaActual}</p>}
+                  </div>
+
+                  {/* Campo nueva contraseña */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-400 mb-2">Nueva contraseña *</label>
+                    <div className="relative">
+                      <input
+                        type={showPw.nueva ? 'text' : 'password'}
+                        value={pwForm.nuevaContrasena}
+                        onChange={(e) => { setPwForm({ ...pwForm, nuevaContrasena: e.target.value }); setPwErrors({ ...pwErrors, nuevaContrasena: undefined }); }}
+                        className={`w-full bg-[#0A0F2C] border rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all ${
+                          pwErrors.nuevaContrasena ? 'border-red-500' : 'border-[#2a3055]'
+                        }`}
+                        placeholder="Mínimo 8 caracteres"
+                      />
+                      <button type="button" onClick={() => setShowPw({ ...showPw, nueva: !showPw.nueva })} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyan-400 transition">
+                        {showPw.nueva ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    {pwErrors.nuevaContrasena && <p className="text-red-400 text-xs mt-1">{pwErrors.nuevaContrasena}</p>}
+                    {/* Requisitos de contraseña */}
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className={`w-2 h-2 rounded-full transition-colors ${pwForm.nuevaContrasena.length >= 8 ? 'bg-green-400' : 'bg-gray-600'}`} />
+                      <span className={`text-xs transition-colors ${pwForm.nuevaContrasena.length >= 8 ? 'text-green-400' : 'text-gray-500'}`}>Mínimo 8 caracteres</span>
+                    </div>
+                  </div>
+
+                  {/* Campo confirmar contraseña */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-400 mb-2">Confirmar nueva contraseña *</label>
+                    <div className="relative">
+                      <input
+                        type={showPw.confirmar ? 'text' : 'password'}
+                        value={pwForm.confirmar}
+                        onChange={(e) => { setPwForm({ ...pwForm, confirmar: e.target.value }); setPwErrors({ ...pwErrors, confirmar: undefined }); }}
+                        className={`w-full bg-[#0A0F2C] border rounded-xl px-4 py-3 pr-12 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all ${
+                          pwErrors.confirmar ? 'border-red-500' : 'border-[#2a3055]'
+                        }`}
+                        placeholder="Repite la nueva contraseña"
+                      />
+                      <button type="button" onClick={() => setShowPw({ ...showPw, confirmar: !showPw.confirmar })} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyan-400 transition">
+                        {showPw.confirmar ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    {pwErrors.confirmar && <p className="text-red-400 text-xs mt-1">{pwErrors.confirmar}</p>}
+                    {pwForm.confirmar && pwForm.nuevaContrasena && pwForm.confirmar === pwForm.nuevaContrasena && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <CheckCircle size={14} className="text-green-400" />
+                        <span className="text-xs text-green-400">Las contraseñas coinciden</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setPasswordModal(false)}
+                      className="flex-1 bg-[#0A0F2C] border border-cyan-500/30 text-cyan-400 py-3 px-4 rounded-xl hover:bg-cyan-500/10 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all font-medium text-sm"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleChangePassword}
+                      disabled={pwLoading}
+                      className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-black py-3 px-4 rounded-xl font-bold hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                    >
+                      {pwLoading ? (
+                        <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Lock size={16} />
+                      )}
+                      {pwLoading ? 'Guardando...' : 'Guardar contraseña'}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ─── Modal Preferencias ─── */}
+      <AnimatePresence>
+        {prefsModal && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPrefsModal(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <div className="flex min-h-full items-start justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative bg-[#10193F] w-full max-w-md rounded-2xl border border-[#2a3055] overflow-hidden shadow-2xl my-8"
+              >
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                      <Settings className="text-cyan-400" size={22} />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Preferencias</h3>
+                      <p className="text-sm text-gray-400">Configura tu experiencia en Treddy</p>
+                    </div>
+                  </div>
+
+                  {/* Notificaciones */}
+                  <div className="mb-6">
+                    <p className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                      <Bell size={16} className="text-cyan-400" /> Notificaciones
+                    </p>
+                    <div className="space-y-3">
+                      <label className="flex items-center justify-between p-3 bg-[#0A0F2C] rounded-xl border border-[#2a3055] cursor-pointer hover:border-cyan-500/30 transition">
+                        <div>
+                          <p className="text-white text-sm font-medium">Notificaciones por email</p>
+                          <p className="text-gray-500 text-xs">Recibe actualizaciones en tu correo</p>
+                        </div>
+                        <div
+                          onClick={() => setPrefs({ ...prefs, notificaciones_email: !prefs.notificaciones_email })}
+                          className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                            prefs.notificaciones_email ? 'bg-cyan-500' : 'bg-gray-700'
+                          }`}
+                        >
+                          <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                            prefs.notificaciones_email ? 'translate-x-5' : 'translate-x-0'
+                          }`} />
+                        </div>
+                      </label>
+                      <label className="flex items-center justify-between p-3 bg-[#0A0F2C] rounded-xl border border-[#2a3055] cursor-pointer hover:border-cyan-500/30 transition">
+                        <div>
+                          <p className="text-white text-sm font-medium">Notificaciones por SMS</p>
+                          <p className="text-gray-500 text-xs">Recibe alertas en tu teléfono</p>
+                        </div>
+                        <div
+                          onClick={() => setPrefs({ ...prefs, notificaciones_sms: !prefs.notificaciones_sms })}
+                          className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                            prefs.notificaciones_sms ? 'bg-cyan-500' : 'bg-gray-700'
+                          }`}
+                        >
+                          <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                            prefs.notificaciones_sms ? 'translate-x-5' : 'translate-x-0'
+                          }`} />
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Tema */}
+                  <div className="mb-6">
+                    <p className="text-sm font-semibold text-gray-300 mb-3">Tema de la interfaz</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => setPrefs({ ...prefs, tema: 'oscuro' })}
+                        className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border font-medium text-sm transition-all ${
+                          prefs.tema === 'oscuro'
+                            ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
+                            : 'border-[#2a3055] bg-[#0A0F2C] text-gray-400 hover:border-cyan-500/30'
+                        }`}
+                      >
+                        <Moon size={16} /> Oscuro
+                      </button>
+                      <button
+                        onClick={() => setPrefs({ ...prefs, tema: 'claro' })}
+                        className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl border font-medium text-sm transition-all ${
+                          prefs.tema === 'claro'
+                            ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
+                            : 'border-[#2a3055] bg-[#0A0F2C] text-gray-400 hover:border-cyan-500/30'
+                        }`}
+                      >
+                        <Sun size={16} /> Claro
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">* El tema claro se aplicará en una próxima actualización.</p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setPrefsModal(false)}
+                      className="flex-1 bg-[#0A0F2C] border border-cyan-500/30 text-cyan-400 py-3 px-4 rounded-xl hover:bg-cyan-500/10 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all font-medium text-sm"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleSavePreferences}
+                      disabled={prefsLoading}
+                      className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-black py-3 px-4 rounded-xl font-bold hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+                    >
+                      {prefsLoading ? (
+                        <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <CheckCircle size={16} />
+                      )}
+                      {prefsLoading ? 'Guardando...' : 'Guardar preferencias'}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <Footer />
     </main>
