@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { Search, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
@@ -18,20 +19,28 @@ interface Auditoria {
     email: string;
   };
 }
+
 export default function AuditoriaPage() {
   const [auditorias, setAuditorias] = useState<Auditoria[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Búsqueda, Filtros y Paginación
+  const [searchTerm, setSearchTerm] = useState("");
+  const [accionFilter, setAccionFilter] = useState("todos");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
   useEffect(() => {
     const fetchAuditorias = async () => {
       try {
-        const token = localStorage.getItem("token"); // O de donde saques el token
+        const token = localStorage.getItem("token");
         if (!token) {
           setError("No estás autenticado");
           setLoading(false);
           return;
         }
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
         const res = await fetch(`${apiUrl}/api/auditoria`, {
           headers: {
             Authorization: `Bearer ${token}`
@@ -55,13 +64,14 @@ export default function AuditoriaPage() {
     };
     fetchAuditorias();
   }, []);
+
   const descargarPDF = () => {
     const doc = new jsPDF();
     doc.text("Reporte de Auditoría de Sistemas", 14, 15);
     
     const tableColumn = ["ID", "Usuario", "Email", "Tabla", "Acción", "Fecha"];
     const tableRows: (string | number)[][] = [];
-    auditorias.forEach(audit => {
+    filteredAuditorias.forEach(audit => {
       const auditData = [
         audit.auditoria_id,
         audit.usuarios ? `${audit.usuarios.nombre} ${audit.usuarios.apellido}` : audit.usuario_id,
@@ -79,6 +89,38 @@ export default function AuditoriaPage() {
     });
     doc.save("auditoria_sistemas.pdf");
   };
+
+  // Filtrado
+  const filteredAuditorias = auditorias.filter((audit) => {
+    const userName = audit.usuarios ? `${audit.usuarios.nombre} ${audit.usuarios.apellido}` : audit.usuario_id;
+    const fullText = `${audit.auditoria_id} ${userName} ${audit.usuarios?.email || ""} ${audit.tabla_afectada} ${audit.accion}`.toLowerCase();
+    const matchesSearch = fullText.includes(searchTerm.toLowerCase());
+    
+    let matchesAccion = true;
+    if (accionFilter !== "todos") {
+      matchesAccion = audit.accion.toUpperCase().includes(accionFilter.toUpperCase());
+    }
+    
+    return matchesSearch && matchesAccion;
+  });
+
+  // Paginación
+  const totalPages = Math.ceil(filteredAuditorias.length / ITEMS_PER_PAGE) || 1;
+  const paginatedAuditorias = filteredAuditorias.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleAccionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setAccionFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-[#0A0F2C] text-white flex flex-col">
       <Nav />
@@ -90,6 +132,7 @@ export default function AuditoriaPage() {
       </div>
     </div>
   );
+
   if (error) return (
     <div className="min-h-screen bg-[#0A0F2C] text-white flex flex-col">
       <Nav />
@@ -101,6 +144,7 @@ export default function AuditoriaPage() {
       </div>
     </div>
   );
+
   return (
     <div className="min-h-screen bg-[#0A0F2C] text-white flex flex-col relative">
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -124,6 +168,39 @@ export default function AuditoriaPage() {
             Descargar PDF
           </button>
         </div>
+
+        {/* Barra de Filtros y Búsqueda */}
+        <div className="bg-[#1a1f40]/60 border border-cyan-500/20 p-4 rounded-2xl mb-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg backdrop-blur-md">
+          <div className="relative w-full md:w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Buscar en auditoría (usuario, tabla, acción...)"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full bg-[#0A0F2C] border border-cyan-500/20 text-white pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500 text-sm transition-colors"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="flex items-center gap-2 text-xs text-gray-400 font-semibold uppercase tracking-wider">
+              <Filter size={14} className="text-cyan-400" />
+              Acción:
+            </div>
+
+            <select
+              value={accionFilter}
+              onChange={handleAccionChange}
+              className="bg-[#0A0F2C] border border-cyan-500/20 text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="todos">Todas las Acciones</option>
+              <option value="INSERT">Crear (INSERT)</option>
+              <option value="UPDATE">Actualizar (UPDATE)</option>
+              <option value="DELETE">Eliminar (DELETE)</option>
+            </select>
+          </div>
+        </div>
+
         <div className="bg-[#1a1f40]/60 backdrop-blur-md shadow-xl rounded-2xl border border-cyan-500/20 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full leading-normal">
@@ -147,7 +224,7 @@ export default function AuditoriaPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-cyan-500/10">
-                {auditorias.map((audit) => (
+                {paginatedAuditorias.map((audit) => (
                   <tr key={audit.auditoria_id} className="hover:bg-cyan-500/5 transition-colors duration-200">
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span className="font-mono text-xs bg-[#0A0F2C] px-2 py-1 rounded text-cyan-400 border border-cyan-500/20">
@@ -177,14 +254,14 @@ export default function AuditoriaPage() {
                     </td>
                   </tr>
                 ))}
-                {auditorias.length === 0 && (
+                {paginatedAuditorias.length === 0 && (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-gray-400 bg-[#0A0F2C]/30">
                       <div className="flex flex-col items-center justify-center">
                         <svg className="w-12 h-12 mb-4 text-[#00E6F6]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <p className="text-lg">No hay registros de auditoría.</p>
+                        <p className="text-lg">No se encontraron registros de auditoría.</p>
                       </div>
                     </td>
                   </tr>
@@ -192,9 +269,38 @@ export default function AuditoriaPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Controles de Paginación */}
+          {filteredAuditorias.length > 0 && (
+            <div className="p-4 border-t border-cyan-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400 bg-[#0A0F2C]/60">
+              <div>
+                Mostrando <span className="font-semibold text-white">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> a <span className="font-semibold text-white">{Math.min(currentPage * ITEMS_PER_PAGE, filteredAuditorias.length)}</span> de <span className="font-semibold text-white">{filteredAuditorias.length}</span> registros
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg bg-[#0A0F2C] border border-cyan-500/20 text-gray-300 hover:text-white hover:border-cyan-500 disabled:opacity-40 disabled:hover:border-cyan-500/20 transition-colors"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <span className="px-3 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-lg font-semibold">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg bg-[#0A0F2C] border border-cyan-500/20 text-gray-300 hover:text-white hover:border-cyan-500 disabled:opacity-40 disabled:hover:border-cyan-500/20 transition-colors"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
       <Footer />
     </div>
   );
-}
+}

@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Swal from "sweetalert2";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -21,6 +22,10 @@ export default function ProductManagementPreview() {
   const [imagenPreview, setImagenPreview] = useState<string>("");
   const [modelo3dFile, setModelo3dFile] = useState<File | null>(null);
   const [vistaArFile, setVistaArFile] = useState<File | null>(null);
+
+  // Paginación (Max 10 por página)
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const showTreddyAlert = (
     type: "success" | "error" | "warning" | "info",
@@ -174,6 +179,13 @@ export default function ProductManagementPreview() {
     }
   };
 
+  // Paginado
+  const totalPages = Math.ceil(figuras.length / ITEMS_PER_PAGE) || 1;
+  const paginatedFiguras = figuras.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-[#0A0F2C] to-[#0D1333] text-white">
       <Nav />
@@ -276,7 +288,7 @@ export default function ProductManagementPreview() {
         </div>
 
 
-        <div className="overflow-y-auto overflow-x-visible max-h-[700px] pr-2">
+        <div className="overflow-y-auto overflow-x-visible max-h-[750px] pr-2">
           <h2 className="text-2xl font-semibold mb-6 text-center text-cyan-400">
             Vista previa de figuras
           </h2>
@@ -284,43 +296,73 @@ export default function ProductManagementPreview() {
           {figuras.length === 0 ? (
             <p className="text-gray-400 text-center mt-10">Aún no hay figuras registradas.</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 overflow-visible ml-4 mr-4">
-              {figuras.map((f) => (
-                <div
-                  key={f.producto_id}
-                  className="bg-[#0F173A]/70 p-6 rounded-2xl text-center border border-[#1a2640] hover:border-cyan-400/40 shadow-lg transition-all duration-300 hover:scale-105"
-                >
-                  <Image
-                    src={f.imagenUrl}
-                    alt={f.nombre}
-                    width={160}
-                    height={160}
-                    className="mx-auto rounded-lg shadow-md"
-                  />
-                  <p className="mt-4 text-lg font-semibold">{f.nombre}</p>
-                  <p className="text-cyan-400 font-bold text-lg">
-                    ${Number(f.precio_base ?? f.precio ?? 0).toFixed(2)}
-                  </p>
-                  {f.categoria && (
-                    <p className="text-gray-400 text-sm mt-1 italic">{f.categoria}</p>
-                  )}
-                  <div className="flex justify-center gap-3 mt-4">
-                    <button
-                      onClick={() => editarFigura(f)}
-                      className="bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-1.5 rounded-lg text-black font-semibold hover:scale-105 transition"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => eliminarFigura(f.producto_id)}
-                      className="bg-gradient-to-r from-pink-500 to-red-500 px-4 py-1.5 rounded-lg text-black font-semibold hover:scale-105 transition"
-                    >
-                      Eliminar
-                    </button>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 overflow-visible ml-4 mr-4">
+                {paginatedFiguras.map((f) => (
+                  <div
+                    key={f.producto_id}
+                    className="bg-[#0F173A]/70 p-6 rounded-2xl text-center border border-[#1a2640] hover:border-cyan-400/40 shadow-lg transition-all duration-300 hover:scale-105 flex flex-col justify-between"
+                  >
+                    <div>
+                      <Image
+                        src={f.imagenUrl}
+                        alt={f.nombre}
+                        width={160}
+                        height={160}
+                        className="mx-auto rounded-lg shadow-md h-40 object-cover"
+                      />
+                      <p className="mt-4 text-lg font-semibold">{f.nombre}</p>
+                      <p className="text-cyan-400 font-bold text-lg">
+                        ${Number(f.precio_base ?? f.precio ?? 0).toFixed(2)}
+                      </p>
+                      {f.categoria && (
+                        <p className="text-gray-400 text-sm mt-1 italic">{f.categoria}</p>
+                      )}
+                    </div>
+                    <div className="flex justify-center gap-3 mt-4">
+                      <button
+                        onClick={() => editarFigura(f)}
+                        className="bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-1.5 rounded-lg text-black font-semibold hover:scale-105 transition text-sm"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => eliminarFigura(f.producto_id)}
+                        className="bg-gradient-to-r from-pink-500 to-red-500 px-4 py-1.5 rounded-lg text-black font-semibold hover:scale-105 transition text-sm"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
                   </div>
+                ))}
+              </div>
+
+              {/* Controles de Paginación */}
+              <div className="mt-8 mb-4 p-4 bg-[#0F173A]/60 border border-[#1a2640] rounded-xl flex items-center justify-between text-sm text-gray-400">
+                <div>
+                  Mostrando <span className="font-semibold text-white">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> a <span className="font-semibold text-white">{Math.min(currentPage * ITEMS_PER_PAGE, figuras.length)}</span> de <span className="font-semibold text-white">{figuras.length}</span> figuras
                 </div>
-              ))}
-            </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-lg bg-[#0C1330] border border-[#1a2640] text-gray-300 hover:text-white hover:border-cyan-500 disabled:opacity-40 transition-colors"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span className="px-3 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-lg font-semibold text-xs">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-lg bg-[#0C1330] border border-[#1a2640] text-gray-300 hover:text-white hover:border-cyan-500 disabled:opacity-40 transition-colors"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </section>
@@ -329,3 +371,4 @@ export default function ProductManagementPreview() {
     </main>
   );
 }
+

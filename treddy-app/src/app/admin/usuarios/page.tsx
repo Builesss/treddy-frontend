@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { motion } from "framer-motion";
-import { User, Trash2, Edit2, Shield, Ban, CheckCircle } from "lucide-react";
+import { User, Trash2, Edit2, Shield, Ban, CheckCircle, Search, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import Swal from "sweetalert2";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -22,6 +22,15 @@ export default function AdminUsuarios() {
   const router = useRouter();
   const [users, setUsers] = useState<UserType[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filtros y Búsqueda
+  const [searchTerm, setSearchTerm] = useState("");
+  const [roleFilter, setRoleFilter] = useState("todos");
+  const [statusFilter, setStatusFilter] = useState("todos");
+
+  // Paginación (Max 10 por página)
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -43,7 +52,6 @@ export default function AdminUsuarios() {
 
   const fetchUsers = async (token: string) => {
     try {
-      // Usar URL absoluta al backend asumiendo estándar o variable de entorno
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const response = await fetch(`${API_URL}/api/user/all`, {
         headers: {
@@ -177,6 +185,38 @@ export default function AdminUsuarios() {
     }
   };
 
+  // Filtrado de usuarios
+  const filteredUsers = users.filter((u) => {
+    const fullText = `${u.nombre} ${u.apellido} ${u.email} ${u.telefono || ""}`.toLowerCase();
+    const matchesSearch = fullText.includes(searchTerm.toLowerCase());
+    const matchesRole = roleFilter === "todos" || u.tipo_usuario === roleFilter;
+    const userStatus = u.estado || "activo";
+    const matchesStatus = statusFilter === "todos" || userStatus === statusFilter;
+    return matchesSearch && matchesRole && matchesStatus;
+  });
+
+  // Paginado
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE) || 1;
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setRoleFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0A0F2C] flex items-center justify-center">
@@ -189,102 +229,171 @@ export default function AdminUsuarios() {
     <main className="min-h-screen bg-[#0A0F2C] text-white flex flex-col">
       <Nav />
       <div className="flex-1 p-6 lg:p-12">
-      <div className="max-w-7xl mx-auto">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex justify-between items-center mb-8"
-        >
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00E6F6] to-blue-500">
-            Gestión de Usuarios
-          </h1>
-          <button onClick={() => router.push('/gestion-productos')} className="text-sm text-cyan-400 hover:underline">
-            Ir a Productos
-          </button>
-        </motion.div>
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-between items-center mb-8"
+          >
+            <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00E6F6] to-blue-500">
+              Gestión de Usuarios
+            </h1>
+          </motion.div>
 
-        <div className="bg-[#0F173A] border border-[#1e293b] rounded-2xl overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-[#1e293b]/50 text-gray-300 text-sm uppercase tracking-wider">
-                  <th className="p-4 font-semibold">Usuario</th>
-                  <th className="p-4 font-semibold hidden md:table-cell">Contacto</th>
-                  <th className="p-4 font-semibold">Rol</th>
-                  <th className="p-4 font-semibold">Estado</th>
-                  <th className="p-4 font-semibold text-center">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-8 text-center text-gray-400">
-                      No hay usuarios registrados.
-                    </td>
+          {/* Barra de Filtros y Búsqueda */}
+          <div className="bg-[#0F173A] border border-[#1e293b] p-4 rounded-2xl mb-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, email o teléfono..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-full bg-[#0A0F2C] border border-[#1e293b] text-white pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500 text-sm transition-colors"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              <div className="flex items-center gap-2 text-xs text-gray-400 font-semibold uppercase tracking-wider">
+                <Filter size={14} className="text-cyan-400" />
+                Filtros:
+              </div>
+
+              <select
+                value={roleFilter}
+                onChange={handleRoleChange}
+                className="bg-[#0A0F2C] border border-[#1e293b] text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-cyan-500 transition-colors"
+              >
+                <option value="todos">Todos los Roles</option>
+                <option value="cliente">Cliente</option>
+                <option value="administrador">Administrador</option>
+              </select>
+
+              <select
+                value={statusFilter}
+                onChange={handleStatusChange}
+                className="bg-[#0A0F2C] border border-[#1e293b] text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-cyan-500 transition-colors"
+              >
+                <option value="todos">Todos los Estados</option>
+                <option value="activo">Activo</option>
+                <option value="suspendido">Suspendido</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Tabla */}
+          <div className="bg-[#0F173A] border border-[#1e293b] rounded-2xl overflow-hidden shadow-xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#1e293b]/50 text-gray-300 text-sm uppercase tracking-wider">
+                    <th className="p-4 font-semibold">Usuario</th>
+                    <th className="p-4 font-semibold hidden md:table-cell">Contacto</th>
+                    <th className="p-4 font-semibold">Rol</th>
+                    <th className="p-4 font-semibold">Estado</th>
+                    <th className="p-4 font-semibold text-center">Acciones</th>
                   </tr>
-                ) : (
-                  users.map((user, idx) => (
-                    <motion.tr 
-                      key={user.usuario_id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      className="border-t border-[#1e293b] hover:bg-white/5 transition-colors"
-                    >
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-cyan-900/50 flex items-center justify-center text-cyan-400 border border-cyan-500/30">
-                            <User size={18} />
+                </thead>
+                <tbody>
+                  {paginatedUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-gray-400">
+                        No se encontraron usuarios.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedUsers.map((user, idx) => (
+                      <motion.tr 
+                        key={user.usuario_id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.03 }}
+                        className="border-t border-[#1e293b] hover:bg-white/5 transition-colors"
+                      >
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-cyan-900/50 flex items-center justify-center text-cyan-400 border border-cyan-500/30">
+                              <User size={18} />
+                            </div>
+                            <div>
+                              <p className="font-semibold">{user.nombre} {user.apellido}</p>
+                              <p className="text-xs text-gray-400">{user.email}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-semibold">{user.nombre} {user.apellido}</p>
-                            <p className="text-xs text-gray-400">{user.email}</p>
+                        </td>
+                        <td className="p-4 hidden md:table-cell text-gray-300">
+                          {user.telefono || "Sin teléfono"}
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${user.tipo_usuario === 'administrador' ? 'bg-purple-900/30 text-purple-400 border-purple-500/30' : 'bg-blue-900/30 text-blue-400 border-blue-500/30'}`}>
+                            {user.tipo_usuario === 'administrador' ? <Shield size={12}/> : <User size={12}/>}
+                            {user.tipo_usuario}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${user.estado === 'suspendido' ? 'bg-red-900/30 text-red-400 border-red-500/30' : 'bg-green-900/30 text-green-400 border-green-500/30'}`}>
+                            {user.estado === 'suspendido' ? <Ban size={12}/> : <CheckCircle size={12}/>}
+                            {user.estado || 'activo'}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button 
+                              onClick={() => changeStatus(user.usuario_id, user.estado || 'activo', user.tipo_usuario)}
+                              className="p-2 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-500/20 transition-colors"
+                              title="Editar"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button 
+                              onClick={() => deleteUser(user.usuario_id)}
+                              className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
+                              title="Eliminar"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
-                        </div>
-                      </td>
-                      <td className="p-4 hidden md:table-cell text-gray-300">
-                        {user.telefono || "Sin teléfono"}
-                      </td>
-                      <td className="p-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${user.tipo_usuario === 'administrador' ? 'bg-purple-900/30 text-purple-400 border-purple-500/30' : 'bg-blue-900/30 text-blue-400 border-blue-500/30'}`}>
-                          {user.tipo_usuario === 'administrador' ? <Shield size={12}/> : <User size={12}/>}
-                          {user.tipo_usuario}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${user.estado === 'suspendido' ? 'bg-red-900/30 text-red-400 border-red-500/30' : 'bg-green-900/30 text-green-400 border-green-500/30'}`}>
-                          {user.estado === 'suspendido' ? <Ban size={12}/> : <CheckCircle size={12}/>}
-                          {user.estado || 'activo'}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-center gap-2">
-                          <button 
-                            onClick={() => changeStatus(user.usuario_id, user.estado || 'activo', user.tipo_usuario)}
-                            className="p-2 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-500/20 transition-colors"
-                            title="Editar"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button 
-                            onClick={() => deleteUser(user.usuario_id)}
-                            className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
-                            title="Eliminar"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                        </td>
+                      </motion.tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Controles de Paginación */}
+            {filteredUsers.length > 0 && (
+              <div className="p-4 border-t border-[#1e293b] flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400 bg-[#0A0F2C]/40">
+                <div>
+                  Mostrando <span className="font-semibold text-white">{((currentPage - 1) * ITEMS_PER_PAGE) + 1}</span> a <span className="font-semibold text-white">{Math.min(currentPage * ITEMS_PER_PAGE, filteredUsers.length)}</span> de <span className="font-semibold text-white">{filteredUsers.length}</span> registros
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-lg bg-[#0A0F2C] border border-[#1e293b] text-gray-300 hover:text-white hover:border-cyan-500 disabled:opacity-40 disabled:hover:border-[#1e293b] disabled:hover:text-gray-300 transition-colors"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <span className="px-3 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-lg font-semibold">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-lg bg-[#0A0F2C] border border-[#1e293b] text-gray-300 hover:text-white hover:border-cyan-500 disabled:opacity-40 disabled:hover:border-[#1e293b] disabled:hover:text-gray-300 transition-colors"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
       </div>
       <Footer />
     </main>
   );
 }
+
