@@ -55,24 +55,27 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
       domOverlay: { root: container },
     })
 
-    // Personalización de estilo y posición del botón AR para coincidir con TarjetaExpandible
-    arButton.style.position = 'absolute'
-    arButton.style.bottom = '16px'
-    arButton.style.left = '50%'
-    arButton.style.transform = 'translateX(-50%)'
-    arButton.style.zIndex = '30'
-    arButton.style.padding = '10px 22px'
-    arButton.style.borderRadius = '9999px'
-    arButton.style.background = 'linear-gradient(135deg, rgba(6, 182, 212, 0.95) 0%, rgba(8, 145, 178, 0.95) 100%)'
-    arButton.style.color = '#0F173A'
-    arButton.style.fontWeight = '700'
-    arButton.style.fontSize = '13px'
-    arButton.style.letterSpacing = '0.5px'
-    arButton.style.border = '1px solid rgba(6, 182, 212, 0.8)'
-    arButton.style.boxShadow = '0 0 20px rgba(6, 182, 212, 0.5)'
-    arButton.style.cursor = 'pointer'
-    arButton.style.backdropFilter = 'blur(8px)'
-    arButton.style.outline = 'none'
+    // Personalización de estilo y centrado perfecto del botón AR
+    arButton.style.setProperty('position', 'absolute', 'important')
+    arButton.style.setProperty('bottom', '16px', 'important')
+    arButton.style.setProperty('left', '50%', 'important')
+    arButton.style.setProperty('transform', 'translateX(-50%)', 'important')
+    arButton.style.setProperty('width', 'max-content', 'important')
+    arButton.style.setProperty('white-space', 'nowrap', 'important')
+    arButton.style.setProperty('z-index', '30', 'important')
+    arButton.style.setProperty('padding', '10px 22px', 'important')
+    arButton.style.setProperty('border-radius', '9999px', 'important')
+    arButton.style.setProperty('background', 'linear-gradient(135deg, rgba(6, 182, 212, 0.95) 0%, rgba(8, 145, 178, 0.95) 100%)', 'important')
+    arButton.style.setProperty('color', '#0F173A', 'important')
+    arButton.style.setProperty('font-weight', '700', 'important')
+    arButton.style.setProperty('font-size', '13px', 'important')
+    arButton.style.setProperty('letter-spacing', '0.5px', 'important')
+    arButton.style.setProperty('border', '1px solid rgba(6, 182, 212, 0.8)', 'important')
+    arButton.style.setProperty('box-shadow', '0 0 20px rgba(6, 182, 212, 0.5)', 'important')
+    arButton.style.setProperty('cursor', 'pointer', 'important')
+    arButton.style.setProperty('backdrop-filter', 'blur(8px)', 'important')
+    arButton.style.setProperty('outline', 'none', 'important')
+    arButton.style.setProperty('opacity', '1', 'important')
 
     container.appendChild(arButton)
 
