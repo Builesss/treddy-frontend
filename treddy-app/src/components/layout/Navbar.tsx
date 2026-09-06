@@ -102,8 +102,8 @@ export default function Nav() {
           {isAdmin ? (
           <>
             <Link
-              href="/gestion-productos"
-              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/gestion-productos"
+              href="/admin/dashboard"
+              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/admin/dashboard"
                 ? "text-[#00E6F6] font-semibold"
                 : "text-white hover:text-[#00E6F6]"
                 }`}
@@ -223,9 +223,9 @@ export default function Nav() {
               transition={{ delay: 0.4 }}
             >
               <Link
-                href={isAdmin ? "/dashboard" : "/carrito-compras"}
+                href={isAdmin ? "/admin/dashboard" : "/carrito-compras"}
                 onClick={() => setOpen(false)}
-                className={`flex items-center space-x-2 py-2 ${pathname === (isAdmin ? "/dashboard" : "/carrito-compras")
+                className={`flex items-center space-x-2 py-2 ${pathname === (isAdmin ? "/admin/dashboard" : "/carrito-compras")
                   ? "text-[#00E6F6] font-semibold"
                   : "text-white hover:text-[#00E6F6]"
                   }`}

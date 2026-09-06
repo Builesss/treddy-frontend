@@ -6,6 +6,7 @@ import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
+import { jwtDecode } from "jwt-decode";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash2, Plus, Minus, ShoppingCart, CreditCard, Loader2 } from "lucide-react";
 
@@ -90,8 +91,18 @@ export default function Carrito() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded: any = jwtDecode(token);
+        if (decoded.role === "administrador") {
+          router.push("/admin/dashboard");
+          return;
+        }
+      } catch {}
+    }
     cargarCarrito();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const script = document.createElement("script");
