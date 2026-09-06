@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { Search, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Filter, Eye, X } from "lucide-react";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CustomSelect from "@/components/ui/CustomSelect";
@@ -14,6 +14,8 @@ interface Auditoria {
   registro_id: string;
   accion: string;
   fecha: string;
+  datos_antes?: Record<string, unknown> | null;
+  datos_despues?: Record<string, unknown> | null;
   usuarios?: {
     nombre: string;
     apellido: string;
@@ -21,10 +23,42 @@ interface Auditoria {
   };
 }
 
+function getChanges(antes: unknown, despues: unknown) {
+  const changes: { key: string; oldVal: string; newVal: string }[] = [];
+  
+  try {
+    const objAntes: Record<string, unknown> = typeof antes === 'string' ? JSON.parse(antes || '{}') : (antes || {});
+    const objDespues: Record<string, unknown> = typeof despues === 'string' ? JSON.parse(despues || '{}') : (despues || {});
+
+    const allKeys = new Set([...Object.keys(objAntes), ...Object.keys(objDespues)]);
+
+    allKeys.forEach(key => {
+      const valAntes = objAntes[key];
+      const valDespues = objDespues[key];
+
+      if (JSON.stringify(valAntes) !== JSON.stringify(valDespues)) {
+        changes.push({
+          key,
+          oldVal: valAntes !== undefined && valAntes !== null ? (typeof valAntes === 'object' ? JSON.stringify(valAntes) : String(valAntes)) : 'N/A',
+          newVal: valDespues !== undefined && valDespues !== null ? (typeof valDespues === 'object' ? JSON.stringify(valDespues) : String(valDespues)) : 'N/A'
+        });
+      }
+    });
+  } catch (e) {
+    console.error("Error al parsear datos de auditoría", e);
+  }
+
+  return changes;
+}
+
 export default function AuditoriaPage() {
   const [auditorias, setAuditorias] = useState<Auditoria[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Modal de Detalles
+  const [selectedAudit, setSelectedAudit] = useState<Auditoria | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Búsqueda, Filtros y Paginación
   const [searchTerm, setSearchTerm] = useState("");
@@ -223,6 +257,9 @@ export default function AuditoriaPage() {
                   <th className="px-6 py-4 border-b border-cyan-500/20 bg-[#0A0F2C]/80 text-left text-xs font-bold text-[#00E6F6] uppercase tracking-wider">
                     Fecha
                   </th>
+                  <th className="px-6 py-4 border-b border-cyan-500/20 bg-[#0A0F2C]/80 text-center text-xs font-bold text-[#00E6F6] uppercase tracking-wider">
+                    Detalles
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-cyan-500/10">
@@ -254,11 +291,23 @@ export default function AuditoriaPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {new Date(audit.fecha).toLocaleString()}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
+                      <button
+                        onClick={() => {
+                          setSelectedAudit(audit);
+                          setIsModalOpen(true);
+                        }}
+                        className="p-2 bg-[#00E6F6]/10 text-[#00E6F6] hover:bg-[#00E6F6]/20 rounded-lg transition-colors border border-[#00E6F6]/20"
+                        title="Ver Detalles"
+                      >
+                        <Eye size={18} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {paginatedAuditorias.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-400 bg-[#0A0F2C]/30">
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-400 bg-[#0A0F2C]/30">
                       <div className="flex flex-col items-center justify-center">
                         <svg className="w-12 h-12 mb-4 text-[#00E6F6]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -301,6 +350,82 @@ export default function AuditoriaPage() {
             </div>
           )}
         </div>
+
+        {/* Modal de Detalles */}
+        {isModalOpen && selectedAudit && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="bg-[#0A0F2C] border border-cyan-500/30 rounded-2xl p-6 w-full max-w-2xl shadow-2xl shadow-cyan-500/20 max-h-[90vh] flex flex-col">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-[#00E6F6]">
+                  Detalles de Auditoría
+                </h2>
+                <button
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setSelectedAudit(null);
+                  }}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="flex-grow overflow-y-auto pr-2">
+                <div className="mb-4 text-sm text-gray-300 grid grid-cols-2 gap-2">
+                  <p><strong className="text-white">Acción:</strong> {selectedAudit.accion}</p>
+                  <p><strong className="text-white">Tabla:</strong> {selectedAudit.tabla_afectada}</p>
+                  <p><strong className="text-white">ID Registro:</strong> {selectedAudit.registro_id}</p>
+                  <p><strong className="text-white">Fecha:</strong> {new Date(selectedAudit.fecha).toLocaleString()}</p>
+                </div>
+
+                <h3 className="text-md font-semibold text-cyan-400 mb-3 border-b border-cyan-500/20 pb-2">Cambios Detectados</h3>
+                
+                {(() => {
+                  const changes = getChanges(selectedAudit.datos_antes, selectedAudit.datos_despues);
+                  
+                  if (changes.length === 0) {
+                    return <p className="text-gray-400 italic text-sm">No se detectaron cambios en los campos o es una acción que no registra estado.</p>;
+                  }
+
+                  return (
+                    <div className="overflow-x-auto rounded-lg border border-cyan-500/20">
+                      <table className="min-w-full text-sm text-left">
+                        <thead className="bg-[#1a1f40]">
+                          <tr>
+                            <th className="px-4 py-2 border-b border-cyan-500/20 text-cyan-300 font-semibold">Campo</th>
+                            <th className="px-4 py-2 border-b border-cyan-500/20 text-cyan-300 font-semibold">Valor Anterior</th>
+                            <th className="px-4 py-2 border-b border-cyan-500/20 text-cyan-300 font-semibold">Valor Nuevo</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-cyan-500/10">
+                          {changes.map((change, idx) => (
+                            <tr key={idx} className="hover:bg-cyan-500/5">
+                              <td className="px-4 py-2 font-mono text-xs text-gray-300">{change.key}</td>
+                              <td className="px-4 py-2 text-red-400 max-w-[200px] truncate" title={change.oldVal}>{change.oldVal}</td>
+                              <td className="px-4 py-2 text-green-400 max-w-[200px] truncate" title={change.newVal}>{change.newVal}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
+              </div>
+              
+              <div className="mt-6 flex justify-end pt-4 border-t border-cyan-500/20">
+                <button
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setSelectedAudit(null);
+                  }}
+                  className="px-4 py-2 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 rounded-lg hover:bg-cyan-500/20 transition-colors font-medium"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
       <Footer />
     </div>
