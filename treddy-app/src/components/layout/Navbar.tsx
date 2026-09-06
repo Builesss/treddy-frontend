@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, ShoppingBag, User, LogOut, Package, Users, ShoppingCart, LayoutDashboard, ChevronDown } from "lucide-react";
+import { Menu, X, ShoppingBag, User, LogOut, Package, Users, ShoppingCart, LayoutDashboard, ChevronDown, FileText } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -32,6 +32,7 @@ export default function Nav() {
     { href: "/gestion-productos", label: "Productos", icon: <Package size={16} /> },
     { href: "/admin/usuarios", label: "Usuarios", icon: <Users size={16} /> },
     { href: "/admin/pedidos", label: "Pedidos", icon: <ShoppingCart size={16} /> },
+    { href: "/admin/auditoria", label: "Auditoría", icon: <FileText size={16} /> },
   ];
 
   const isAdminRoute = adminLinks.some(l => pathname === l.href);
