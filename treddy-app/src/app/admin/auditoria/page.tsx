@@ -5,6 +5,7 @@ import autoTable from "jspdf-autotable";
 import { Search, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 interface Auditoria {
   auditoria_id: string;
@@ -116,10 +117,12 @@ export default function AuditoriaPage() {
     setCurrentPage(1);
   };
 
-  const handleAccionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setAccionFilter(e.target.value);
-    setCurrentPage(1);
-  };
+  const accionOptions = [
+    { value: "todos", label: "Todas las Acciones" },
+    { value: "INSERT", label: "Crear (INSERT)" },
+    { value: "UPDATE", label: "Actualizar (UPDATE)" },
+    { value: "DELETE", label: "Eliminar (DELETE)" },
+  ];
 
   if (loading) return (
     <div className="min-h-screen bg-[#0A0F2C] text-white flex flex-col">
@@ -188,16 +191,15 @@ export default function AuditoriaPage() {
               Acción:
             </div>
 
-            <select
+            <CustomSelect
+              options={accionOptions}
               value={accionFilter}
-              onChange={handleAccionChange}
-              className="bg-[#0A0F2C] border border-cyan-500/20 text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-cyan-500 transition-colors"
-            >
-              <option value="todos">Todas las Acciones</option>
-              <option value="INSERT">Crear (INSERT)</option>
-              <option value="UPDATE">Actualizar (UPDATE)</option>
-              <option value="DELETE">Eliminar (DELETE)</option>
-            </select>
+              onChange={(val) => {
+                setAccionFilter(val);
+                setCurrentPage(1);
+              }}
+              width="w-52"
+            />
           </div>
         </div>
 

@@ -7,6 +7,7 @@ import { Trash2, Edit2, Package, Clock, CheckCircle, Truck, XCircle, Search, Che
 import Swal from "sweetalert2";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 type OrderType = {
   id: number;
@@ -71,9 +72,11 @@ export default function AdminPedidos() {
   };
 
   const getStatusIcon = (estado: string) => {
-    switch (estado) {
+    const st = estado.toLowerCase();
+    switch (st) {
       case 'pendiente': return <Clock size={14} className="text-yellow-400"/>;
-      case 'en_producción': return <Package size={14} className="text-purple-400"/>;
+      case 'en_producción':
+      case 'en produccion': return <Package size={14} className="text-purple-400"/>;
       case 'enviado': return <Truck size={14} className="text-blue-400"/>;
       case 'entregado': return <CheckCircle size={14} className="text-green-400"/>;
       case 'cancelado': return <XCircle size={14} className="text-red-400"/>;
@@ -82,9 +85,11 @@ export default function AdminPedidos() {
   };
 
   const getStatusColor = (estado: string) => {
-    switch (estado) {
+    const st = estado.toLowerCase();
+    switch (st) {
       case 'pendiente': return 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30';
-      case 'en_producción': return 'bg-purple-900/30 text-purple-400 border-purple-500/30';
+      case 'en_producción':
+      case 'en produccion': return 'bg-purple-900/30 text-purple-400 border-purple-500/30';
       case 'enviado': return 'bg-blue-900/30 text-blue-400 border-blue-500/30';
       case 'entregado': return 'bg-green-900/30 text-green-400 border-green-500/30';
       case 'cancelado': return 'bg-red-900/30 text-red-400 border-red-500/30';
@@ -203,7 +208,7 @@ export default function AdminPedidos() {
   const filteredOrders = orders.filter((o) => {
     const fullText = `${o.codigo || ""} ${o.id} ${o.cliente} ${o.email}`.toLowerCase();
     const matchesSearch = fullText.includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "todos" || o.estado === statusFilter;
+    const matchesStatus = statusFilter === "todos" || o.estado.toLowerCase() === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
 
@@ -219,10 +224,14 @@ export default function AdminPedidos() {
     setCurrentPage(1);
   };
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setStatusFilter(e.target.value);
-    setCurrentPage(1);
-  };
+  const statusOptions = [
+    { value: "todos", label: "Todos los Estados" },
+    { value: "pendiente", label: "Pendiente" },
+    { value: "en_producción", label: "En Producción" },
+    { value: "enviado", label: "Enviado" },
+    { value: "entregado", label: "Entregado" },
+    { value: "cancelado", label: "Cancelado" },
+  ];
 
   if (loading) {
     return (
@@ -266,20 +275,18 @@ export default function AdminPedidos() {
                 Estado:
               </div>
 
-              <select
+              <CustomSelect
+                options={statusOptions}
                 value={statusFilter}
-                onChange={handleStatusChange}
-                className="bg-[#0A0F2C] border border-[#1e293b] text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-green-500 transition-colors"
-              >
-                <option value="todos">Todos los Estados</option>
-                <option value="pendiente">Pendiente</option>
-                <option value="en_producción">En Producción</option>
-                <option value="enviado">Enviado</option>
-                <option value="entregado">Entregado</option>
-                <option value="cancelado">Cancelado</option>
-              </select>
+                onChange={(val) => {
+                  setStatusFilter(val);
+                  setCurrentPage(1);
+                }}
+                width="w-48"
+              />
             </div>
           </div>
+
 
           {/* Tabla */}
           <div className="bg-[#0F173A] border border-[#1e293b] rounded-2xl overflow-hidden shadow-xl">

@@ -3,10 +3,11 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { motion } from "framer-motion";
-import { User, Trash2, Edit2, Shield, Ban, CheckCircle, Search, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import { User, Trash2, Edit2, Shield, Ban, CheckCircle, Search, ChevronLeft, ChevronRight, Filter, Clock } from "lucide-react";
 import Swal from "sweetalert2";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 type UserType = {
   usuario_id: number;
@@ -77,12 +78,13 @@ export default function AdminUsuarios() {
       title: 'Editar Usuario',
       html:
         `<select id="swal-input1" class="swal2-input bg-[#0A0F2C] text-white border-cyan-500/50">
-          <option value="activo" ${currentStatus === 'activo' ? 'selected' : ''}>Activo</option>
-          <option value="suspendido" ${currentStatus === 'suspendido' ? 'selected' : ''}>Suspendido</option>
+          <option value="activo" ${currentStatus.toLowerCase() === 'activo' ? 'selected' : ''}>Activo</option>
+          <option value="pendiente" ${currentStatus.toLowerCase() === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+          <option value="suspendido" ${currentStatus.toLowerCase() === 'suspendido' ? 'selected' : ''}>Suspendido</option>
         </select>
         <select id="swal-input2" class="swal2-input bg-[#0A0F2C] text-white border-cyan-500/50 mt-4">
-          <option value="cliente" ${currentRole === 'cliente' ? 'selected' : ''}>Cliente</option>
-          <option value="administrador" ${currentRole === 'administrador' ? 'selected' : ''}>Administrador</option>
+          <option value="cliente" ${currentRole.toLowerCase() === 'cliente' ? 'selected' : ''}>Cliente</option>
+          <option value="administrador" ${currentRole.toLowerCase() === 'administrador' ? 'selected' : ''}>Administrador</option>
         </select>`,
       focusConfirm: false,
       background: '#0F173A',
@@ -189,9 +191,9 @@ export default function AdminUsuarios() {
   const filteredUsers = users.filter((u) => {
     const fullText = `${u.nombre} ${u.apellido} ${u.email} ${u.telefono || ""}`.toLowerCase();
     const matchesSearch = fullText.includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "todos" || u.tipo_usuario === roleFilter;
-    const userStatus = u.estado || "activo";
-    const matchesStatus = statusFilter === "todos" || userStatus === statusFilter;
+    const matchesRole = roleFilter === "todos" || u.tipo_usuario.toLowerCase() === roleFilter.toLowerCase();
+    const userStatus = (u.estado || "activo").toLowerCase().trim();
+    const matchesStatus = statusFilter === "todos" || userStatus === statusFilter.toLowerCase();
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -207,15 +209,18 @@ export default function AdminUsuarios() {
     setCurrentPage(1);
   };
 
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRoleFilter(e.target.value);
-    setCurrentPage(1);
-  };
+  const roleOptions = [
+    { value: "todos", label: "Todos los Roles" },
+    { value: "cliente", label: "Cliente" },
+    { value: "administrador", label: "Administrador" },
+  ];
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setStatusFilter(e.target.value);
-    setCurrentPage(1);
-  };
+  const statusOptions = [
+    { value: "todos", label: "Todos los Estados" },
+    { value: "activo", label: "Activo" },
+    { value: "pendiente", label: "Pendiente" },
+    { value: "suspendido", label: "Suspendido" },
+  ];
 
   if (loading) {
     return (
@@ -259,25 +264,25 @@ export default function AdminUsuarios() {
                 Filtros:
               </div>
 
-              <select
+              <CustomSelect
+                options={roleOptions}
                 value={roleFilter}
-                onChange={handleRoleChange}
-                className="bg-[#0A0F2C] border border-[#1e293b] text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-cyan-500 transition-colors"
-              >
-                <option value="todos">Todos los Roles</option>
-                <option value="cliente">Cliente</option>
-                <option value="administrador">Administrador</option>
-              </select>
+                onChange={(val) => {
+                  setRoleFilter(val);
+                  setCurrentPage(1);
+                }}
+                width="w-44"
+              />
 
-              <select
+              <CustomSelect
+                options={statusOptions}
                 value={statusFilter}
-                onChange={handleStatusChange}
-                className="bg-[#0A0F2C] border border-[#1e293b] text-white text-sm px-3 py-2 rounded-xl focus:outline-none focus:border-cyan-500 transition-colors"
-              >
-                <option value="todos">Todos los Estados</option>
-                <option value="activo">Activo</option>
-                <option value="suspendido">Suspendido</option>
-              </select>
+                onChange={(val) => {
+                  setStatusFilter(val);
+                  setCurrentPage(1);
+                }}
+                width="w-44"
+              />
             </div>
           </div>
 
@@ -302,64 +307,74 @@ export default function AdminUsuarios() {
                       </td>
                     </tr>
                   ) : (
-                    paginatedUsers.map((user, idx) => (
-                      <motion.tr 
-                        key={user.usuario_id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.03 }}
-                        className="border-t border-[#1e293b] hover:bg-white/5 transition-colors"
-                      >
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-cyan-900/50 flex items-center justify-center text-cyan-400 border border-cyan-500/30">
-                              <User size={18} />
+                    paginatedUsers.map((user, idx) => {
+                      const st = (user.estado || "activo").toLowerCase();
+                      return (
+                        <motion.tr 
+                          key={user.usuario_id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.03 }}
+                          className="border-t border-[#1e293b] hover:bg-white/5 transition-colors"
+                        >
+                          <td className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-cyan-900/50 flex items-center justify-center text-cyan-400 border border-cyan-500/30">
+                                <User size={18} />
+                              </div>
+                              <div>
+                                <p className="font-semibold">{user.nombre} {user.apellido}</p>
+                                <p className="text-xs text-gray-400">{user.email}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-semibold">{user.nombre} {user.apellido}</p>
-                              <p className="text-xs text-gray-400">{user.email}</p>
+                          </td>
+                          <td className="p-4 hidden md:table-cell text-gray-300">
+                            {user.telefono || "Sin teléfono"}
+                          </td>
+                          <td className="p-4">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${user.tipo_usuario.toLowerCase() === 'administrador' ? 'bg-purple-900/30 text-purple-400 border-purple-500/30' : 'bg-blue-900/30 text-blue-400 border-blue-500/30'}`}>
+                              {user.tipo_usuario.toLowerCase() === 'administrador' ? <Shield size={12}/> : <User size={12}/>}
+                              {user.tipo_usuario}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
+                              st === 'suspendido'
+                                ? 'bg-red-900/30 text-red-400 border-red-500/30'
+                                : st === 'pendiente'
+                                ? 'bg-yellow-900/30 text-yellow-400 border-yellow-500/30'
+                                : 'bg-green-900/30 text-green-400 border-green-500/30'
+                            }`}>
+                              {st === 'suspendido' ? <Ban size={12}/> : st === 'pendiente' ? <Clock size={12}/> : <CheckCircle size={12}/>}
+                              <span className="capitalize">{user.estado || 'activo'}</span>
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center justify-center gap-2">
+                              <button 
+                                onClick={() => changeStatus(user.usuario_id, user.estado || 'activo', user.tipo_usuario)}
+                                className="p-2 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-500/20 transition-colors"
+                                title="Editar"
+                              >
+                                <Edit2 size={16} />
+                              </button>
+                              <button 
+                                onClick={() => deleteUser(user.usuario_id)}
+                                className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
+                                title="Eliminar"
+                              >
+                                <Trash2 size={16} />
+                              </button>
                             </div>
-                          </div>
-                        </td>
-                        <td className="p-4 hidden md:table-cell text-gray-300">
-                          {user.telefono || "Sin teléfono"}
-                        </td>
-                        <td className="p-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${user.tipo_usuario === 'administrador' ? 'bg-purple-900/30 text-purple-400 border-purple-500/30' : 'bg-blue-900/30 text-blue-400 border-blue-500/30'}`}>
-                            {user.tipo_usuario === 'administrador' ? <Shield size={12}/> : <User size={12}/>}
-                            {user.tipo_usuario}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${user.estado === 'suspendido' ? 'bg-red-900/30 text-red-400 border-red-500/30' : 'bg-green-900/30 text-green-400 border-green-500/30'}`}>
-                            {user.estado === 'suspendido' ? <Ban size={12}/> : <CheckCircle size={12}/>}
-                            {user.estado || 'activo'}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <button 
-                              onClick={() => changeStatus(user.usuario_id, user.estado || 'activo', user.tipo_usuario)}
-                              className="p-2 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-500/20 transition-colors"
-                              title="Editar"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            <button 
-                              onClick={() => deleteUser(user.usuario_id)}
-                              className="p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors"
-                              title="Eliminar"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </motion.tr>
-                    ))
+                          </td>
+                        </motion.tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
             </div>
+
 
             {/* Controles de Paginación */}
             {filteredUsers.length > 0 && (
