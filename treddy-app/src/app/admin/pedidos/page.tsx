@@ -5,6 +5,8 @@ import { jwtDecode } from "jwt-decode";
 import { motion } from "framer-motion";
 import { Trash2, Edit2, Package, Clock, CheckCircle, Truck, XCircle } from "lucide-react";
 import Swal from "sweetalert2";
+import Nav from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 type OrderType = {
   id: number;
@@ -198,7 +200,9 @@ export default function AdminPedidos() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0F2C] p-6 lg:p-12 text-white">
+    <main className="min-h-screen bg-[#0A0F2C] text-white flex flex-col">
+      <Nav />
+      <div className="flex-1 p-6 lg:p-12">
       <div className="max-w-7xl mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -285,6 +289,8 @@ export default function AdminPedidos() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      <Footer />
+    </main>
   );
 }

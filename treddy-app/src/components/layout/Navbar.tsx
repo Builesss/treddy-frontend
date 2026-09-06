@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, ShoppingBag, User, LogOut, Package, Users, ShoppingCart } from "lucide-react";
+import { Menu, X, ShoppingBag, User, LogOut, Package, Users, ShoppingCart, LayoutDashboard, ChevronDown } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -19,6 +19,7 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminDropdown, setAdminDropdown] = useState(false);
 
   const links = [
     { href: "/", label: "Inicio" },
@@ -26,6 +27,14 @@ export default function Nav() {
     { href: "/personalizacion", label: "Personalizar" },
     { href: "/contactanos", label: "Contacto" },
   ];
+
+  const adminLinks = [
+    { href: "/gestion-productos", label: "Productos", icon: <Package size={16} /> },
+    { href: "/admin/usuarios", label: "Usuarios", icon: <Users size={16} /> },
+    { href: "/admin/pedidos", label: "Pedidos", icon: <ShoppingCart size={16} /> },
+  ];
+
+  const isAdminRoute = adminLinks.some(l => pathname === l.href);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -44,6 +53,17 @@ export default function Nav() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("#admin-dropdown-wrapper")) {
+        setAdminDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
@@ -55,10 +75,8 @@ export default function Nav() {
     <motion.header
       className="bg-[#0A0F2C] border-b border-[#1a1f40] shadow-md sticky top-0 z-50"
     >
-      {/* Usamos position relative en el contenedor para poder centrar el nav absolutamente */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center relative">
 
-        {/* Logo — lado izquierdo, ocupa flex-1 para empujar el centro */}
         <div className="flex-1 flex justify-start">
           <Link href="/" className="relative group text-xl sm:text-2xl font-extrabold text-[#00E6F6]">
             TREDDY
@@ -66,7 +84,6 @@ export default function Nav() {
           </Link>
         </div>
 
-        {/* Desktop Nav Links — centrado ABSOLUTAMENTE para que no dependa de los laterales */}
         <nav
           className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2"
           aria-label="Main Navigation"
@@ -96,42 +113,49 @@ export default function Nav() {
           ))}
         </nav>
 
-        {/* Desktop Right Actions — lado derecho, ocupa flex-1 para empujar el centro */}
         <div className="flex-1 hidden md:flex items-center justify-end gap-3">
 
           {isAdmin ? (
-          <>
-            <Link
-              href="/gestion-productos"
-              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/gestion-productos"
-                ? "text-[#00E6F6] font-semibold"
-                : "text-white hover:text-[#00E6F6]"
-                }`}
-            >
-              <Package size={18} />
-              <span>Productos</span>
-            </Link>
-            <Link
-              href="/admin/usuarios"
-              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/admin/usuarios"
-                ? "text-[#00E6F6] font-semibold"
-                : "text-white hover:text-[#00E6F6]"
-                }`}
-            >
-              <Users size={18} />
-              <span>Usuarios</span>
-            </Link>
-            <Link
-              href="/admin/pedidos"
-              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/admin/pedidos"
-                ? "text-[#00E6F6] font-semibold"
-                : "text-white hover:text-[#00E6F6]"
-                }`}
-            >
-              <ShoppingCart size={18} />
-              <span>Pedidos</span>
-            </Link>
-          </>
+            <div id="admin-dropdown-wrapper" className="relative">
+              <button
+                onClick={() => setAdminDropdown(!adminDropdown)}
+                className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors px-3 py-1.5 rounded-lg ${isAdminRoute
+                  ? "text-[#00E6F6] font-semibold bg-[#00E6F6]/10"
+                  : "text-white hover:text-[#00E6F6] hover:bg-white/5"
+                  }`}
+              >
+                <LayoutDashboard size={18} />
+                <span>Administración</span>
+                <ChevronDown size={15} className={`transition-transform duration-200 ${adminDropdown ? "rotate-180" : ""}`} />
+              </button>
+
+              <AnimatePresence>
+                {adminDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-52 bg-[#0F173A] border border-[#1e293b] rounded-xl shadow-2xl overflow-hidden z-50"
+                  >
+                    {adminLinks.map(({ href, label, icon }) => (
+                      <Link
+                        key={href}
+                        href={href}
+                        onClick={() => setAdminDropdown(false)}
+                        className={`flex items-center gap-3 px-4 py-3 text-sm transition-colors ${pathname === href
+                          ? "text-[#00E6F6] font-semibold bg-[#00E6F6]/10"
+                          : "text-gray-300 hover:text-white hover:bg-white/5"
+                          }`}
+                      >
+                        <span className={pathname === href ? "text-[#00E6F6]" : "text-gray-500"}>{icon}</span>
+                        {label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           ) : (
             <Link
               href="/carrito-compras"
@@ -175,7 +199,6 @@ export default function Nav() {
           )}
         </div>
 
-        {/* Mobile: Cart icon + Hamburger */}
         <div className="flex md:hidden items-center gap-3">
           {!isAdmin && (
             <Link
@@ -234,18 +257,13 @@ export default function Nav() {
             >
               {isAdmin ? (
                 <>
-                  <Link href="/gestion-productos" onClick={() => setOpen(false)} className={`flex items-center space-x-2 py-2 ${pathname === "/gestion-productos" ? "text-[#00E6F6] font-semibold" : "text-white hover:text-[#00E6F6]"}`}>
-                    <Package size={20} />
-                    <span>Productos</span>
-                  </Link>
-                  <Link href="/admin/usuarios" onClick={() => setOpen(false)} className={`flex items-center space-x-2 py-2 ${pathname === "/admin/usuarios" ? "text-[#00E6F6] font-semibold" : "text-white hover:text-[#00E6F6]"}`}>
-                    <Users size={20} />
-                    <span>Usuarios</span>
-                  </Link>
-                  <Link href="/admin/pedidos" onClick={() => setOpen(false)} className={`flex items-center space-x-2 py-2 ${pathname === "/admin/pedidos" ? "text-[#00E6F6] font-semibold" : "text-white hover:text-[#00E6F6]"}`}>
-                    <ShoppingCart size={20} />
-                    <span>Pedidos</span>
-                  </Link>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-2 mt-2">Administración</p>
+                  {adminLinks.map(({ href, label, icon }) => (
+                    <Link key={href} href={href} onClick={() => setOpen(false)} className={`flex items-center space-x-2 py-2 ${pathname === href ? "text-[#00E6F6] font-semibold" : "text-white hover:text-[#00E6F6]"}`}>
+                      {icon}
+                      <span>{label}</span>
+                    </Link>
+                  ))}
                 </>
               ) : (
                 <Link
