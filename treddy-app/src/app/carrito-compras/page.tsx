@@ -94,9 +94,9 @@ export default function Carrito() {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        const decoded: any = jwtDecode(token);
+        const decoded = jwtDecode<{ role: string }>(token);
         if (decoded.role === "administrador") {
-          router.push("/admin/dashboard");
+          router.push("/gestion-productos");
           return;
         }
       } catch {}

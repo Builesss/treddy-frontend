@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, ShoppingBag, LayoutDashboard, User, LogOut, FileText } from "lucide-react";
+import { Menu, X, ShoppingBag, User, LogOut, Package, Users, ShoppingCart } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -102,26 +102,36 @@ export default function Nav() {
           {isAdmin ? (
           <>
             <Link
-              href="/admin/dashboard"
-              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/admin/dashboard"
+              href="/gestion-productos"
+              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/gestion-productos"
                 ? "text-[#00E6F6] font-semibold"
                 : "text-white hover:text-[#00E6F6]"
                 }`}
             >
-              <LayoutDashboard size={18} />
-              <span>Dashboard</span>
+              <Package size={18} />
+              <span>Productos</span>
             </Link>
             <Link
-                href="/admin/auditoria"
-                title="Auditoría"
-                className={`flex items-center justify-center p-2 rounded-full transition-colors ${pathname === "/admin/auditoria"
-                  ? "bg-[#00E6F6]/10 text-[#00E6F6]"
-                  : "text-white hover:bg-white/5 hover:text-[#00E6F6]"
-                  }`}
-              >
-                <FileText size={20} />
-              </Link>
-            </>
+              href="/admin/usuarios"
+              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/admin/usuarios"
+                ? "text-[#00E6F6] font-semibold"
+                : "text-white hover:text-[#00E6F6]"
+                }`}
+            >
+              <Users size={18} />
+              <span>Usuarios</span>
+            </Link>
+            <Link
+              href="/admin/pedidos"
+              className={`flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors ${pathname === "/admin/pedidos"
+                ? "text-[#00E6F6] font-semibold"
+                : "text-white hover:text-[#00E6F6]"
+                }`}
+            >
+              <ShoppingCart size={18} />
+              <span>Pedidos</span>
+            </Link>
+          </>
           ) : (
             <Link
               href="/carrito-compras"
@@ -222,29 +232,32 @@ export default function Nav() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
             >
-              <Link
-                href={isAdmin ? "/admin/dashboard" : "/carrito-compras"}
-                onClick={() => setOpen(false)}
-                className={`flex items-center space-x-2 py-2 ${pathname === (isAdmin ? "/admin/dashboard" : "/carrito-compras")
-                  ? "text-[#00E6F6] font-semibold"
-                  : "text-white hover:text-[#00E6F6]"
-                  }`}
-              >
-                {isAdmin ? <LayoutDashboard size={20} /> : <ShoppingBag size={20} />}
-                <span>{isAdmin ? "Dashboard" : "Carrito"}</span>
-              </Link>
-               {isAdmin && (
+              {isAdmin ? (
+                <>
+                  <Link href="/gestion-productos" onClick={() => setOpen(false)} className={`flex items-center space-x-2 py-2 ${pathname === "/gestion-productos" ? "text-[#00E6F6] font-semibold" : "text-white hover:text-[#00E6F6]"}`}>
+                    <Package size={20} />
+                    <span>Productos</span>
+                  </Link>
+                  <Link href="/admin/usuarios" onClick={() => setOpen(false)} className={`flex items-center space-x-2 py-2 ${pathname === "/admin/usuarios" ? "text-[#00E6F6] font-semibold" : "text-white hover:text-[#00E6F6]"}`}>
+                    <Users size={20} />
+                    <span>Usuarios</span>
+                  </Link>
+                  <Link href="/admin/pedidos" onClick={() => setOpen(false)} className={`flex items-center space-x-2 py-2 ${pathname === "/admin/pedidos" ? "text-[#00E6F6] font-semibold" : "text-white hover:text-[#00E6F6]"}`}>
+                    <ShoppingCart size={20} />
+                    <span>Pedidos</span>
+                  </Link>
+                </>
+              ) : (
                 <Link
-                  href="/admin/auditoria"
-                  title="Auditoría"
+                  href="/carrito-compras"
                   onClick={() => setOpen(false)}
-                  className={`flex items-center space-x-2 mt-4 transition-colors ${pathname === "/admin/auditoria"
+                  className={`flex items-center space-x-2 py-2 ${pathname === "/carrito-compras"
                     ? "text-[#00E6F6] font-semibold"
                     : "text-white hover:text-[#00E6F6]"
                     }`}
                 >
-                  <FileText size={20} />
-                  <span>Auditoría</span>
+                  <ShoppingBag size={20} />
+                  <span>Carrito</span>
                 </Link>
               )}
             </motion.div>

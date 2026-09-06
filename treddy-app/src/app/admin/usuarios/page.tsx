@@ -194,8 +194,8 @@ export default function AdminUsuarios() {
           <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00E6F6] to-blue-500">
             Gestión de Usuarios
           </h1>
-          <button onClick={() => router.push('/admin/dashboard')} className="text-sm text-cyan-400 hover:underline">
-            Volver al Dashboard
+          <button onClick={() => router.push('/gestion-productos')} className="text-sm text-cyan-400 hover:underline">
+            Ir a Productos
           </button>
         </motion.div>
 
