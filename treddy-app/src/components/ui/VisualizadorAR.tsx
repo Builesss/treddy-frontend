@@ -55,19 +55,26 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
       domOverlay: { root: container },
     })
 
-    // Fija el botón AR a una posición constante del VIEWPORT (no de la
-    // página). Por defecto Three.js lo crea con `position: absolute`,
-    // que se ancla al documento y se desplaza si el fondo detrás del
-    // modal hace scroll. Con `position: fixed` queda siempre en el
-    // mismo lugar en pantalla, sin importar el scroll, y totalmente
-    // funcional (no se toca pointer-events ni opacidad).
-    arButton.style.position = 'fixed'
-    arButton.style.bottom = '24px'
+    // Personalización de estilo y posición del botón AR para coincidir con TarjetaExpandible
+    arButton.style.position = 'absolute'
+    arButton.style.bottom = '16px'
     arButton.style.left = '50%'
     arButton.style.transform = 'translateX(-50%)'
-    arButton.style.zIndex = '99999'
+    arButton.style.zIndex = '30'
+    arButton.style.padding = '10px 22px'
+    arButton.style.borderRadius = '9999px'
+    arButton.style.background = 'linear-gradient(135deg, rgba(6, 182, 212, 0.95) 0%, rgba(8, 145, 178, 0.95) 100%)'
+    arButton.style.color = '#0F173A'
+    arButton.style.fontWeight = '700'
+    arButton.style.fontSize = '13px'
+    arButton.style.letterSpacing = '0.5px'
+    arButton.style.border = '1px solid rgba(6, 182, 212, 0.8)'
+    arButton.style.boxShadow = '0 0 20px rgba(6, 182, 212, 0.5)'
+    arButton.style.cursor = 'pointer'
+    arButton.style.backdropFilter = 'blur(8px)'
+    arButton.style.outline = 'none'
 
-    document.body.appendChild(arButton)
+    container.appendChild(arButton)
 
     // --- Etiqueta de tamaño (cm) ---
     // Vive DENTRO de `container`, que es el root del dom-overlay, así que
@@ -226,7 +233,7 @@ export default function ARViewer({ modelUrl = "/HORNET.glb" }: VisualizadorARPro
       container.removeEventListener('touchmove', handleTouchMove)
       container.removeEventListener('touchend', handleTouchEnd)
       renderer.dispose()
-      if (arButton.parentNode) document.body.removeChild(arButton)
+      if (arButton.parentNode) arButton.parentNode.removeChild(arButton)
       if (sizeLabel.parentNode) sizeLabel.parentNode.removeChild(sizeLabel)
     }
   }, [modelUrl])
