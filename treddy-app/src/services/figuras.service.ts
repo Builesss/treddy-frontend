@@ -14,6 +14,11 @@ export async function getFiguraById(id: number) {
   return res.json();
 }
 
+function getAuthHeaders(): Record<string, string> {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function createFigura(data: {
   nombre: string;
   precio: number;
@@ -24,7 +29,7 @@ export async function createFigura(data: {
 }) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/figuras`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     body: JSON.stringify(data),
   });
   if (!res.ok) {
@@ -49,7 +54,7 @@ export async function updateFigura(
     `${process.env.NEXT_PUBLIC_API_URL}/api/figuras/${id}`,
     {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
       body: JSON.stringify(data),
     },
   );
@@ -65,6 +70,7 @@ export async function deleteFigura(id: number) {
     `${process.env.NEXT_PUBLIC_API_URL}/api/figuras/${id}`,
     {
       method: "DELETE",
+      headers: { ...getAuthHeaders() },
     },
   );
   if (!res.ok) {

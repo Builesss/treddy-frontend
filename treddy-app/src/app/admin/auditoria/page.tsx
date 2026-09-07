@@ -153,9 +153,9 @@ export default function AuditoriaPage() {
 
   const accionOptions = [
     { value: "todos", label: "Todas las Acciones" },
-    { value: "INSERT", label: "Crear (INSERT)" },
-    { value: "UPDATE", label: "Actualizar (UPDATE)" },
-    { value: "DELETE", label: "Eliminar (DELETE)" },
+    { value: "crear", label: "Crear" },
+    { value: "modificar", label: "Modificar" },
+    { value: "eliminar", label: "Eliminar" },
   ];
 
   if (loading) return (

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronDown, Check } from "lucide-react";
 
 interface Option {
@@ -25,23 +25,60 @@ export default function CustomSelect({
   width = "w-48",
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selectedOption = options.find((opt) => opt.value === value);
 
+  const updateDropdownPosition = useCallback(() => {
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: "fixed",
+      top: rect.bottom + 8,
+      left: rect.left,
+      width: rect.width,
+      minWidth: 170,
+      zIndex: 9999,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      updateDropdownPosition();
+    }
+  }, [isOpen, updateDropdownPosition]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
+    const handleScroll = () => {
+      if (isOpen) updateDropdownPosition();
+    };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    window.addEventListener("scroll", handleScroll, true);
+    window.addEventListener("resize", updateDropdownPosition);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("resize", updateDropdownPosition);
+    };
+  }, [isOpen, updateDropdownPosition]);
 
   return (
-    <div className={`relative ${width}`} ref={dropdownRef}>
+    <div className={`relative ${width}`}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="w-full bg-[#0A0F2C] border border-[#1e293b] hover:border-cyan-500/50 text-white text-sm px-3.5 py-2 rounded-xl flex items-center justify-between gap-2 focus:outline-none transition-all shadow-md"
@@ -59,7 +96,11 @@ export default function CustomSelect({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 z-50 w-full min-w-[170px] bg-[#0F173A] border border-cyan-500/30 rounded-xl shadow-2xl overflow-hidden py-1 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150">
+        <div
+          ref={dropdownRef}
+          style={dropdownStyle}
+          className="bg-[#0F173A] border border-cyan-500/30 rounded-xl shadow-2xl overflow-hidden py-1 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150"
+        >
           {options.map((option) => {
             const isSelected = option.value === value;
             return (
