@@ -37,9 +37,8 @@ export default function CustomSelect({
     setDropdownStyle({
       position: "fixed",
       top: rect.bottom + 8,
-      left: rect.left,
-      width: rect.width,
-      minWidth: 170,
+      right: window.innerWidth - rect.right,
+      minWidth: rect.width,
       zIndex: 9999,
     });
   }, []);
