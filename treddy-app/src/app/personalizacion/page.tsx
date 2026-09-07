@@ -550,12 +550,6 @@ function CustomizerContent() {
                           </>
                         )}
                       </button>
-
-                      {!productoId && (
-                        <p className="text-xs text-yellow-400/70 text-center">
-                          Accede desde el catálogo para poder comprar.
-                        </p>
-                      )}
                     </div>
                   )}
                 </div>

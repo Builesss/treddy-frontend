@@ -482,13 +482,6 @@ export default function TarjetaExpandible({
                     <span className="text-cyan-400 font-bold text-xl">
                       ${figura.precio_base.toLocaleString()}
                     </span>
-                    <span className="text-gray-500 text-sm">|</span>
-                    <span
-                      className={`text-sm ${figura.stock > 0 ? "text-green-400" : "text-red-400"
-                        }`}
-                    >
-                      {figura.stock > 0 ? `Stock: ${figura.stock}` : "Agotado"}
-                    </span>
                   </div>
                   <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
                     {figura.descripcion ||
@@ -499,12 +492,11 @@ export default function TarjetaExpandible({
                 <div className="flex flex-col gap-3 mt-2">
                   <Button
                     onClick={handleComprar}
-                    disabled={figura.stock <= 0}
                     isLoading={loading}
                     className="w-full"
                   >
                     <ShoppingCart size={20} />
-                    {figura.stock > 0 ? "Agregar al Carrito" : "Sin Stock"}
+                    Agregar al Carrito
                   </Button>
 
                   <Button

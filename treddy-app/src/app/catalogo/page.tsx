@@ -203,11 +203,6 @@ export default function Catalogo() {
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300 pointer-events-none" />
 
               <div className="relative z-10 flex flex-col h-full w-full">
-                <div className="absolute top-0 right-0 z-20">
-                  <span className="bg-cyan-500/10 text-cyan-400 text-xs font-bold px-2 py-1 rounded-full border border-cyan-500/20">
-                    Stock: {figura.stock}
-                  </span>
-                </div>
 
                 <div className="relative flex-grow mb-4 w-full flex items-center justify-center overflow-visible mt-6">
                   <Image

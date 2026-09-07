@@ -353,8 +353,8 @@ export default function AuditoriaPage() {
 
         {/* Modal de Detalles */}
         {isModalOpen && selectedAudit && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div className="bg-[#0A0F2C] border border-cyan-500/30 rounded-2xl p-6 w-full max-w-2xl shadow-2xl shadow-cyan-500/20 max-h-[90vh] flex flex-col">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 pt-24">
+            <div className="bg-[#0A0F2C] border border-cyan-500/30 rounded-2xl p-6 w-full max-w-2xl shadow-2xl shadow-cyan-500/20 max-h-[85vh] flex flex-col">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-[#00E6F6]">
                   Detalles de Auditoría
