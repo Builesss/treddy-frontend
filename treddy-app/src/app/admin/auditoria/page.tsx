@@ -410,6 +410,63 @@ export default function AuditoriaPage() {
                     </div>
                   );
                 })()}
+
+                {/* Sección de Items Comprados (solo para pedidos nuevos) */}
+                {(() => {
+                  if (
+                    selectedAudit.tabla_afectada === "pedidos" &&
+                    (selectedAudit.accion.toLowerCase().includes("crear") || selectedAudit.accion.toLowerCase().includes("insert"))
+                  ) {
+                    try {
+                      const datosDespues: Record<string, unknown> = typeof selectedAudit.datos_despues === 'string' 
+                        ? JSON.parse(selectedAudit.datos_despues || '{}') 
+                        : (selectedAudit.datos_despues || {});
+                      
+                      const items = datosDespues.items_comprados as Array<Record<string, unknown>> | undefined;
+                      
+                      if (items && Array.isArray(items) && items.length > 0) {
+                        return (
+                          <div className="mt-6">
+                            <h3 className="text-md font-semibold text-cyan-400 mb-3 border-b border-cyan-500/20 pb-2">
+                              Detalles del Pedido (Items Comprados)
+                            </h3>
+                            <div className="space-y-3">
+                              {items.map((item, idx) => (
+                                <div key={idx} className="bg-[#1a1f40] border border-cyan-500/20 rounded-lg p-3 text-sm">
+                                  <div className="flex justify-between items-start mb-2">
+                                    <span className="font-semibold text-white">
+                                      {String(item.nombre || item.figura_nombre || 'Producto')}
+                                    </span>
+                                    <span className="text-green-400 font-mono">
+                                      ${String(item.subtotal || (Number(item.precio) * Number(item.cantidad)) || 0)}
+                                    </span>
+                                  </div>
+                                  <div className="text-gray-400 text-xs flex gap-4">
+                                    <span>Cantidad: <span className="text-white">{String(item.cantidad || 0)}</span></span>
+                                    <span>Precio Unitario: <span className="text-white">${String(item.precio || 0)}</span></span>
+                                  </div>
+                                  {item.personalizacion != null && String(item.personalizacion).trim() !== '' && (
+                                    <div className="mt-2 text-xs">
+                                      <span className="text-cyan-400">Opciones de Personalización:</span>
+                                      <pre className="mt-1 bg-[#0A0F2C] p-2 rounded text-gray-300 font-mono text-[10px] overflow-x-auto">
+                                        {typeof item.personalizacion === 'object' 
+                                          ? JSON.stringify(item.personalizacion, null, 2) 
+                                          : String(item.personalizacion)}
+                                      </pre>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
+                    } catch (e) {
+                      console.error("Error al renderizar items comprados:", e);
+                    }
+                  }
+                  return null;
+                })()}
               </div>
               
               <div className="mt-6 flex justify-end pt-4 border-t border-cyan-500/20">
