@@ -25,7 +25,7 @@ interface Auditoria {
 
 function getChanges(antes: unknown, despues: unknown) {
   const changes: { key: string; oldVal: string; newVal: string }[] = [];
-
+  
   try {
     const objAntes: Record<string, unknown> = typeof antes === 'string' ? JSON.parse(antes || '{}') : (antes || {});
     const objDespues: Record<string, unknown> = typeof despues === 'string' ? JSON.parse(despues || '{}') : (despues || {});
@@ -103,7 +103,7 @@ export default function AuditoriaPage() {
   const descargarPDF = () => {
     const doc = new jsPDF();
     doc.text("Reporte de Auditoría de Sistemas", 14, 15);
-
+    
     const tableColumn = ["ID", "Usuario", "Email", "Tabla", "Acción", "Fecha"];
     const tableRows: (string | number)[][] = [];
     filteredAuditorias.forEach(audit => {
@@ -130,12 +130,12 @@ export default function AuditoriaPage() {
     const userName = audit.usuarios ? `${audit.usuarios.nombre} ${audit.usuarios.apellido}` : audit.usuario_id;
     const fullText = `${audit.auditoria_id} ${userName} ${audit.usuarios?.email || ""} ${audit.tabla_afectada} ${audit.accion}`.toLowerCase();
     const matchesSearch = fullText.includes(searchTerm.toLowerCase());
-
+    
     let matchesAccion = true;
     if (accionFilter !== "todos") {
       matchesAccion = audit.accion.toUpperCase().includes(accionFilter.toUpperCase());
     }
-
+    
     return matchesSearch && matchesAccion;
   });
 
@@ -188,7 +188,7 @@ export default function AuditoriaPage() {
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px]" />
       </div>
-
+      
       <Nav />
       <main className="flex-grow relative z-10 p-8 max-w-7xl mx-auto w-full">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
@@ -207,7 +207,7 @@ export default function AuditoriaPage() {
         </div>
 
         {/* Barra de Filtros y Búsqueda */}
-        <div className="bg-[#1a1f40]/60 border border-cyan-500/20 p-4 rounded-2xl mb-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg backdrop-blur-md">
+        <div className="bg-[#1a1f40]/80 border border-cyan-500/20 p-4 rounded-2xl mb-6 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
@@ -219,9 +219,9 @@ export default function AuditoriaPage() {
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="flex items-center gap-2 text-xs text-gray-400 font-semibold uppercase tracking-wider">
-              <Filter size={14} className="text-green-400" />
+              <Filter size={14} className="text-cyan-400" />
               Acción:
             </div>
 
@@ -232,7 +232,7 @@ export default function AuditoriaPage() {
                 setAccionFilter(val);
                 setCurrentPage(1);
               }}
-              width="w-48"
+              width="w-52"
             />
           </div>
         </div>
@@ -282,9 +282,9 @@ export default function AuditoriaPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border
                         ${audit.accion.toUpperCase().includes('DELETE') ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                          audit.accion.toUpperCase().includes('UPDATE') ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                            audit.accion.toUpperCase().includes('INSERT') || audit.accion.toUpperCase().includes('CREATE') ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                              'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
+                        audit.accion.toUpperCase().includes('UPDATE') ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                        audit.accion.toUpperCase().includes('INSERT') || audit.accion.toUpperCase().includes('CREATE') ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                        'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
                         {audit.accion}
                       </span>
                     </td>
@@ -379,10 +379,10 @@ export default function AuditoriaPage() {
                 </div>
 
                 <h3 className="text-md font-semibold text-cyan-400 mb-3 border-b border-cyan-500/20 pb-2">Cambios Detectados</h3>
-
+                
                 {(() => {
                   const changes = getChanges(selectedAudit.datos_antes, selectedAudit.datos_despues);
-
+                  
                   if (changes.length === 0) {
                     return <p className="text-gray-400 italic text-sm">No se detectaron cambios en los campos o es una acción que no registra estado.</p>;
                   }
@@ -418,12 +418,12 @@ export default function AuditoriaPage() {
                     (selectedAudit.accion.toLowerCase().includes("crear") || selectedAudit.accion.toLowerCase().includes("insert"))
                   ) {
                     try {
-                      const datosDespues: Record<string, unknown> = typeof selectedAudit.datos_despues === 'string'
-                        ? JSON.parse(selectedAudit.datos_despues || '{}')
+                      const datosDespues: Record<string, unknown> = typeof selectedAudit.datos_despues === 'string' 
+                        ? JSON.parse(selectedAudit.datos_despues || '{}') 
                         : (selectedAudit.datos_despues || {});
-
+                      
                       const items = datosDespues.items_comprados as Array<Record<string, unknown>> | undefined;
-
+                      
                       if (items && Array.isArray(items) && items.length > 0) {
                         return (
                           <div className="mt-6">
@@ -449,8 +449,8 @@ export default function AuditoriaPage() {
                                     <div className="mt-2 text-xs">
                                       <span className="text-cyan-400">Opciones de Personalización:</span>
                                       <pre className="mt-1 bg-[#0A0F2C] p-2 rounded text-gray-300 font-mono text-[10px] overflow-x-auto">
-                                        {typeof item.personalizacion === 'object'
-                                          ? JSON.stringify(item.personalizacion, null, 2)
+                                        {typeof item.personalizacion === 'object' 
+                                          ? JSON.stringify(item.personalizacion, null, 2) 
                                           : String(item.personalizacion)}
                                       </pre>
                                     </div>
@@ -468,7 +468,7 @@ export default function AuditoriaPage() {
                   return null;
                 })()}
               </div>
-
+              
               <div className="mt-6 flex justify-end pt-4 border-t border-cyan-500/20">
                 <button
                   onClick={() => {
