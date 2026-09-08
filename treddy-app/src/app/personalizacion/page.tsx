@@ -61,8 +61,10 @@ function CustomizerContent() {
   const initialModelUrl  = searchParams.get('modelUrl')
   const productoId       = searchParams.get('productoId')
   const precioBaseParam  = searchParams.get('precioBase')
-  const nombreProducto   = searchParams.get('nombreProducto') || 'Producto'
-  const precioBase       = precioBaseParam ? Number(precioBaseParam) : 0
+  
+  const esModeloPropio   = !productoId;
+  const nombreProducto   = searchParams.get('nombreProducto') || (esModeloPropio ? 'Modelo Personalizado' : 'Producto')
+  const precioBase       = precioBaseParam ? Number(precioBaseParam) : (esModeloPropio ? 60000 : 0)
 
   // ─── Estado ─────────────────────────────────────────────────────────────
   const [mostrar3D, setMostrar3D] = useState(false)
@@ -265,32 +267,24 @@ function CustomizerContent() {
 
   // ─── Agregar al carrito con precio personalizado ─────────────────────────
   const handleComprar = async () => {
-    if (!productoId) {
-      Swal.fire({
-        title: 'Producto no identificado',
-        text: 'Accede al personalizador desde el catálogo.',
-        icon: 'warning',
-        confirmButtonColor: '#00E6F6',
-        background: '#0F173A',
-        color: 'white',
-      })
-      return
-    }
-
     try {
       setAgregando(true)
       const sessionId = ensureSessionId()
       const apiUrl    = process.env.NEXT_PUBLIC_API_URL || 'https://treddy-backend.onrender.com'
 
+      const bodyPayload: any = {
+        sessionId,
+        cantidad: 1,
+        precioPersonalizado: precioFinal,
+      }
+      if (productoId) {
+        bodyPayload.productoId = Number(productoId)
+      }
+
       const res = await fetch(`${apiUrl}/api/cart/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          productoId: Number(productoId),
-          cantidad: 1,
-          precioPersonalizado: precioFinal,
-        }),
+        body: JSON.stringify(bodyPayload),
       })
 
       if (!res.ok) throw new Error('No se pudo agregar al carrito')
@@ -529,7 +523,7 @@ function CustomizerContent() {
 
                       <button
                         onClick={handleComprar}
-                        disabled={agregando || !productoId}
+                        disabled={agregando}
                         className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold rounded-xl transform hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all duration-200 flex items-center justify-center gap-2"
                       >
                         {agregando ? (
