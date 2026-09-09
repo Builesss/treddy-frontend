@@ -3,12 +3,52 @@
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
 import { Sparkles, Zap, ShieldCheck, ArrowRight } from "lucide-react";
+import { Sparkles, Zap, ShieldCheck, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Figura } from "@/types";
+import { useState, useEffect } from "react";
 import { useState, useEffect } from "react";
 
 interface HeroProps {
   figuras: Figura[];
+}
+
+const ROTATING_WORDS = ["unicas", "precisas", "tuyas", "epicas", "premium"];
+
+function RotatingWord() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % ROTATING_WORDS.length), 2200);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <span className="relative inline-block overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={idx}
+          initial={{ y: 36, opacity: 0, filter: "blur(6px)" }}
+          animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+          exit={{ y: -36, opacity: 0, filter: "blur(6px)" }}
+          transition={{ duration: 0.45, ease: "easeInOut" }}
+          className="inline-block bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent"
+        >
+          {ROTATING_WORDS[idx]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div>
+        <p className="text-xl font-black text-white leading-none">{value}</p>
+        <p className="text-[11px] text-gray-500 mt-0.5 leading-none">{label}</p>
+      </div>
+    </div>
+  );
 }
 
 const ROTATING_WORDS = ["unicas", "precisas", "tuyas", "epicas", "premium"];
@@ -63,6 +103,15 @@ export default function Hero({
     }),
   };
 
+  const itemVariants: Variants = {
+    hidden: { y: 28, opacity: 0 },
+    visible: (i: number) => ({
+      y: 0,
+      opacity: 1,
+      transition: { delay: i * 0.12, type: "spring", stiffness: 90, damping: 18 },
+    }),
+  };
+
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -74,6 +123,8 @@ export default function Hero({
   };
 
   return (
+    <section className="pt-8 sm:pt-12 pb-12 sm:pb-24 px-4 sm:px-8 relative overflow-hidden">
+      {/* Decorative background elements sutiles igual que antes */}
     <section className="pt-8 sm:pt-12 pb-12 sm:pb-24 px-4 sm:px-8 relative overflow-hidden">
       {/* Decorative background elements sutiles igual que antes */}
       <div className="absolute top-1/4 left-10 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl animate-pulse pointer-events-none" />
@@ -101,6 +152,22 @@ export default function Hero({
 
           <motion.h1
             custom={1}
+
+        <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left md:ml-10">
+
+          <motion.div
+            custom={0}
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            className="inline-flex items-center gap-2 px-4 py-1.5 mb-5 rounded-full bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/25 text-cyan-400 text-xs font-bold tracking-widest uppercase"
+          >
+            <Sparkles size={13} className="text-cyan-300" />
+            Impresión 3D de alta precisión
+          </motion.div>
+
+          <motion.h1
+            custom={1}
             variants={itemVariants}
             initial="hidden"
             animate="visible"
@@ -110,15 +177,27 @@ export default function Hero({
             <RotatingWord />
           </motion.h1>
 
+            Treddy — Figuras 3D<br />
+            <RotatingWord />
+          </motion.h1>
+
           <motion.p
+            custom={2}
             custom={2}
             variants={itemVariants}
             initial="hidden"
             animate="visible"
             className="text-base sm:text-xl text-[#B5B8C5] mb-6 sm:mb-8 leading-relaxed max-w-lg"
+            initial="hidden"
+            animate="visible"
+            className="text-base sm:text-xl text-[#B5B8C5] mb-6 sm:mb-8 leading-relaxed max-w-lg"
           >
             Personaliza o crea tu propia figura impresa en 3D con tecnología de vanguardia y acabados profesionales.
+            Personaliza o crea tu propia figura impresa en 3D con tecnología de vanguardia y acabados profesionales.
           </motion.p>
+
+          <motion.div
+            custom={3}
 
           <motion.div
             custom={3}
@@ -149,7 +228,50 @@ export default function Hero({
             initial="hidden"
             animate="visible"
             className="flex items-center gap-6 flex-wrap justify-center md:justify-start"
+            initial="hidden"
+            animate="visible"
+            className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-8 sm:mb-10"
           >
+            <button
+              onClick={() => router.push("/catalogo")}
+              className="group flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black px-7 py-3.5 rounded-full font-bold text-sm hover:shadow-[0_0_35px_rgba(6,182,212,0.55)] shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all duration-300 hover:scale-[1.03] active:scale-[0.97]"
+            >
+              Ver catalogo
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
+              onClick={() => router.push("/personalizacion")}
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm text-white border border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/30 backdrop-blur-sm transition-all duration-300"
+            >
+              <Zap size={15} className="text-cyan-400" />
+              Personalizar
+            </button>
+          </motion.div>
+
+          <motion.div
+            custom={4}
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            className="flex items-center gap-6 flex-wrap justify-center md:justify-start"
+          >
+            <Stat value="10k+" label="Pedidos entregados" />
+            <div className="w-px h-8 bg-white/10" />
+            <Stat value="98%" label="Satisfaccion" />
+            <div className="w-px h-8 bg-white/10" />
+            <Stat value="48h" label="Tiempo de entrega" />
+          </motion.div>
+
+          <motion.div
+            custom={5}
+            variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            className="mt-6 flex items-center gap-2 text-[11px] text-gray-500"
+          >
+            <ShieldCheck size={14} className="text-cyan-600" />
+            Pago seguro · Envío protegido · Garantía 15 días
+          </motion.div>
             <Stat value="10k+" label="Pedidos entregados" />
             <div className="w-px h-8 bg-white/10" />
             <Stat value="98%" label="Satisfaccion" />

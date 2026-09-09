@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -7,14 +8,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare, BoxSelect } from "lucide-react";
 import Button from "./Button";
 import { QRCodeSVG } from "qrcode.react";
-import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-type Figura = {
+// Componentes locales
+import Visualizador3D from "./Visualizador3D";
+import VisualizadorAR from "./VisualizadorAR";
+
+// --- Tipos e Interfaces ---
+interface Figura {
   producto_id: number;
   nombre: string;
   imagenUrl: string;
+  modeloUrl?: string;
   precio_base: number;
   descripcion: string;
   stock: number;
@@ -23,6 +27,7 @@ type Figura = {
 };
 
 function ensureSessionId() {
+  if (typeof window === "undefined") return "";
   let sid = localStorage.getItem("sessionId");
   if (!sid) {
     sid = crypto.randomUUID();
@@ -31,15 +36,13 @@ function ensureSessionId() {
   return sid;
 }
 
-export default function TarjetaExpandible({
-  figura,
-  onClose,
-}: {
-  figura: Figura;
-  onClose: () => void;
-}) {
-  const [mostrarAR, setMostrarAR] = useState(false);
-  const [mostrarQR, setMostrarQR] = useState(false);
+// --- Componente Principal ---
+export default function TarjetaExpandible({ figura, onClose }: { figura: Figura; onClose: () => void }) {
+  // Estados de Visualización
+  const [viewMode, setViewMode] = useState<"image" | "3d" | "ar" | "qr">("image");
+  const [tab, setTab] = useState<"detalles" | "resenas">("detalles");
+
+  // Estados de Carga y Datos
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -49,7 +52,6 @@ export default function TarjetaExpandible({
   const [reviews, setReviews] = useState<{ resena_id: string; rating: number; comentario: string; fecha: string; autor: string }[]>([]);
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState("");
-  const [loadingReviews, setLoadingReviews] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
 
@@ -158,15 +160,7 @@ export default function TarjetaExpandible({
 
 
     return () => {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      if (rendererRef.current) {
-        rendererRef.current.dispose();
-        rendererRef.current.forceContextLoss();
-      }
-      if (controlsRef.current) controlsRef.current.dispose();
-      if (modelRef.current && sceneRef.current) {
-        sceneRef.current.remove(modelRef.current);
-      }
+      document.body.style.overflow = originalOverflow;
     };
   }, [mostrarAR, figura.modelo3dUrl, figura.modelo_3d_path]);
 
@@ -181,70 +175,50 @@ export default function TarjetaExpandible({
   }, []);
 
   const fetchReviews = useCallback(async () => {
-    if (!figura) return;
+    if (!figura?.producto_id) return;
     try {
       setLoadingReviews(true);
-      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com").replace(/\/$/, "");
-      const res = await fetch(`${BACK_BASE}/api/resenas/${figura.producto_id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setReviews(data);
-      }
+      const res = await fetch(`${API_BASE}/api/resenas/${figura.producto_id}`);
+      if (res.ok) setReviews(await res.json());
     } catch (e) {
       console.error("Error fetching reviews:", e);
     } finally {
       setLoadingReviews(false);
     }
-  }, [figura]);
+  }, [figura.producto_id]);
 
   useEffect(() => {
-    if (figura?.producto_id) {
-      fetchReviews();
-    }
-  }, [figura?.producto_id, fetchReviews]);
+    fetchReviews();
+  }, [fetchReviews]);
 
-  if (!figura) return null;
-
+  // --- Handlers de Acciones ---
   const handleComprar = async () => {
     try {
       setLoading(true);
-      const sessionId = ensureSessionId();
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com";
-      const res = await fetch(`${apiUrl}/api/cart/items`, {
+      const res = await fetch(`${API_BASE}/api/cart/items`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionId,
+          sessionId: ensureSessionId(),
           productoId: figura.producto_id,
           cantidad: 1,
         }),
       });
 
-      if (!res.ok) throw new Error("No se pudo agregar al carrito");
+      if (!res.ok) throw new Error();
 
-      await Swal.fire({
+      Swal.fire({
         icon: "success",
         title: "¡Agregado!",
-        text: `${figura.nombre} se añadió a tu carrito.`,
+        text: `${figura.nombre} se añadió al carrito.`,
         timer: 1500,
         showConfirmButton: false,
         background: "#0F173A",
         color: "white",
-        customClass: { popup: "rounded-2xl border border-cyan-500/30" },
       });
-
-
       onClose();
-    } catch (e) {
-      console.error("Error al agregar al carrito:", e);
-      Swal.fire({
-        icon: "error",
-        title: "Ups...",
-        text: "No pudimos agregar el producto. Intenta de nuevo.",
-        confirmButtonColor: "#00E6F6",
-        background: "#0F173A",
-        color: "white",
-      });
+    } catch {
+      Swal.fire({ icon: "error", title: "Error", text: "No se pudo agregar el producto.", background: "#0F173A", color: "white" });
     } finally {
       setLoading(false);
     }
@@ -273,66 +247,27 @@ export default function TarjetaExpandible({
   };
 
   const handleSubmitReview = async () => {
-    if (!newComment.trim() || isSubmittingReview) return;
-    setIsSubmittingReview(true);
-    
     const token = localStorage.getItem("token");
     if (!token) {
-      Swal.fire({
-        icon: "warning",
-        title: "Inicia sesión",
-        text: "Debes tener una cuenta para dejar una reseña.",
-        confirmButtonColor: "#00E6F6",
-        background: "#0F173A",
-        color: "white",
-      });
+      Swal.fire({ icon: "warning", title: "Inicia sesión", text: "Debes estar logueado para opinar.", background: "#0F173A", color: "white" });
       return;
     }
 
+    setIsSubmittingReview(true);
     try {
-      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com").replace(/\/$/, "");
-      const res = await fetch(`${BACK_BASE}/api/resenas/${figura.producto_id}`, {
+      const res = await fetch(`${API_BASE}/api/resenas/${figura.producto_id}`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          rating: newRating,
-          comentario: newComment,
-        }),
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ rating: newRating, comentario: newComment }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Error al publicar la reseña");
-      }
+      if (!res.ok) throw new Error();
 
-      await fetchReviews();
       setNewComment("");
-      setNewRating(5);
-      
-      Swal.fire({
-        icon: "success",
-        title: "Reseña añadida",
-        text: "Gracias por tu opinión.",
-        timer: 1500,
-        showConfirmButton: false,
-        background: "#0F173A",
-        color: "white",
-        customClass: { popup: "rounded-2xl border border-cyan-500/30" },
-      });
-    } catch (e: unknown) {
-      console.error("Error posting review:", e);
-      const errorMessage = e instanceof Error ? e.message : "Ocurrió un error inesperado.";
-      Swal.fire({
-        icon: "error",
-        title: "No se pudo guardar",
-        text: errorMessage,
-        confirmButtonColor: "#EF4444",
-        background: "#0F173A",
-        color: "white",
-      });
+      fetchReviews();
+      Swal.fire({ icon: "success", title: "¡Gracias!", timer: 1500, showConfirmButton: false, background: "#0F173A", color: "white" });
+    } catch {
+      Swal.fire({ icon: "error", title: "Error", text: "No se pudo publicar la reseña.", background: "#0F173A", color: "white" });
     } finally {
       setIsSubmittingReview(false);
     }
@@ -441,39 +376,28 @@ export default function TarjetaExpandible({
                   </motion.div>
                 )}
               </div>
-            ) : mostrarQR ? (
-              <div className="flex flex-col items-center justify-center gap-4 bg-#0F173A p-6 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-                <QRCodeSVG
-                  value={figura.imagenUrl || "https://treddy.com"}
-                  size={200}
-                  level={"H"}
-                  includeMargin={true}
-                  fgColor="#0F173A"
-                />
+            )}
+
+            {viewMode === "qr" && (
+              <div className="bg-white p-4 rounded-xl">
+                <QRCodeSVG value={figura.imagenUrl} size={180} fgColor="#0F173A" />
               </div>
-            ) : (
-              <div className="relative w-full h-full">
-                <Image
-                  src={figura.imagenUrl || "/images/placeholder.png"}
-                  alt={figura.nombre}
-                  fill
-                  className="object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-                />
-              </div>
+            )}
+            {viewMode === "image" && (
+              <Image src={figura.imagenUrl || "/images/placeholder.png"} alt={figura.nombre} fill className="object-contain p-6" />
             )}
           </div>
 
+          {/* Contenido inferior */}
           <div className="p-6 flex flex-col gap-4">
-            {/* TABS */}
+            {/* Tabs Selector */}
             <div className="flex gap-2 bg-[#1a214f] p-1 rounded-xl">
-              <button onClick={() => setTab("detalles")} className={`flex-1 py-2 rounded-lg font-medium text-sm transition-all ${tab === "detalles" ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-gray-400 hover:text-white"}`}>Detalles</button>
-              <button onClick={() => setTab("resenas")} className={`flex-1 py-2 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-1 ${tab === "resenas" ? "bg-cyan-500/20 text-cyan-400 shadow-sm" : "text-gray-400 hover:text-white"}`}>
-                <MessageSquare size={14} /> Reseñas ({reviews.length})
-              </button>
+              <TabButton active={tab === "detalles"} onClick={() => setTab("detalles")} label="Detalles" />
+              <TabButton active={tab === "resenas"} onClick={() => setTab("resenas")} label={`Reseñas (${reviews.length})`} icon={<MessageSquare size={14} />} />
             </div>
 
             {tab === "detalles" ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-4">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-white mb-1">
                     {figura.nombre}
@@ -483,10 +407,7 @@ export default function TarjetaExpandible({
                       ${figura.precio_base.toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-gray-300 text-sm leading-relaxed line-clamp-3">
-                    {figura.descripcion ||
-                      "Una increíble figura 3D lista para tu colección."}
-                  </p>
+                  <p className="text-gray-300 text-sm mt-3 leading-relaxed">{figura.descripcion}</p>
                 </div>
 
                 <div className="flex flex-col gap-3 mt-2">
@@ -567,4 +488,99 @@ export default function TarjetaExpandible({
     </div>
   </AnimatePresence>
 );
+}
+
+// --- Subcomponentes de Apoyo ---
+
+interface HeaderButtonProps {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}
+
+function HeaderButton({ active, onClick, icon, label }: HeaderButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all ${active ? "bg-cyan-500 text-black shadow-[0_0_10px_#06b6d4]" : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50"
+        }`}
+    >
+      {icon} {label}
+    </button>
+  );
+}
+
+interface TabButtonProps {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  icon?: React.ReactNode;
+}
+
+function TabButton({ active, onClick, label, icon }: TabButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex-1 py-2 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2 ${active ? "bg-cyan-500/20 text-cyan-400" : "text-gray-400"
+        }`}
+    >
+      {icon} {label}
+    </button>
+  );
+}
+
+interface ResenasSectionProps {
+  reviews: Review[];
+  loading: boolean;
+  newRating: number;
+  setNewRating: (r: number) => void;
+  newComment: string;
+  setNewComment: (c: string) => void;
+  onSubmit: () => void;
+  submitting: boolean;
+}
+
+function ResenasSection({ reviews, loading, newRating, setNewRating, newComment, setNewComment, onSubmit, submitting }: ResenasSectionProps) {
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+      <div className="bg-[#1a214f] p-4 rounded-xl space-y-3">
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <Star key={s} size={20} onClick={() => setNewRating(s)} className={`cursor-pointer ${s <= newRating ? "fill-cyan-400 text-cyan-400" : "text-gray-600"}`} />
+          ))}
+        </div>
+        <textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Tu opinión importa..."
+          className="w-full bg-[#0A0F2C] border border-[#2a3055] rounded-lg p-3 text-sm text-white resize-none h-20"
+        />
+        <button onClick={onSubmit} disabled={!newComment.trim() || submitting} className="w-full bg-cyan-500/20 text-cyan-400 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2">
+          {submitting ? <Loader2 className="animate-spin" size={16} /> : "Publicar"}
+        </button>
+      </div>
+
+      <div className="max-h-48 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+        {loading ? (
+          <Loader2 className="animate-spin mx-auto text-cyan-500" />
+        ) : reviews.length > 0 ? (
+          reviews.map((r: Review) => (
+            <div key={r.resena_id} className="bg-[#1a214f]/50 p-3 rounded-lg border border-[#2a3055]/50">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="font-bold text-cyan-400">{r.autor}</span>
+                <span className="text-gray-500">{r.fecha}</span>
+              </div>
+              <div className="flex mb-1">
+                {[...Array(5)].map((_, i) => <Star key={i} size={10} className={i < r.rating ? "fill-cyan-400 text-cyan-400" : "text-gray-700"} />)}
+              </div>
+              <p className="text-gray-300 text-xs">{r.comentario}</p>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500 text-xs py-4">No hay reseñas aún.</p>
+        )}
+      </div>
+    </motion.div>
+  );
 }
