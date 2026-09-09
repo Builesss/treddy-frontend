@@ -26,9 +26,7 @@ export default function PopularProducts({
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             className="text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r py-3 from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4 tracking-tight"
-            className="text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r py-3 from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4 tracking-tight"
           >
-            Colección Premium
             Colección Premium
           </motion.h3>
           <motion.p
@@ -126,10 +124,8 @@ export default function PopularProducts({
 
               {/* Holographic Reflection Overlay */}
               <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/0 via-white/[0.04] to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2.5rem]" />
-              <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/0 via-white/[0.04] to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2.5rem]" />
 
               {/* Card Glow Background */}
-              <div className="absolute -inset-[1px] bg-gradient-to-br from-cyan-500/20 to-blue-600/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500 pointer-events-none rounded-[2.5rem]" />
               <div className="absolute -inset-[1px] bg-gradient-to-br from-cyan-500/20 to-blue-600/20 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500 pointer-events-none rounded-[2.5rem]" />
             </motion.div>
           ))}

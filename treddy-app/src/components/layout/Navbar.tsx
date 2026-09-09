@@ -97,7 +97,6 @@ export default function Nav() {
             >
               <span
                 className={`text-sm transition-colors ${pathname === href
-                className={`text-sm transition-colors ${pathname === href
                   ? "text-[#00E6F6] font-semibold"
                   : "text-white hover:text-[#00E6F6]"
                   }`}
