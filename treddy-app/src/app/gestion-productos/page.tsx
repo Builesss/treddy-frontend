@@ -59,7 +59,8 @@ export default function ProductManagementPreview() {
   const cargarFiguras = async () => {
     try {
       const data = await getFiguras();
-      setFiguras(data);
+      // Ocultar modelos personalizados en la gestión de productos
+      setFiguras(data.filter((f: { nombre: string }) => f.nombre !== "Modelo Personalizado"));
     } catch (error) {
       console.error(error);
       showTreddyAlert("error", "Error al cargar las figuras");

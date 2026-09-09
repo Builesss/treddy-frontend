@@ -69,6 +69,8 @@ export default function Catalogo() {
   ).filter(Boolean);
 
   const figurasFiltradas = figuras.filter((figura) => {
+    // Ocultar modelos personalizados del catálogo público
+    if (figura.nombre === "Modelo Personalizado") return false;
     const coincideNombre = figura.nombre
       .toLowerCase()
       .includes(busqueda.toLowerCase());

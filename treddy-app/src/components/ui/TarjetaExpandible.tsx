@@ -43,6 +43,7 @@ export default function TarjetaExpandible({
   const [mostrarQR, setMostrarQR] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
   const hasModel = !!(figura.modelo3dUrl || figura.modelo_3d_path);
@@ -61,6 +62,20 @@ export default function TarjetaExpandible({
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (payload.rol === "administrador" || payload.role === "administrador") {
+          setIsAdmin(true);
+        }
+      }
+    } catch {
+      // token inválido, no es admin
+    }
   }, []);
 
 
@@ -538,15 +553,22 @@ export default function TarjetaExpandible({
                 </div>
 
                 <div className="flex flex-col gap-3 mt-2">
-                  <Button
-                    onClick={handleComprar}
-                    disabled={figura.stock <= 0}
-                    isLoading={loading}
-                    className="w-full"
-                  >
-                    <ShoppingCart size={20} />
-                    {figura.stock > 0 ? "Agregar al Carrito" : "Sin Stock"}
-                  </Button>
+                  {isAdmin ? (
+                    <div className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gray-700/30 border border-gray-600/30 text-gray-500 text-sm font-semibold cursor-not-allowed select-none">
+                      <ShoppingCart size={18} />
+                      Solo clientes pueden comprar
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={handleComprar}
+                      disabled={figura.stock <= 0}
+                      isLoading={loading}
+                      className="w-full"
+                    >
+                      <ShoppingCart size={20} />
+                      {figura.stock > 0 ? "Agregar al Carrito" : "Sin Stock"}
+                    </Button>
+                  )}
 
                   <Button
                     onClick={handlePersonalizar}
