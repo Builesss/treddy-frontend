@@ -475,7 +475,7 @@ function CustomizerContent() {
                               <span className="text-sm font-medium text-[#B5B8C5] truncate max-w-[120px]" title={parte}>{parte}</span>
                               {estaModificado && (
                                 <span className="text-[10px] text-cyan-400 bg-cyan-400/10 px-1.5 py-0.5 rounded-full">
-                                  +$15.000
+                                  +${PRECIO_POR_COLOR.toLocaleString('es-CO')}
                                 </span>
                               )}
                             </div>
