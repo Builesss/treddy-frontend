@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare, BoxSelect } from "lucide-react";
+import { X, Camera, ShoppingCart, Edit3, Loader2, QrCode, Star, MessageSquare, BoxSelect, Trash2 } from "lucide-react";
 import Button from "./Button";
 import { QRCodeSVG } from "qrcode.react";
 import * as THREE from "three";
@@ -49,11 +49,12 @@ export default function TarjetaExpandible({
   const hasModel = !!(figura.modelo3dUrl || figura.modelo_3d_path);
   
   const [tab, setTab] = useState<"detalles" | "resenas">("detalles");
-  const [reviews, setReviews] = useState<{ resena_id: string; rating: number; comentario: string; fecha: string; autor: string }[]>([]);
+  const [reviews, setReviews] = useState<{ resena_id: string; rating: number; comentario: string; fecha: string; autor: string; usuario_id?: number }[]>([]);
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState("");
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -72,9 +73,12 @@ export default function TarjetaExpandible({
         if (payload.rol === "administrador" || payload.role === "administrador") {
           setIsAdmin(true);
         }
+        if (payload.id || payload.sub) {
+          setCurrentUserId(Number(payload.id || payload.sub));
+        }
       }
     } catch {
-      // token inválido, no es admin
+      // token inválido
     }
   }, []);
 
@@ -297,6 +301,31 @@ export default function TarjetaExpandible({
     }
   };
 
+  const handleDeleteReview = async (resenaId: string) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const BACK_BASE = (process.env.NEXT_PUBLIC_API_URL || "https://treddy-backend.onrender.com").replace(/\/$/, "");
+      const res = await fetch(`${BACK_BASE}/api/resenas/${resenaId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok || res.status === 204) {
+        await fetchReviews();
+        Swal.fire({
+          icon: "success",
+          title: "Reseña eliminada",
+          timer: 1200,
+          showConfirmButton: false,
+          background: "#0F173A",
+          color: "white",
+        });
+      }
+    } catch (e) {
+      console.error("Error eliminando reseña:", e);
+    }
+  };
+
   const handleSubmitReview = async () => {
     if (!newComment.trim() || isSubmittingReview) return;
     setIsSubmittingReview(true);
@@ -328,6 +357,17 @@ export default function TarjetaExpandible({
         }),
       });
 
+      if (res.status === 409) {
+        Swal.fire({
+          icon: "info",
+          title: "Ya calificaste este producto",
+          text: "Ya has calificado este producto. Solo se permite una reseña por usuario.",
+          confirmButtonColor: "#00E6F6",
+          background: "#0F173A",
+          color: "white",
+        });
+        return;
+      }
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || "Error al publicar la reseña");
@@ -611,22 +651,44 @@ export default function TarjetaExpandible({
                 <div className="flex flex-col gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                   {loadingReviews ? (
                     <div className="flex justify-center py-4"><Loader2 className="animate-spin text-cyan-500" size={24} /></div>
-                  ) : reviews.length > 0 ? reviews.map((review) => (
-                    <div key={review.resena_id} className="bg-[#1a214f]/50 p-4 rounded-xl border border-[#2a3055]/50 hover:border-cyan-500/30 transition-all">
-                      <div className="flex justify-between items-center mb-2">
+                  ) : reviews.length > 0 ? (
+                    <>
+                      <div className="flex items-center justify-between bg-[#1a214f]/30 p-3 rounded-xl border border-cyan-500/20 mb-2">
+                        <span className="text-gray-300 font-medium text-sm">Promedio de calificación</span>
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-cyan-400 text-sm">{review.autor}</span>
-                          <div className="flex gap-0.5">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star key={star} size={12} className={star <= review.rating ? "fill-cyan-400 text-cyan-400" : "text-gray-600"} />
-                            ))}
-                          </div>
+                          <span className="text-cyan-400 font-bold text-lg">
+                            {(reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length).toFixed(1)}
+                          </span>
+                          <Star size={16} className="fill-cyan-400 text-cyan-400" />
                         </div>
-                        <span className="text-xs text-gray-400 font-medium">{review.fecha}</span>
                       </div>
-                      <p className="text-gray-300 text-sm leading-relaxed">{review.comentario}</p>
-                    </div>
-                  )) : (
+                      {reviews.map((review) => (
+                        <div key={review.resena_id} className="bg-[#1a214f]/50 p-4 rounded-xl border border-[#2a3055]/50 hover:border-cyan-500/30 transition-all relative">
+                          {(isAdmin || currentUserId === review.usuario_id) && (
+                            <button
+                              onClick={() => handleDeleteReview(review.resena_id)}
+                              className="absolute top-4 right-4 text-gray-500 hover:text-red-400 transition-colors"
+                              title="Eliminar reseña"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                          <div className="flex justify-between items-center mb-2 pr-6">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-cyan-400 text-sm">{review.autor}</span>
+                              <div className="flex gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star key={star} size={12} className={star <= review.rating ? "fill-cyan-400 text-cyan-400" : "text-gray-600"} />
+                                ))}
+                              </div>
+                            </div>
+                            <span className="text-xs text-gray-400 font-medium">{review.fecha}</span>
+                          </div>
+                          <p className="text-gray-300 text-sm leading-relaxed">{review.comentario}</p>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
                     <p className="text-center text-gray-500 text-sm py-4">Aún no hay reseñas. ¡Sé el primero en opinar!</p>
                   )}
                 </div>

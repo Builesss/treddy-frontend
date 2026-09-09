@@ -321,6 +321,37 @@ export default function Carrito() {
                             <p className="text-sm text-gray-400 md:hidden">
                               ${figura.precio_base.toLocaleString()}
                             </p>
+                            {(() => {
+                              if (typeof window === 'undefined') return null;
+                              const keys = Object.keys(localStorage).filter(k => k.startsWith("customizacion_"));
+                              const match = keys.find(k => k.endsWith(`_${figura.id}`) || k.endsWith(`_${figura.producto_id}`) || (figura.nombre === "Modelo Personalizado" && k.endsWith("_custom")));
+                              if (match) {
+                                try {
+                                  const custom = JSON.parse(localStorage.getItem(match) || "{}");
+                                  return (
+                                    <div className="mt-2 flex flex-col gap-1">
+                                      {custom.tamano && custom.tamano !== 'mediano' && (
+                                        <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded w-fit border border-cyan-500/20">
+                                          Tamaño: {custom.tamano}
+                                        </span>
+                                      )}
+                                      {custom.partesModificadas > 0 && (
+                                        <span className="text-xs bg-purple-500/10 text-purple-400 px-2 py-1 rounded w-fit border border-purple-500/20">
+                                          {custom.partesModificadas} parte(s) personalizada(s)
+                                        </span>
+                                      )}
+                                      {custom.imagenReferenciaUrl && (
+                                        <div className="mt-1">
+                                          <p className="text-[10px] text-gray-500 mb-1">Imagen de referencia:</p>
+                                          <img src={custom.imagenReferenciaUrl} alt="Ref" className="w-12 h-12 object-cover rounded border border-cyan-500/30" />
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                } catch {}
+                              }
+                              return null;
+                            })()}
                           </div>
                         </div>
 

@@ -47,6 +47,9 @@ export default function HomePage() {
     window.location.href = `/catalogo?search=${encodeURIComponent(nombre)}`;
   };
 
+  // Excluir modelos personalizados de las secciones públicas
+  const figurasPublicas = figuras.filter((f) => f.nombre !== "Modelo Personalizado");
+
   return (
     <main className="min-h-screen bg-[#0A0F2C] text-white relative">
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -55,9 +58,9 @@ export default function HomePage() {
       </div>
       <Nav />
 
-      <Hero figuras={figuras} />
+      <Hero figuras={figurasPublicas} />
 
-      <PopularProducts figuras={figuras} handleVerMas={handleVerMas} />
+      <PopularProducts figuras={figurasPublicas} handleVerMas={handleVerMas} />
 
       <HowItWorks />
 

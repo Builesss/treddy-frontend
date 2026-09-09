@@ -1,8 +1,18 @@
 export async function getFiguras() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/figuras`, {
-    next: { revalidate: 3600 }, // Cache for 1 hour
+    next: { revalidate: 3600 },
   });
   if (!res.ok) throw new Error("Error al obtener las figuras");
+  return res.json();
+}
+
+export async function getFigurasAdmin() {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/figuras/admin/all`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Error al obtener las figuras (admin)");
   return res.json();
 }
 
@@ -76,6 +86,21 @@ export async function deleteFigura(id: number) {
   if (!res.ok) {
     const err = await res.json();
     throw new Error(err.error || "Error al eliminar la figura");
+  }
+  return res.json();
+}
+
+export async function toggleFiguraEstado(id: number) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/figuras/${id}/toggle-estado`,
+    {
+      method: "PATCH",
+      headers: { ...getAuthHeaders() },
+    },
+  );
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || "Error al cambiar el estado");
   }
   return res.json();
 }

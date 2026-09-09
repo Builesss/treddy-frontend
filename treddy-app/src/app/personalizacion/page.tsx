@@ -73,6 +73,8 @@ function CustomizerContent() {
   const [partes, setPartes] = useState<Record<string, ParteConfig>>({})
   const [tamano, setTamano] = useState<Tamano>('mediano')
   const [agregando, setAgregando] = useState(false)
+  const [imagenReferenciaUrl, setImagenReferenciaUrl] = useState<string | null>(null)
+  const [subiendoImagen, setSubiendoImagen] = useState(false)
 
   const canvasRef    = useRef<HTMLDivElement | null>(null)
   const modelRef     = useRef<THREE.Object3D | null>(null)
@@ -277,6 +279,9 @@ function CustomizerContent() {
         cantidad: 1,
         precioPersonalizado: precioFinal,
       }
+      if (imagenReferenciaUrl) {
+        bodyPayload.imagen_referencia_url = imagenReferenciaUrl;
+      }
       if (productoId) {
         bodyPayload.productoId = Number(productoId)
       }
@@ -288,6 +293,19 @@ function CustomizerContent() {
       })
 
       if (!res.ok) throw new Error('No se pudo agregar al carrito')
+      
+      const cartItem = await res.json()
+      const itemIdForStorage = cartItem.id || cartItem.producto_id || productoId || 'custom'
+      
+      localStorage.setItem(
+        `customizacion_${sessionId}_${itemIdForStorage}`,
+        JSON.stringify({
+          tamano,
+          partesModificadas,
+          precioFinal,
+          imagenReferenciaUrl
+        })
+      )
 
       await Swal.fire({
         icon: 'success',
@@ -508,6 +526,68 @@ function CustomizerContent() {
                       <input type="file" accept=".glb" onChange={handleFileChange} className="hidden" />
                     </div>
                   </label>
+
+                  <div className="space-y-3 pt-2">
+                    <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                      Imagen de Referencia
+                    </h2>
+                    <label className="block w-full group cursor-pointer">
+                      <div className="flex items-center justify-center w-full h-14 px-4 transition bg-[#0A0F2C] border-2 border-dashed border-cyan-500/30 rounded-xl group-hover:border-cyan-500 group-hover:bg-[#0F173A]">
+                        {subiendoImagen ? (
+                          <div className="flex items-center space-x-2 text-cyan-400">
+                            <span className="animate-spin text-xl">⏳</span>
+                            <span className="font-medium text-sm">Subiendo...</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center space-x-2 text-[#B5B8C5] group-hover:text-cyan-400 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span className="font-medium text-sm">Adjuntar imagen (opcional)</span>
+                          </div>
+                        )}
+                        <input type="file" accept="image/*" onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const token = localStorage.getItem('token');
+                          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://treddy-backend.onrender.com';
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          setSubiendoImagen(true);
+                          try {
+                            const res = await fetch(`${apiUrl}/api/gcs/image`, {
+                              method: 'POST',
+                              headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                              body: formData
+                            });
+                            if (!res.ok) throw new Error('Error al subir imagen');
+                            const data = await res.json();
+                            setImagenReferenciaUrl(data.url);
+                          } catch (error) {
+                            console.error('Error subiendo imagen:', error);
+                          } finally {
+                            setSubiendoImagen(false);
+                          }
+                        }} className="hidden" disabled={subiendoImagen} />
+                      </div>
+                    </label>
+                    {imagenReferenciaUrl && (
+                      <div className="relative w-full h-32 mt-2 rounded-xl border border-cyan-500/30 overflow-hidden group bg-[#0A0F2C]">
+                        <img src={imagenReferenciaUrl} alt="Referencia" className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => setImagenReferenciaUrl(null)}
+                          className="absolute top-2 right-2 bg-red-500/80 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                          title="Eliminar referencia"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
                   {modelUrl && (
                     <div className="flex flex-col gap-3">

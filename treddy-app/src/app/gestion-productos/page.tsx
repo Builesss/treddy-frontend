@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Swal from "sweetalert2";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { getFiguras, createFigura, updateFigura, deleteFigura } from "@/services/figuras.service";
+import { getFigurasAdmin, createFigura, updateFigura, deleteFigura, toggleFiguraEstado } from "@/services/figuras.service";
 
 export default function ProductManagementPreview() {
   const [figuras, setFiguras] = useState<any[]>([]);
@@ -58,12 +58,26 @@ export default function ProductManagementPreview() {
 
   const cargarFiguras = async () => {
     try {
-      const data = await getFiguras();
+      const data = await getFigurasAdmin();
       // Ocultar modelos personalizados en la gestión de productos
       setFiguras(data.filter((f: { nombre: string }) => f.nombre !== "Modelo Personalizado"));
     } catch (error) {
       console.error(error);
       showTreddyAlert("error", "Error al cargar las figuras");
+    }
+  };
+
+  const toggleEstado = async (id: number, estadoActual: string) => {
+    try {
+      await toggleFiguraEstado(id);
+      showTreddyAlert(
+        "success",
+        estadoActual === "activo" ? "Producto ocultado" : "Producto activado",
+        estadoActual === "activo" ? "El producto ya no aparecerá en el catálogo." : "El producto volverá a aparecer en el catálogo."
+      );
+      cargarFiguras();
+    } catch {
+      showTreddyAlert("error", "Error al cambiar estado del producto");
     }
   };
 
@@ -312,7 +326,14 @@ export default function ProductManagementPreview() {
                         height={160}
                         className="mx-auto rounded-lg shadow-md h-40 object-cover"
                       />
-                      <p className="mt-4 text-lg font-semibold">{f.nombre}</p>
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <p className="mt-4 text-lg font-semibold">{f.nombre}</p>
+                        <span className={`mt-4 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          f.estado === 'activo' || !f.estado ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                        }`}>
+                          {f.estado === 'activo' || !f.estado ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </div>
                       <p className="text-cyan-400 font-bold text-lg">
                         ${Number(f.precio_base ?? f.precio ?? 0).toFixed(2)}
                       </p>
@@ -320,12 +341,20 @@ export default function ProductManagementPreview() {
                         <p className="text-gray-400 text-sm mt-1 italic">{f.categoria}</p>
                       )}
                     </div>
-                    <div className="flex justify-center gap-3 mt-4">
+                    <div className="flex justify-center gap-2 mt-4 flex-wrap">
                       <button
                         onClick={() => editarFigura(f)}
                         className="bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-1.5 rounded-lg text-black font-semibold hover:scale-105 transition text-sm"
                       >
                         Editar
+                      </button>
+                      <button
+                        onClick={() => toggleEstado(f.producto_id, f.estado || 'activo')}
+                        className={`px-4 py-1.5 rounded-lg font-semibold hover:scale-105 transition text-sm ${
+                          f.estado === 'inactivo' ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-black' : 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black'
+                        }`}
+                      >
+                        {f.estado === 'inactivo' ? 'Activar' : 'Ocultar'}
                       </button>
                       <button
                         onClick={() => eliminarFigura(f.producto_id)}
