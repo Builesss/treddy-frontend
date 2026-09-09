@@ -10,7 +10,7 @@ import { QRCodeSVG } from "qrcode.react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-
+import VisualizadorAR from "./VisualizadorAR";
 type Figura = {
   producto_id: number;
   nombre: string;
@@ -39,7 +39,9 @@ export default function TarjetaExpandible({
   onClose: () => void;
 }) {
   const [mostrarAR, setMostrarAR] = useState(false);
+  const [mostrarRA, setMostrarRA] = useState(false);
   const [mostrarQR, setMostrarQR] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -52,6 +54,14 @@ export default function TarjetaExpandible({
   const [loadingReviews, setLoadingReviews] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
 
   const canvasRef = useRef<HTMLDivElement | null>(null);
@@ -376,6 +386,7 @@ export default function TarjetaExpandible({
                 } else {
                   setMostrarAR(true);
                   setMostrarQR(false);
+                  setMostrarRA(false);
                 }
               }}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all duration-300 ${mostrarAR
@@ -394,6 +405,7 @@ export default function TarjetaExpandible({
                 } else {
                   setMostrarQR(true);
                   setMostrarAR(false);
+                  setMostrarRA(false);
                 }
               }}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all duration-300 ${mostrarQR
@@ -404,10 +416,39 @@ export default function TarjetaExpandible({
               <QrCode size={16} />
               {mostrarQR ? "Cerrar QR" : "QR"}
             </button>
+            
+            {isMobile && (
+              <button
+                onClick={() => {
+                  if (mostrarRA) {
+                    setMostrarRA(false);
+                  } else {
+                    setMostrarRA(true);
+                    setMostrarAR(false);
+                    setMostrarQR(false);
+                  }
+                }}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-semibold text-xs transition-all duration-300 ${mostrarRA
+                    ? "bg-purple-500/20 text-purple-400 border border-purple-500/50 hover:bg-purple-500/30"
+                    : "bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 hover:bg-cyan-500/30"
+                  }`}
+              >
+                <Camera size={16} />
+                {mostrarRA ? "Cerrar RA" : "RA"}
+              </button>
+            )}
           </div>
 
           <div className="relative w-full h-80 bg-gradient-to-b from-[#1a214f] to-[#0F173A] flex items-center justify-center p-6 overflow-hidden mt-14">
-            {mostrarAR ? (
+            {mostrarRA ? (
+              <div
+                onTouchStart={e => e.stopPropagation()}
+                onTouchMove={e => e.stopPropagation()}
+                className="w-full h-full rounded-2xl overflow-hidden border-2 border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+              >
+                <VisualizadorAR modelUrl={figura.modelo3dUrl || figura.modelo_3d_path || "/HORNET.glb"} />
+              </div>
+            ) : mostrarAR ? (
               <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
                 {figura.modelo3dUrl || figura.modelo_3d_path ? (
                   <div ref={canvasRef} className="w-full h-full" />
