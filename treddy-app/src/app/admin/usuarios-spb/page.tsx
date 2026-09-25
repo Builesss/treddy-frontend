@@ -163,33 +163,62 @@ export default function AdminUsuariosSpb() {
           Swal.fire({ icon: "warning", title: "Contraseña requerida", text: "Debes ingresar una contraseña para crear el usuario.", background: "#0F173A", color: "#E0EAFD" });
           return;
         }
-        // 1. Crear en SPB (MySQL)
-        res = await fetchWithSpbAuth(`${SPB_API}/api/users`, {
-          method: "POST",
-          body: JSON.stringify({ ...body, password: form.password }),
-        });
+        // 1. Crear en Supabase (Backend principal) PRIMERO para ejecutar todas las validaciones de contraseña
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const partesNombre = form.name.split(" ");
+        const nombre = partesNombre[0] || "Usuario";
+        const apellido = partesNombre.slice(1).join(" ") || "SPB";
 
-        // 2. Crear también en Supabase (Backend en Node.js/Prisma)
-        if (res.ok) {
+        let supaRes;
+        try {
+          supaRes = await fetch(`${API_URL}/api/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nombre: nombre,
+              apellido: apellido,
+              email: form.email,
+              telefono: "0000000000",
+              contrasena: form.password
+            }),
+          });
+        } catch (e) {
+          Swal.fire({ icon: "error", title: "Error", text: "Fallo la conexión con Supabase.", background: "#0F173A", color: "#E0EAFD" });
+          return;
+        }
+
+        // Si el backend principal (Supabase) rechaza por contraseña débil, correo repetido, etc.
+        if (!supaRes.ok) {
+          const errData = await supaRes.json().catch(() => ({}));
+          Swal.fire({ 
+            icon: "error", 
+            title: "Error de validación", 
+            text: errData.message || errData.error || "Los datos o la contraseña no cumplen los requisitos.", 
+            background: "#0F173A", 
+            color: "#E0EAFD" 
+          });
+          return;
+        }
+
+        // 2. Si pasó Supabase, el backend Node.js AUTOMÁTICAMENTE lo guarda en SPB (MySQL).
+        // Sin embargo, Node.js lo guarda con rol "USER". Si seleccionamos ADMIN, lo actualizamos.
+        res = { ok: true } as Response; // Simulamos éxito para cerrar el modal
+        if (form.role !== "USER") {
+          await new Promise(r => setTimeout(r, 1000)); // Esperar a que el backend de Node termine de guardar en SPB
           try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-            const partesNombre = form.name.split(" ");
-            const nombre = partesNombre[0] || "Usuario";
-            const apellido = partesNombre.slice(1).join(" ") || "SPB";
-            
-            await fetch(`${API_URL}/api/auth/register`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                nombre: nombre,
-                apellido: apellido,
-                email: form.email,
-                telefono: "0000000000",
-                contrasena: form.password
-              }),
-            });
-          } catch (supaError) {
-            console.error("No se pudo crear en Supabase:", supaError);
+            const listRes = await fetchWithSpbAuth(`${SPB_API}/api/users?page=0&size=1000`);
+            if (listRes.ok) {
+              const data = await listRes.json();
+              const createdUser = data.content.find((u: any) => u.email === form.email);
+              if (createdUser) {
+                await fetchWithSpbAuth(`${SPB_API}/api/users/${createdUser.id}`, {
+                  method: "PUT",
+                  body: JSON.stringify({ name: form.name, email: form.email, role: form.role, password: form.password })
+                });
+              }
+            }
+          } catch (e) {
+            console.warn("No se pudo actualizar el rol a ADMIN en SPB", e);
           }
         }
       }
