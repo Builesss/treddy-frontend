@@ -182,7 +182,7 @@ export default function AdminUsuariosSpb() {
               contrasena: form.password
             }),
           });
-        } catch (e) {
+        } catch {
           Swal.fire({ icon: "error", title: "Error", text: "Fallo la conexión con Supabase.", background: "#0F173A", color: "#E0EAFD" });
           return;
         }
@@ -209,7 +209,7 @@ export default function AdminUsuariosSpb() {
             const listRes = await fetchWithSpbAuth(`${SPB_API}/api/users?page=0&size=1000`);
             if (listRes.ok) {
               const data = await listRes.json();
-              const createdUser = data.content.find((u: any) => u.email === form.email);
+              const createdUser = data.content.find((u: { email: string; id: number }) => u.email === form.email);
               if (createdUser) {
                 await fetchWithSpbAuth(`${SPB_API}/api/users/${createdUser.id}`, {
                   method: "PUT",
