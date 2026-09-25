@@ -195,10 +195,8 @@ export default function AdminUsuarios() {
   };
 
   const changeStatus = async (userId: number | string, currentStatus: string, currentRole: string) => {
-    if (typeof userId === 'string' && userId.startsWith('spb-')) {
-      Swal.fire('Atención', 'Para editar usuarios de MySQL, ve a la pestaña específica de "Usuarios (SPB)".', 'info');
-      return;
-    }
+    const userToEdit = users.find(u => u.usuario_id === userId);
+    if (!userToEdit) return;
 
     const token = localStorage.getItem("token");
     const { value: formValues } = await Swal.fire({
@@ -230,31 +228,58 @@ export default function AdminUsuarios() {
     if (formValues) {
       const [nuevoEstado, nuevoRol] = formValues;
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      
+      const SPB_API = process.env.NEXT_PUBLIC_SPB_API_URL || "http://localhost:8080";
+      const spbRole = nuevoRol === "administrador" ? "ADMIN" : "USER";
+      const isSpbOnly = typeof userId === 'string' && userId.startsWith('spb-');
+
       try {
-        const res = await fetch(`${API_URL}/api/user/${userId}/status`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({ estado: nuevoEstado, tipo_usuario: nuevoRol })
-        });
-        
-        if (res.ok) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Actualizado',
-            background: '#0F173A',
-            color: '#E0EAFD',
-            timer: 1500,
-            showConfirmButton: false
+        if (!isSpbOnly) {
+          const res = await fetch(`${API_URL}/api/user/${userId}/status`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ estado: nuevoEstado, tipo_usuario: nuevoRol })
           });
-          fetchUsers(token!);
-        } else {
-          throw new Error();
+          if (!res.ok) throw new Error("Error en Supabase");
         }
-      } catch {
+
+        // Actualizar en Spring Boot (MySQL)
+        let spbIdToUpdate = isSpbOnly ? userId.toString().replace('spb-', '') : null;
+        
+        if (!isSpbOnly) {
+          const listRes = await fetch(`${SPB_API}/api/users?page=0&size=1000`, { headers: { "ngrok-skip-browser-warning": "true" }});
+          if (listRes.ok) {
+            const data = await listRes.json();
+            const spbUser = data.content.find((u: any) => u.email === userToEdit.email);
+            if (spbUser) spbIdToUpdate = spbUser.id;
+          }
+        }
+
+        if (spbIdToUpdate) {
+          await fetch(`${SPB_API}/api/users/${spbIdToUpdate}`, {
+            method: 'PUT',
+            headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
+            body: JSON.stringify({ 
+              name: `${userToEdit.nombre} ${userToEdit.apellido}`.trim(), 
+              email: userToEdit.email, 
+              role: spbRole 
+            })
+          });
+        }
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Actualizado',
+          background: '#0F173A',
+          color: '#E0EAFD',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        if (token) fetchUsers(token);
+      } catch (e) {
+        console.error(e);
         Swal.fire({
           icon: 'error',
           title: 'Error al actualizar',
