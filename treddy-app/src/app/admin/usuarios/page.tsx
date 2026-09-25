@@ -10,13 +10,14 @@ import Footer from "@/components/layout/Footer";
 import CustomSelect from "@/components/ui/CustomSelect";
 
 type UserType = {
-  usuario_id: number;
+  usuario_id: number | string;
   nombre: string;
   apellido: string;
   email: string;
   telefono?: string;
   tipo_usuario: string;
   estado?: string;
+  source?: string;
 };
 
 export default function AdminUsuarios() {
@@ -53,18 +54,53 @@ export default function AdminUsuarios() {
 
   const fetchUsers = async (token: string) => {
     try {
+      setLoading(true);
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const response = await fetch(`${API_URL}/api/user/all`, {
-        headers: {
-          "Authorization": `Bearer ${token}`
+      const SPB_API = process.env.NEXT_PUBLIC_SPB_API_URL || "http://localhost:8080";
+
+      // 1. Obtener usuarios de Supabase (Backend Principal)
+      let supaUsers: UserType[] = [];
+      try {
+        const response = await fetch(`${API_URL}/api/user/all`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          supaUsers = data.map((u: any) => ({ ...u, source: "Supabase" }));
         }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data);
-      } else {
-        console.error("Error al obtener usuarios");
+      } catch (err) {
+        console.error("Error obteniendo usuarios Supabase", err);
       }
+
+      // 2. Obtener usuarios de Spring Boot (MySQL)
+      let spbUsers: UserType[] = [];
+      try {
+        const responseSpb = await fetch(`${SPB_API}/api/users?page=0&size=1000`, {
+          headers: { "ngrok-skip-browser-warning": "true" }
+        });
+        if (responseSpb.ok) {
+          const spbData = await responseSpb.json();
+          spbUsers = spbData.content.map((u: any) => {
+            const parts = (u.name || "").split(" ");
+            return {
+              usuario_id: `spb-${u.id}`,
+              nombre: parts[0] || "",
+              apellido: parts.slice(1).join(" ") || "",
+              email: u.email,
+              telefono: "N/A",
+              tipo_usuario: u.role || "USER",
+              estado: "activo",
+              source: "Spring Boot (MySQL)"
+            };
+          });
+        }
+      } catch (err) {
+        console.warn("No se pudo cargar usuarios de SPB", err);
+      }
+
+      // Combinar ambas listas
+      setUsers([...supaUsers, ...spbUsers]);
+
     } catch (error) {
       console.error(error);
     } finally {
@@ -72,7 +108,12 @@ export default function AdminUsuarios() {
     }
   };
 
-  const changeStatus = async (userId: number, currentStatus: string, currentRole: string) => {
+  const changeStatus = async (userId: number | string, currentStatus: string, currentRole: string) => {
+    if (typeof userId === 'string' && userId.startsWith('spb-')) {
+      Swal.fire('Atención', 'Para editar usuarios de MySQL, ve a la pestaña específica de "Usuarios (SPB)".', 'info');
+      return;
+    }
+
     const token = localStorage.getItem("token");
     const { value: formValues } = await Swal.fire({
       title: 'Editar Usuario',
@@ -138,7 +179,12 @@ export default function AdminUsuarios() {
     }
   };
 
-  const deleteUser = async (userId: number) => {
+  const deleteUser = async (userId: number | string) => {
+    if (typeof userId === 'string' && userId.startsWith('spb-')) {
+      Swal.fire('Atención', 'Para eliminar usuarios de MySQL, ve a la pestaña específica de "Usuarios (SPB)".', 'info');
+      return;
+    }
+
     const result = await Swal.fire({
       title: '¿Estás seguro?',
       text: "Esta acción no se puede deshacer.",
@@ -325,6 +371,11 @@ export default function AdminUsuarios() {
                               <div>
                                 <p className="font-semibold">{user.nombre} {user.apellido}</p>
                                 <p className="text-xs text-gray-400">{user.email}</p>
+                                {user.source === "Spring Boot (MySQL)" && (
+                                  <span className="inline-block mt-1 text-[10px] bg-green-900/50 text-green-400 px-1.5 py-0.5 rounded border border-green-500/30">
+                                    Spring Boot
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </td>
