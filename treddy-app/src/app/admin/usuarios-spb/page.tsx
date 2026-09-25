@@ -30,10 +30,6 @@ type SpbUserPage = {
   size: number;
 };
 
-type LoginResponse = {
-  token: string;
-};
-
 // ──────────────────────────────────────────────
 // Constantes
 // ──────────────────────────────────────────────
