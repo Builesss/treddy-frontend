@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import { motion } from "framer-motion";
-import { User, Trash2, Edit2, Shield, Ban, CheckCircle, Search, ChevronLeft, ChevronRight, Filter, Clock } from "lucide-react";
+import { User, Trash2, Edit2, Shield, Ban, CheckCircle, Search, ChevronLeft, ChevronRight, Filter, Clock, Plus, X } from "lucide-react";
 import Swal from "sweetalert2";
 import Nav from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -30,6 +30,10 @@ export default function AdminUsuarios() {
   const [roleFilter, setRoleFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
   const [sourceFilter, setSourceFilter] = useState("todos");
+
+  // Creación de usuario (Modal)
+  const [modalOpen, setModalOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "cliente" });
 
   // Paginación (Max 10 por página)
   const [currentPage, setCurrentPage] = useState(1);
@@ -107,6 +111,86 @@ export default function AdminUsuarios() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openCreateModal = () => {
+    setForm({ name: "", email: "", password: "", role: "cliente" });
+    setModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.name.trim() || !form.email.trim() || !form.password.trim()) {
+      Swal.fire({ icon: "warning", title: "Campos requeridos", text: "Nombre, email y contraseña son obligatorios.", background: "#0F173A", color: "#E0EAFD" });
+      return;
+    }
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    const SPB_API = process.env.NEXT_PUBLIC_SPB_API_URL || "http://localhost:8080";
+    const partesNombre = form.name.split(" ");
+    const nombre = partesNombre[0] || "Usuario";
+    const apellido = partesNombre.slice(1).join(" ") || "";
+
+    let supaRes;
+    try {
+      supaRes = await fetch(`${API_URL}/api/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: nombre,
+          apellido: apellido,
+          email: form.email,
+          telefono: "0000000000",
+          contrasena: form.password
+        }),
+      });
+    } catch {
+      Swal.fire({ icon: "error", title: "Error", text: "Fallo la conexión con Supabase.", background: "#0F173A", color: "#E0EAFD" });
+      return;
+    }
+
+    if (!supaRes.ok) {
+      const errData = await supaRes.json().catch(() => ({}));
+      Swal.fire({ 
+        icon: "error", 
+        title: "Error de validación", 
+        text: errData.message || errData.error || "Los datos o la contraseña no cumplen los requisitos.", 
+        background: "#0F173A", 
+        color: "#E0EAFD" 
+      });
+      return;
+    }
+
+    // Si pasó Supabase, el backend Node.js lo guarda en SPB (MySQL) con rol "USER".
+    // Si queremos que sea ADMIN en SPB (y admin en supabase), Node.js ya lo guarda como cliente en Supabase.
+    // Para no complicarlo mucho en este botón global, simplemente actualizaremos el rol en SPB si es 'administrador'.
+    // Ojo: Esto es una simplificación. Si es administrador, Node.js lo guardó en Supabase como "cliente" de todos modos,
+    // porque el endpoint /register está hardcodeado para "cliente". 
+    // Para simplificar según lo pedido, cerraremos el modal y recargaremos.
+    
+    if (form.role === "administrador") {
+      await new Promise(r => setTimeout(r, 1000));
+      try {
+        const listRes = await fetch(`${SPB_API}/api/users?page=0&size=1000`, { headers: { "ngrok-skip-browser-warning": "true" }});
+        if (listRes.ok) {
+          const data = await listRes.json();
+          const createdUser = data.content.find((u: { email: string; id: number }) => u.email === form.email);
+          if (createdUser) {
+            await fetch(`${SPB_API}/api/users/${createdUser.id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
+              body: JSON.stringify({ name: form.name, email: form.email, role: "ADMIN", password: form.password })
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("No se pudo actualizar el rol a ADMIN en SPB", e);
+      }
+    }
+
+    setModalOpen(false);
+    Swal.fire({ icon: "success", title: "Usuario creado", background: "#0F173A", color: "#E0EAFD", timer: 1500, showConfirmButton: false });
+    const token = localStorage.getItem("token");
+    if (token) fetchUsers(token);
   };
 
   const changeStatus = async (userId: number | string, currentStatus: string, currentRole: string) => {
@@ -292,11 +376,18 @@ export default function AdminUsuarios() {
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex justify-between items-center mb-8"
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"
           >
             <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00E6F6] to-blue-500">
               Gestión de Usuarios
             </h1>
+            <button
+              onClick={openCreateModal}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-black font-semibold rounded-xl hover:opacity-90 transition-opacity"
+            >
+              <Plus size={18} />
+              Nuevo usuario
+            </button>
           </motion.div>
 
           {/* Barra de Filtros y Búsqueda */}
@@ -472,6 +563,88 @@ export default function AdminUsuarios() {
         </div>
       </div>
       <Footer />
+
+      {/* ── Modal Crear Usuario ── */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-[#0F173A] border border-[#1e293b] rounded-2xl shadow-2xl w-full max-w-md"
+          >
+            <div className="flex items-center justify-between p-6 border-b border-[#1e293b]">
+              <h2 className="text-lg font-bold text-white">Nuevo usuario</h2>
+              <button onClick={() => setModalOpen(false)} className="text-gray-400 hover:text-white transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Nombre Completo *</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  placeholder="Ej: Juan Perez"
+                  className="w-full bg-[#0A0F2C] border border-[#1e293b] text-white px-4 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500 text-sm transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Email *</label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  placeholder="correo@ejemplo.com"
+                  className="w-full bg-[#0A0F2C] border border-[#1e293b] text-white px-4 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500 text-sm transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Contraseña *</label>
+                <input
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  placeholder="Nueva contraseña"
+                  className="w-full bg-[#0A0F2C] border border-[#1e293b] text-white px-4 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500 text-sm transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 font-semibold uppercase tracking-wider">Rol (Aplicado en MySQL) *</label>
+                <select
+                  value={form.role}
+                  onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
+                  className="w-full bg-[#0A0F2C] border border-[#1e293b] text-white px-4 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500 text-sm transition-colors"
+                >
+                  <option value="cliente">Cliente (USER)</option>
+                  <option value="administrador">Administrador (ADMIN)</option>
+                </select>
+                <p className="text-[10px] text-gray-500 mt-1">* En Supabase se creará temporalmente como cliente.</p>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-[#1e293b] flex justify-end gap-3">
+              <button
+                onClick={() => setModalOpen(false)}
+                className="px-4 py-2 text-sm text-gray-400 hover:text-white border border-[#1e293b] rounded-xl hover:border-gray-500 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-5 py-2 text-sm font-semibold bg-gradient-to-r from-cyan-500 to-blue-500 text-black rounded-xl hover:opacity-90 transition-opacity"
+              >
+                Crear usuario
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </main>
   );
 }
