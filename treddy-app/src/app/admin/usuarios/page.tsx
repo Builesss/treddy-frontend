@@ -66,7 +66,7 @@ export default function AdminUsuarios() {
         });
         if (response.ok) {
           const data = await response.json();
-          supaUsers = data.map((u: any) => ({ ...u, source: "Supabase" }));
+          supaUsers = data.map((u: UserType) => ({ ...u, source: "Supabase" }));
         }
       } catch (err) {
         console.error("Error obteniendo usuarios Supabase", err);
@@ -80,7 +80,7 @@ export default function AdminUsuarios() {
         });
         if (responseSpb.ok) {
           const spbData = await responseSpb.json();
-          spbUsers = spbData.content.map((u: any) => {
+          spbUsers = spbData.content.map((u: { id: number; name: string; email: string; role: string }) => {
             const parts = (u.name || "").split(" ");
             return {
               usuario_id: `spb-${u.id}`,
