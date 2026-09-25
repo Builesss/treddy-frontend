@@ -29,6 +29,7 @@ export default function AdminUsuarios() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("todos");
   const [statusFilter, setStatusFilter] = useState("todos");
+  const [sourceFilter, setSourceFilter] = useState("todos");
 
   // Paginación (Max 10 por página)
   const [currentPage, setCurrentPage] = useState(1);
@@ -240,7 +241,8 @@ export default function AdminUsuarios() {
     const matchesRole = roleFilter === "todos" || u.tipo_usuario.toLowerCase() === roleFilter.toLowerCase();
     const userStatus = (u.estado || "activo").toLowerCase().trim();
     const matchesStatus = statusFilter === "todos" || userStatus === statusFilter.toLowerCase();
-    return matchesSearch && matchesRole && matchesStatus;
+    const matchesSource = sourceFilter === "todos" || u.source === sourceFilter;
+    return matchesSearch && matchesRole && matchesStatus && matchesSource;
   });
 
   // Paginado
@@ -266,6 +268,12 @@ export default function AdminUsuarios() {
     { value: "activo", label: "Activo" },
     { value: "pendiente", label: "Pendiente" },
     { value: "suspendido", label: "Suspendido" },
+  ];
+
+  const sourceOptions = [
+    { value: "todos", label: "Ambas Fuentes" },
+    { value: "Supabase", label: "Solo Supabase" },
+    { value: "Spring Boot (MySQL)", label: "Solo Spring Boot" },
   ];
 
   if (loading) {
@@ -325,6 +333,16 @@ export default function AdminUsuarios() {
                 value={statusFilter}
                 onChange={(val) => {
                   setStatusFilter(val);
+                  setCurrentPage(1);
+                }}
+                width="w-44"
+              />
+
+              <CustomSelect
+                options={sourceOptions}
+                value={sourceFilter}
+                onChange={(val) => {
+                  setSourceFilter(val);
                   setCurrentPage(1);
                 }}
                 width="w-44"
