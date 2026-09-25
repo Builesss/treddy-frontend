@@ -41,40 +41,12 @@ const ITEMS_PER_PAGE = 10;
 const SPB_API = process.env.NEXT_PUBLIC_SPB_API_URL ?? "http://localhost:8080";
 
 // ──────────────────────────────────────────────
-// Helpers de token SPB
+// Helper de peticiones SPB (Sin JWT, público)
 // ──────────────────────────────────────────────
-function getSpbToken(): string | null {
-  return sessionStorage.getItem("spb_token");
-}
-
-function saveSpbToken(token: string) {
-  sessionStorage.setItem("spb_token", token);
-}
-
-async function loginSpb(): Promise<string | null> {
-  try {
-    const res = await fetch(`${SPB_API}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "true" },
-      body: JSON.stringify({ email: "admin@treddy.com", password: "admin123" }),
-    });
-    if (!res.ok) return null;
-    const data: LoginResponse = await res.json();
-    saveSpbToken(data.token);
-    return data.token;
-  } catch {
-    return null;
-  }
-}
-
 async function fetchWithSpbAuth(url: string, options: RequestInit = {}): Promise<Response> {
-  let token = getSpbToken();
-  if (!token) token = await loginSpb();
-
   const headers = {
     "Content-Type": "application/json",
     "ngrok-skip-browser-warning": "true",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers ?? {}),
   };
 
