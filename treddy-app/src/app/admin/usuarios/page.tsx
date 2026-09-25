@@ -389,11 +389,6 @@ export default function AdminUsuarios() {
                               <div>
                                 <p className="font-semibold">{user.nombre} {user.apellido}</p>
                                 <p className="text-xs text-gray-400">{user.email}</p>
-                                {user.source === "Spring Boot (MySQL)" && (
-                                  <span className="inline-block mt-1 text-[10px] bg-green-900/50 text-green-400 px-1.5 py-0.5 rounded border border-green-500/30">
-                                    Spring Boot
-                                  </span>
-                                )}
                               </div>
                             </div>
                           </td>
