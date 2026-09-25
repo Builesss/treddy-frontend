@@ -252,7 +252,7 @@ export default function AdminUsuarios() {
           const listRes = await fetch(`${SPB_API}/api/users?page=0&size=1000`, { headers: { "ngrok-skip-browser-warning": "true" }});
           if (listRes.ok) {
             const data = await listRes.json();
-            const spbUser = data.content.find((u: any) => u.email === userToEdit.email);
+            const spbUser = data.content.find((u: { email: string; id: number }) => u.email === userToEdit.email);
             if (spbUser) spbIdToUpdate = spbUser.id;
           }
         }
