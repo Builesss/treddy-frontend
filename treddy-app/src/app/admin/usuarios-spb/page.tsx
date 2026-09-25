@@ -163,10 +163,35 @@ export default function AdminUsuariosSpb() {
           Swal.fire({ icon: "warning", title: "Contraseña requerida", text: "Debes ingresar una contraseña para crear el usuario.", background: "#0F173A", color: "#E0EAFD" });
           return;
         }
+        // 1. Crear en SPB (MySQL)
         res = await fetchWithSpbAuth(`${SPB_API}/api/users`, {
           method: "POST",
           body: JSON.stringify({ ...body, password: form.password }),
         });
+
+        // 2. Crear también en Supabase (Backend en Node.js/Prisma)
+        if (res.ok) {
+          try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+            const partesNombre = form.name.split(" ");
+            const nombre = partesNombre[0] || "Usuario";
+            const apellido = partesNombre.slice(1).join(" ") || "SPB";
+            
+            await fetch(`${API_URL}/api/auth/register`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                nombre: nombre,
+                apellido: apellido,
+                email: form.email,
+                telefono: "0000000000",
+                contrasena: form.password
+              }),
+            });
+          } catch (supaError) {
+            console.error("No se pudo crear en Supabase:", supaError);
+          }
+        }
       }
 
       if (res.ok) {
