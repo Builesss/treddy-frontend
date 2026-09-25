@@ -31,7 +31,7 @@ export default function Nav() {
   const adminLinks = [
     { href: "/gestion-productos", label: "Productos", icon: <Package size={16} /> },
     { href: "/admin/usuarios", label: "Usuarios", icon: <Users size={16} /> },
-    { href: "/admin/usuarios-spb", label: "Usuarios (SPB)", icon: <Server size={16} /> },
+
     { href: "/admin/pedidos", label: "Pedidos", icon: <ShoppingCart size={16} /> },
     { href: "/admin/auditoria", label: "Auditoría", icon: <FileText size={16} /> },
   ];

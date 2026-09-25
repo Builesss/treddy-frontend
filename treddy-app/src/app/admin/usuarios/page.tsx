@@ -71,7 +71,8 @@ export default function AdminUsuarios() {
         });
         if (response.ok) {
           const data = await response.json();
-          supaUsers = data.map((u: UserType) => ({ ...u, source: "Supabase" }));
+          const arr = Array.isArray(data) ? data : (data.users || data.data || []);
+          supaUsers = arr.map((u: UserType) => ({ ...u, source: "Supabase" }));
         }
       } catch (err) {
         console.error("Error obteniendo usuarios Supabase", err);
@@ -322,7 +323,8 @@ export default function AdminUsuarios() {
   const filteredUsers = users.filter((u) => {
     const fullText = `${u.nombre} ${u.apellido} ${u.email} ${u.telefono || ""}`.toLowerCase();
     const matchesSearch = fullText.includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "todos" || u.tipo_usuario.toLowerCase() === roleFilter.toLowerCase();
+    const userRole = (u.tipo_usuario || "cliente").toLowerCase();
+    const matchesRole = roleFilter === "todos" || userRole === roleFilter.toLowerCase();
     const userStatus = (u.estado || "activo").toLowerCase().trim();
     const matchesStatus = statusFilter === "todos" || userStatus === statusFilter.toLowerCase();
     const matchesSource = sourceFilter === "todos" || u.source === sourceFilter;
