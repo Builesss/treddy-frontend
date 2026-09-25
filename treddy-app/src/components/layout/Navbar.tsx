@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Menu, X, ShoppingBag, User, LogOut, Package, Users, ShoppingCart, LayoutDashboard, ChevronDown, FileText, Server } from "lucide-react";
+import { Menu, X, ShoppingBag, User, LogOut, Package, Users, ShoppingCart, LayoutDashboard, ChevronDown, FileText } from "lucide-react";
 import { jwtDecode } from "jwt-decode";
 import { motion, AnimatePresence } from "framer-motion";
 
